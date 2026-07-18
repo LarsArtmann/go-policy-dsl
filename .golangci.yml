@@ -1,0 +1,107 @@
+version: "2"
+run:
+  timeout: 5m
+  go: 1.26.4
+  allow-parallel-runners: true
+  allow-serial-runners: true
+  issues-exit-code: 1
+  tests: true
+output:
+  formats: {}
+linters:
+  enable:
+    - bodyclose
+    - contextcheck
+    - copyloopvar
+    - cyclop
+    - dupl
+    - durationcheck
+    - errcheck
+    - errchkjson
+    - errname
+    - errorlint
+    - exhaustive
+    - exhaustruct
+    - forcetypeassert
+    - funlen
+    - gochecknoglobals
+    - gochecknoinits
+    - gochecksumtype
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - gosec
+    - govet
+    - ineffassign
+    - interfacebloat
+    - intrange
+    - maintidx
+    - mirror
+    - misspell
+    - nakedret
+    - nestif
+    - nilerr
+    - nilnesserr
+    - nilnil
+    - noctx
+    - nolintlint
+    - perfsprint
+    - prealloc
+    - predeclared
+    - recvcheck
+    - reassign
+    - revive
+    - rowserrcheck
+    - sloglint
+    - sqlclosecheck
+    - staticcheck
+    - thelper
+    - unconvert
+    - unparam
+    - unused
+    - usetesting
+    - wastedassign
+    - wrapcheck
+  settings:
+    cyclop:
+      max-complexity: 12
+    dupl:
+      threshold: 100
+    exhaustruct:
+      exclude:
+        - github.com/larsartmann/go-policy-dsl.PolicySpec
+        - github.com/larsartmann/go-policy-dsl.Detection
+        - github.com/larsartmann/go-policy-dsl.CompanionSpec
+        - github.com/larsartmann/go-policy-dsl.Replacement
+        - github.com/larsartmann/go-policy-dsl.Builder
+    gocritic:
+      disabled-checks:
+        - ifElseChain
+    revive:
+      rules:
+        - disabled: true
+          name: exported
+        - disabled: true
+          name: package-comments
+  exclusions:
+    generated: lax
+    rules:
+      - path: _test\.go
+        linters:
+          - goconst
+          - dupl
+          - errcheck
+          - exhaustruct
+          - revive
+          - wrapcheck
+formatters:
+  enable:
+    - gci
+    - goimports
+    - gofumpt
+  exclusions:
+    generated: lax
+issues:
+  max-issues-per-linter: 50
+  max-same-issues: 10

@@ -82,46 +82,46 @@ var BannedOldGolog = policydsl.Ban("golog").
 
 ### Constructors
 
-| Function | Returns | Purpose |
-|---|---|---|
-| `Ban(name string) *Builder` | `*Builder` | Start a banned-library policy (defaults to `SeverityCritical` + `CategorySecurity`) |
-| `Companion(lib, pattern, reason string) CompanionSpec` | `CompanionSpec` | Build a required-companion spec (defaults to `SeverityModerate`) |
-| `CompanionWithSeverity(...)` | `CompanionSpec` | Companion with custom severity |
-| `ImportPattern(pattern string) Detection` | `Detection` | Convenience for source-import detection |
-| `GoModPattern(pattern string) Detection` | `Detection` | Convenience for go.mod-path detection |
-| `NewReplacement(library, reason string) Replacement` | `Replacement` | Build a swap-in alternative value |
+| Function                                               | Returns         | Purpose                                                                             |
+| ------------------------------------------------------ | --------------- | ----------------------------------------------------------------------------------- |
+| `Ban(name string) *Builder`                            | `*Builder`      | Start a banned-library policy (defaults to `SeverityCritical` + `CategorySecurity`) |
+| `Companion(lib, pattern, reason string) CompanionSpec` | `CompanionSpec` | Build a required-companion spec (defaults to `SeverityModerate`)                    |
+| `CompanionWithSeverity(...)`                           | `CompanionSpec` | Companion with custom severity                                                      |
+| `ImportPattern(pattern string) Detection`              | `Detection`     | Convenience for source-import detection                                             |
+| `GoModPattern(pattern string) Detection`               | `Detection`     | Convenience for go.mod-path detection                                               |
+| `NewReplacement(library, reason string) Replacement`   | `Replacement`   | Build a swap-in alternative value                                                   |
 
 ### Builder methods
 
-| Method | Effect |
-|---|---|
-| `Because(reason)` | Sets the human-readable reason (required) |
-| `WithSeverity(s)` | Overrides the default severity |
-| `WithCategory(c)` | Overrides the default category |
-| `DetectVia(d)` | Sets the full `Detection` (import + go.mod + exclusions) |
-| `ImportPatterns(p...)` | Adds source-import patterns |
-| `GoModPatterns(p...)` | Adds go.mod-path patterns |
-| `ExcludeIfContains(p...)` | Suppressions: if string appears, no violation |
-| `ExcludeIfTransitiveFrom(libs...)` | Parent libs that justify transitive presence |
-| `WithDescription(desc)` | Detailed description for reporting |
-| `Suggest(r)` | Adds a recommended replacement |
-| `WithAlternatives(alts...)` | Sets alternative libraries directly |
-| `WithCVEs(cves...)` | Tags with related CVE IDs |
-| `GoVersionRange(min, max)` | Inclusive Go version constraints |
-| `RequiresCompanion(c)` | Adds a required companion spec |
-| `AsCompanionOnly()` | Never ban; only enforce companions |
-| `Spec()` | Returns the finished `PolicySpec` |
+| Method                             | Effect                                                   |
+| ---------------------------------- | -------------------------------------------------------- |
+| `Because(reason)`                  | Sets the human-readable reason (required)                |
+| `WithSeverity(s)`                  | Overrides the default severity                           |
+| `WithCategory(c)`                  | Overrides the default category                           |
+| `DetectVia(d)`                     | Sets the full `Detection` (import + go.mod + exclusions) |
+| `ImportPatterns(p...)`             | Adds source-import patterns                              |
+| `GoModPatterns(p...)`              | Adds go.mod-path patterns                                |
+| `ExcludeIfContains(p...)`          | Suppressions: if string appears, no violation            |
+| `ExcludeIfTransitiveFrom(libs...)` | Parent libs that justify transitive presence             |
+| `WithDescription(desc)`            | Detailed description for reporting                       |
+| `Suggest(r)`                       | Adds a recommended replacement                           |
+| `WithAlternatives(alts...)`        | Sets alternative libraries directly                      |
+| `WithCVEs(cves...)`                | Tags with related CVE IDs                                |
+| `GoVersionRange(min, max)`         | Inclusive Go version constraints                         |
+| `RequiresCompanion(c)`             | Adds a required companion spec                           |
+| `AsCompanionOnly()`                | Never ban; only enforce companions                       |
+| `Spec()`                           | Returns the finished `PolicySpec`                        |
 
 ### Types
 
-| Type | Purpose |
-|---|---|
-| `Severity` | `SeverityCritical` / `SeverityHigh` / `SeverityModerate` / `SeverityLow` / `SeverityInfo` |
-| `Category` | `CategorySecurity` / `CategoryPerformance` / `CategoryMaintainability` / `CategoryCorrectness` / `CategoryLicensing` / `CategoryCompatibility` / `CategoryConfiguration` |
-| `Detection` | How a violation is found: `ImportPatterns`, `GoModPatterns`, `ExcludeIfContains`, `ExcludeIfTransitiveFrom` |
-| `Replacement` | Recommended swap-in: `Library`, `Reason` |
-| `CompanionSpec` | Required companion library |
-| `PolicySpec` | The finished declarative policy value |
+| Type            | Purpose                                                                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Severity`      | `SeverityCritical` / `SeverityHigh` / `SeverityModerate` / `SeverityLow` / `SeverityInfo`                                                                                |
+| `Category`      | `CategorySecurity` / `CategoryPerformance` / `CategoryMaintainability` / `CategoryCorrectness` / `CategoryLicensing` / `CategoryCompatibility` / `CategoryConfiguration` |
+| `Detection`     | How a violation is found: `ImportPatterns`, `GoModPatterns`, `ExcludeIfContains`, `ExcludeIfTransitiveFrom`                                                              |
+| `Replacement`   | Recommended swap-in: `Library`, `Reason`                                                                                                                                 |
+| `CompanionSpec` | Required companion library                                                                                                                                               |
+| `PolicySpec`    | The finished declarative policy value                                                                                                                                    |
 
 ---
 
@@ -130,7 +130,7 @@ var BannedOldGolog = policydsl.Ban("golog").
 - **Stdlib only.** The DSL depends on nothing outside the standard library, so any tool — a CLI, an LSP server, a CI check, a golangci-lint plugin — can adopt it without coupling.
 - **Values, not configuration files.** Policies live in your source tree as Go vars, getting full IDE refactor support, type checking, and grep-ability. YAML is supported only at consumer boundaries (e.g. `library-policy` emits YAML for backward compat).
 - **The `Severity` type is a `string`, not `finding.Severity`.** This keeps the DSL dependency-free. Consumers bridge the two at the boundary.
-- **No execution model.** The DSL declares *what* a policy is; the consumer (`library-policy`, your CI check, etc.) decides *how* to detect and report violations.
+- **No execution model.** The DSL declares _what_ a policy is; the consumer (`library-policy`, your CI check, etc.) decides _how_ to detect and report violations.
 
 ---
 
@@ -139,6 +139,7 @@ var BannedOldGolog = policydsl.Ban("golog").
 - [`library-policy`](https://github.com/LarsArtmann/library-policy) — primary consumer (governance CLI + server + golangci plugin). Its `domain/policy/spec.go` is the migration target.
 
 Planned:
+
 - `go-linter-sdk` — may use `go-policy-dsl` as its rule-declaration language.
 
 ## Status

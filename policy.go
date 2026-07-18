@@ -14,7 +14,7 @@
 //	    WithSeverity(policydsl.SeverityCritical).
 //	    WithCategory(policydsl.CategoryPerformance).
 //	    DetectVia(policydsl.ImportPattern("gorm.io/gorm")).
-//	    Suggest(policydsl.Replacement("github.com/yourorg/sqlc-queries"))
+//	    Suggest(policydsl.NewReplacement("github.com/yourorg/sqlc-queries", "type-safe SQL"))
 //
 // The DSL is intentionally dependency-free (stdlib only) so any tool — a CLI,
 // a CI check, an LSP server, a golangci-lint plugin — can adopt it without
@@ -53,13 +53,13 @@ const (
 type Category string
 
 const (
-	CategorySecurity       Category = "security"
-	CategoryPerformance    Category = "performance"
+	CategorySecurity        Category = "security"
+	CategoryPerformance     Category = "performance"
 	CategoryMaintainability Category = "maintainability"
-	CategoryCorrectness    Category = "correctness"
-	CategoryLicensing      Category = "licensing"
-	CategoryCompatibility  Category = "compatibility"
-	CategoryConfiguration  Category = "configuration"
+	CategoryCorrectness     Category = "correctness"
+	CategoryLicensing       Category = "licensing"
+	CategoryCompatibility   Category = "compatibility"
+	CategoryConfiguration   Category = "configuration"
 )
 
 // Detection declares how a policy violation is found. A policy may declare
