@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Report Title</title>
+    <title>Full Code Review &middot; go-policy-dsl &middot; 2026-07-26</title>
     <style>
       /* =========================================================================
          BAUHAUS DARK — Dashboard template
@@ -924,48 +924,141 @@
           </p>
         </div>
 
-        <!-- Issue Cards -->
-        <h2 id="issues"><span class="num">02</span>Issue Cards</h2>
+        <!-- Issue Detail -->
+        <h2 id="issues"><span class="num">02</span>Issue Detail</h2>
 
         <div class="issue issue-critical">
-          <span class="severity severity-critical">Blocking</span>
-          <h3>Critical finding title</h3>
-          <div class="where">path/to/file.go:42-58</div>
-          <p>Describe the problem and cite the code or behavior that proves it.</p>
+          <span class="severity severity-critical">Critical</span>
+          <h3>Naming lie on a public API symbol</h3>
+          <div class="where">builder.go:114-120 &middot; policy.go:118-122</div>
+          <p>
+            <code>GoVersionRange</code> / <code>GoVersionMin</code> / <code>GoVersionMax</code>
+            advertised themselves as Go-toolchain constraints. The implementation constrained the
+            <em>library</em> version, and AGENTS.md itself admitted it: &ldquo;applies to the library&rsquo;s
+            version constraint, not Go itself.&rdquo; A name the docs must contradict is a structural
+            defect. Zero shipped consumers + pre-1.0 made this the cheapest moment to fix it.
+          </p>
           <div class="callout callout-solution">
-            <strong>Fix</strong>
-            State the concrete recommended action.
+            <strong>Fixed</strong>
+            Renamed to <code>VersionRange</code> / <code>VersionMin</code> / <code>VersionMax</code>;
+            updated README, AGENTS.md, and the test suite to match.
+          </div>
+        </div>
+
+        <div class="issue issue-critical">
+          <span class="severity severity-critical">Critical</span>
+          <h3>Phantom &ldquo;Require&rdquo; builder in package docs</h3>
+          <div class="where">policy.go:1-8, 103</div>
+          <p>
+            The package doc and the <code>PolicySpec</code> doc both name a <code>Require</code>
+            builder (&ldquo;bans, requirements, companions&rdquo; / &ldquo;Ban/Require/Companion&rdquo;) that does
+            not exist. Only <code>Ban</code> and <code>Companion</code> ship. A consumer reading the
+            doc would hunt for a missing function &mdash; a documentation lie.
+          </p>
+          <div class="callout callout-solution">
+            <strong>Fixed</strong>
+            Doc strings now say &ldquo;bans and companions&rdquo; / &ldquo;Ban/Companion&rdquo;, matching the real API.
           </div>
         </div>
 
         <div class="issue issue-important">
-          <span class="severity severity-important">Important</span>
-          <h3>Important finding title</h3>
-          <div class="where">path/to/another.go:12-19</div>
-          <p>Explain the risk and why a careful reviewer would hesitate before shipping.</p>
+          <span class="severity severity-important">High</span>
+          <h3>&ldquo;0 lint issues&rdquo; claim had silently rotted</h3>
+          <div class="where">policy_test.go &middot; .golangci.yml</div>
+          <p>
+            The linter config was tightened 2025-07-25 (enabling <code>paralleltest</code> +
+            <code>testpackage</code>), but the test file was never updated. <code>golangci-lint run</code>
+            returned <strong>7 issues</strong>, contradicting AGENTS.md and the status report.
+            The &ldquo;0 issues&rdquo; claim was once true but had drifted to a lie.
+          </p>
+          <div class="callout callout-solution">
+            <strong>Fixed</strong>
+            Rewrote <code>policy_test.go</code> as external <code>policydsl_test</code> package with
+            <code>t.Parallel()</code> on every test; added <code>depguard</code> to the test
+            exclusions. Restored to <strong>0 issues</strong>.
+          </div>
+        </div>
+
+        <div class="issue issue-important">
+          <span class="severity severity-important">High</span>
+          <h3>Surprising <code>Suggest</code> side-effect had no test</h3>
+          <div class="where">builder.go:90-98</div>
+          <p>
+            <code>Suggest(r)</code> appends to <code>Alternatives</code> <em>and</em> overwrites an
+            empty <code>Description</code>. This is a genuinely surprising behaviour &mdash; documented in
+            AGENTS.md but never pinned by a test, so a silent regression could ship.
+          </p>
+          <div class="callout callout-solution">
+            <strong>Fixed</strong>
+            Added three tests: derives-description, preserves-explicit-description, and
+            multiple-appends. The contract is now locked.
+          </div>
         </div>
 
         <div class="issue issue-nice">
-          <span class="severity severity-nice">Nice to have</span>
-          <h3>Polish suggestion</h3>
-          <div class="where">docs/ or config</div>
-          <p>Minor documentation gaps or future-proofing suggestions go here.</p>
+          <span class="severity severity-nice">Noted</span>
+          <h3>CHANGELOG.md is still boilerplate</h3>
+          <div class="where">CHANGELOG.md</div>
+          <p>
+            The &ldquo;[Unreleased]&rdquo; section says only &ldquo;Initial project structure&rdquo;; the real
+            LICENSE fix, doc fix, and this review&rsquo;s rename are unrecorded. Deferred to a follow-up
+            docs-health pass to keep this review scoped.
+          </p>
+        </div>
+
+        <div class="issue issue-nice">
+          <span class="severity severity-nice">Noted</span>
+          <h3>Stringly-typed version constraints</h3>
+          <div class="where">policy.go:118-122</div>
+          <p>
+            <code>VersionMin/Max</code> are bare <code>string</code> with empty = unconstrained.
+            A typed <code>Version</code> domain could make invalid ranges unrepresentable &mdash; but that
+            would add parsing/semver logic and break the stdlib-only contract. Accepted tradeoff for now.
+          </p>
         </div>
 
         <!-- Strengths -->
-        <h2>Strengths</h2>
+        <h2 id="strengths">Strengths</h2>
         <div class="strengths">
           <div class="strength">
             <div class="check">+</div>
             <div class="text">
-              <strong>Specific strength</strong>
-              <span>Explain why it matters and what it enables.</span>
+              <strong>Zero dependencies &mdash; stdlib only</strong>
+              <span>An SDK any tool (CLI, LSP, golangci plugin, CI check) can adopt without pulling a framework. This is the project&rsquo;s core value proposition and it holds.</span>
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>Consistent builder convention</strong>
+              <span><code>With-</code> methods replace/set; bare methods (<code>ImportPatterns</code>, <code>Suggest</code>) append. The distinction is uniform across the whole API surface.</span>
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>Exemplary architectural-decision docs</strong>
+              <span>AGENTS.md explains the <em>why</em>: root-package placement, string-typed severities, accepted go-structure-linter false-positives. This is exactly what session context docs should contain.</span>
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>Sensible, safe defaults</strong>
+              <span><code>Ban</code> defaults to Critical/Security (fail-safe); <code>Companion</code> to Moderate. A bare <code>Ban(&quot;x&quot;).Spec()</code> compiles into a coherent policy.</span>
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>Small, focused files under 350 lines</strong>
+              <span>policy.go (types) and builder.go (behaviour) are cleanly split. No god-files, no premature decomposition.</span>
             </div>
           </div>
         </div>
 
         <!-- Table with Badges -->
-        <h2>Issue Table</h2>
+        <h2 id="table">Issue Table</h2>
         <table>
           <thead>
             <tr>
@@ -979,61 +1072,69 @@
             <tr>
               <td>1</td>
               <td><span class="badge badge-critical">Critical</span></td>
-              <td>Missing error handling</td>
+              <td>GoVersionRange naming lie on public API</td>
               <td><span class="badge badge-fixed">Fixed</span></td>
             </tr>
             <tr>
               <td>2</td>
+              <td><span class="badge badge-critical">Critical</span></td>
+              <td>Phantom &ldquo;Require&rdquo; builder in docs</td>
+              <td><span class="badge badge-fixed">Fixed</span></td>
+            </tr>
+            <tr>
+              <td>3</td>
               <td><span class="badge badge-high">High</span></td>
-              <td>Race condition</td>
-              <td><span class="badge badge-low">Open</span></td>
+              <td>7 stale lint failures vs &ldquo;0 issues&rdquo; claim</td>
+              <td><span class="badge badge-fixed">Fixed</span></td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td><span class="badge badge-high">High</span></td>
+              <td>Suggest side-effect untested</td>
+              <td><span class="badge badge-fixed">Fixed</span></td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>CHANGELOG.md still boilerplate</td>
+              <td><span class="badge badge-low">Deferred</span></td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>Stringly-typed version constraints</td>
+              <td><span class="badge badge-low">Accepted</span></td>
             </tr>
           </tbody>
         </table>
 
         <!-- Before/After Comparison -->
-        <h2 id="proposal">Before / After</h2>
+        <h2 id="rename">Rename: Before / After</h2>
         <div class="compare-header">
-          <div class="compare-before">Before</div>
-          <div class="compare-after">After</div>
+          <div class="compare-before">Before (lied)</div>
+          <div class="compare-after">After (honest)</div>
         </div>
         <div class="compare-row">
           <div>
-            <pre><code><span class="tok-comment">// Old code</span>
-<span class="tok-keyword">func</span> <span class="tok-func">process</span>(data <span class="tok-type">interface</span>{}) { }</code></pre>
+            <pre><code><span class="tok-comment">// Claimed to constrain Go.</span>
+<span class="tok-keyword">func</span> (b *<span class="tok-type">Builder</span>) <span class="tok-func">GoVersionRange</span>(min, max <span class="tok-type">string</span>) *<span class="tok-type">Builder</span> {
+    b.spec.<span class="tok-type">GoVersionMin</span> = min
+    b.spec.<span class="tok-type">GoVersionMax</span> = max
+    <span class="tok-keyword">return</span> b
+}</code></pre>
           </div>
           <div>
-            <pre><code><span class="tok-comment">// New code</span>
-<span class="tok-keyword">func</span> <span class="tok-func">process</span>[T <span class="tok-type">any</span>](data T) { }</code></pre>
-          </div>
-        </div>
-
-        <!-- ASCII Diagram -->
-        <h2>Dependency Tree</h2>
-        <div class="dep-tree">
-          <span class="root">root</span> ├── <span class="ok">wanted-dep</span> └──
-          <span class="unwanted">unwanted-dep</span>
-        </div>
-
-        <!-- Numbered Steps -->
-        <h2 id="plan"><span class="num">03</span>Migration Plan</h2>
-        <div class="migration-step">
-          <div class="migration-num">1</div>
-          <div class="migration-content">
-            <h4>Add generic type parameter</h4>
-            <p>Update the function signature to accept a type parameter.</p>
-          </div>
-        </div>
-        <div class="migration-step">
-          <div class="migration-num">2</div>
-          <div class="migration-content">
-            <h4>Update all call sites</h4>
-            <p>Pass explicit types at each call site for type safety.</p>
+            <pre><code><span class="tok-comment">// Name now matches what it does.</span>
+<span class="tok-keyword">func</span> (b *<span class="tok-type">Builder</span>) <span class="tok-func">VersionRange</span>(min, max <span class="tok-type">string</span>) *<span class="tok-type">Builder</span> {
+    b.spec.<span class="tok-type">VersionMin</span> = min
+    b.spec.<span class="tok-type">VersionMax</span> = max
+    <span class="tok-keyword">return</span> b
+}</code></pre>
           </div>
         </div>
 
         <footer class="footer">
-          Generated YYYY-MM-DD &middot; All claims verified against source code where noted
+          Generated 2026-07-26 &middot; Every claim verified against source: build OK, vet OK, 15 tests pass (race-clean), 100% statement coverage, golangci-lint 0 issues.
         </footer>
       </main>
     </div>
