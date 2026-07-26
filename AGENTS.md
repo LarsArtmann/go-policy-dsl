@@ -13,7 +13,7 @@ golangci-lint fmt ./...       # apply formatters (gci, goimports, gofumpt)
 go build ./...                # build check
 ```
 
-No `flake.nix` — this is a tiny stdlib-only library; buildflow handles CI. Module: `github.com/larsartmann/go-policy-dsl`, Go 1.26.4.
+No `flake.nix` — this is a tiny stdlib-only library; buildflow handles CI. Module: `github.com/larsartmann/go-policy-dsl`, Go 1.26.5.
 
 ## Architecture Decision: Package Lives at Module Root
 
@@ -37,7 +37,7 @@ Consequence: `go-structure-linter` reports `root-package-files` (ERROR) and `int
 - **`AsCompanionOnly()` suppresses the ban entirely** — the policy never emits a ban finding; it only enforces that declared companions are present. Use this for "this library is fine, but if you use it you must also use X".
 - **`ExcludeIfTransitiveFrom(libs...)` is the false-positive guard** for indirect dependencies: if a listed parent library directly pulls in the banned lib, no violation fires.
 - **`NewReplacement(library, reason)` is the constructor**; `Replacement` is the type. The package doc example uses `NewReplacement(...)`. (An earlier doc example wrongly called `Replacement(...)` — it would not compile.)
-- **`GoVersionRange(min, max)` is inclusive on both ends** and applies to the _library's_ version constraint, not Go itself. Empty string means unconstrained on that side.
+- **`VersionRange(min, max)` is inclusive on both ends** and constrains the version of the _library_ targeted by the policy (NOT the Go toolchain version). Empty string means unconstrained on that side. Renamed from `GoVersionRange` (2026-07 review): the old name lied — it never constrained Go itself, only the library version.
 
 ## Conventions
 

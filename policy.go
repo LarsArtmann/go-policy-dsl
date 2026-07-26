@@ -1,5 +1,5 @@
 // Package policydsl provides a fluent, compile-time-checked Go DSL for
-// declaring library governance policies (bans, requirements, companions).
+// declaring library governance policies (bans and companions).
 //
 // It is the canonical policy-declaration language for the LarsArtmann ecosystem:
 // library-policy is the primary consumer, and go-linter-sdk can use it as its
@@ -100,7 +100,7 @@ type CompanionSpec struct {
 }
 
 // PolicySpec is the declarative Go representation of a library governance
-// policy. Construct via the fluent Builder (Ban/Require/Companion) so every
+// policy. Construct via the fluent Builder (Ban/Companion) so every
 // field has a sensible default and the call sites read like prose.
 type PolicySpec struct {
 	Name     string
@@ -115,9 +115,11 @@ type PolicySpec struct {
 	Alternatives []string
 	CVEs         []string
 
-	// Version constraints (inclusive). Empty means unconstrained.
-	GoVersionMin string
-	GoVersionMax string
+	// VersionMin and VersionMax constrain the version of the library this policy
+	// targets (NOT the Go toolchain version). Inclusive on both ends; empty
+	// means unconstrained on that side.
+	VersionMin string
+	VersionMax string
 
 	// Companions that must be present when this library is used.
 	Companions    []CompanionSpec

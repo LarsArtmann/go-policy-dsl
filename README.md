@@ -70,7 +70,7 @@ var SamberDoRequiresAuditlog = policydsl.Ban("samber/do").
 ```go
 var BannedOldGolog = policydsl.Ban("golog").
     Because("v1.x has a memory leak fixed in v2").
-    GoVersionRange("", "1.99.0"). // ban only on Go < 2.x of the lib
+    VersionRange("", "1.99.0"). // ban only library versions below 2.x
     GoModPatterns("github.com/foo/golog").
     ExcludeIfTransitiveFrom("bar"). // OK if bar pulls it in directly
     Spec()
@@ -107,7 +107,7 @@ var BannedOldGolog = policydsl.Ban("golog").
 | `Suggest(r)`                       | Adds a recommended replacement                           |
 | `WithAlternatives(alts...)`        | Sets alternative libraries directly                      |
 | `WithCVEs(cves...)`                | Tags with related CVE IDs                                |
-| `GoVersionRange(min, max)`         | Inclusive Go version constraints                         |
+| `VersionRange(min, max)`           | Inclusive library version constraints (not Go version)    |
 | `RequiresCompanion(c)`             | Adds a required companion spec                           |
 | `AsCompanionOnly()`                | Never ban; only enforce companions                       |
 | `Spec()`                           | Returns the finished `PolicySpec`                        |

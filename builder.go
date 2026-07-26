@@ -111,10 +111,12 @@ func (b *Builder) WithCVEs(cves ...string) *Builder {
 	return b
 }
 
-// GoVersionRange sets inclusive Go version constraints. Empty means unconstrained.
-func (b *Builder) GoVersionRange(minVer, maxVer string) *Builder {
-	b.spec.GoVersionMin = minVer
-	b.spec.GoVersionMax = maxVer
+// VersionRange sets inclusive version constraints for the library targeted by
+// this policy (NOT the Go toolchain version). Empty means unconstrained on
+// that side.
+func (b *Builder) VersionRange(minVer, maxVer string) *Builder {
+	b.spec.VersionMin = minVer
+	b.spec.VersionMax = maxVer
 
 	return b
 }
