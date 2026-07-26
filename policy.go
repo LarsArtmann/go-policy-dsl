@@ -140,7 +140,7 @@ type PolicySpec struct {
 	// Metadata for reporting
 	Description  string
 	Alternatives []Replacement
-	CVEs         []string
+	CVEs         []CVE
 
 	// VersionMin and VersionMax constrain the version of the library this
 	// policy targets (NOT the Go toolchain version). Inclusive on both ends;

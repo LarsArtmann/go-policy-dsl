@@ -136,8 +136,10 @@ func (b *Builder) WithAlternatives(alts ...Replacement) *Builder {
 	return b
 }
 
-// WithCVEs tags the policy with related CVE identifiers for security reporting.
-func (b *Builder) WithCVEs(cves ...string) *Builder {
+// WithCVEs tags the policy with related, validated CVE identifiers for
+// security reporting. Each CVE is constructed via NewCVE / MustCVE so an
+// invalid identifier cannot reach the spec.
+func (b *Builder) WithCVEs(cves ...CVE) *Builder {
 	b.spec.CVEs = cves
 
 	return b

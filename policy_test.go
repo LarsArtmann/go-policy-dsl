@@ -267,10 +267,20 @@ func TestBuilder_WithAlternatives_Replaces(t *testing.T) {
 func TestBuilder_WithCVEs(t *testing.T) {
 	t.Parallel()
 
-	spec := policydsl.Ban("log4j").WithCVEs("CVE-2021-44228", "CVE-2021-45046").Spec()
+	spec := policydsl.Ban("log4j").WithCVEs(
+		policydsl.MustCVE("CVE-2021-44228"),
+		policydsl.MustCVE("CVE-2021-45046"),
+	).Spec()
 
-	if !equalStrings(spec.CVEs, []string{"CVE-2021-44228", "CVE-2021-45046"}) {
-		t.Errorf("unexpected CVEs: %v", spec.CVEs)
+	want := []policydsl.CVE{"CVE-2021-44228", "CVE-2021-45046"}
+	if len(spec.CVEs) != len(want) {
+		t.Fatalf("unexpected CVEs: %v", spec.CVEs)
+	}
+
+	for i, c := range spec.CVEs {
+		if c != want[i] {
+			t.Errorf("CVE[%d] = %q, want %q", i, c, want[i])
+		}
 	}
 }
 
