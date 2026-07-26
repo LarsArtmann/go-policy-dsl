@@ -68,17 +68,21 @@ var SamberDoRequiresAuditlog = policydsl.Ban("samber/do").
 ### Version-bounded ban with transitive exclusion
 
 ```go
+var maxV, _ = policydsl.ParseVersion("1.99.0")
+
 var BannedOldGolog = policydsl.Ban("golog").
     Because("v1.x has a memory leak fixed in v2").
-    VersionRangeStrings("", "1.99.0"). // ban only library versions below 2.x
+    VersionRange(nil, &maxV). // ban only library versions below 2.x
     GoModPatterns("github.com/foo/golog").
     ExcludeIfTransitiveFrom("bar"). // OK if bar pulls it in directly
     Spec()
 ```
 
-`VersionRangeStrings(min, max)` parses both bounds (empty = unbounded). The typed
-form `VersionRange(*Version, *Version)` rejects an inverted range (`min > max`)
-at construction — the footgun the old string API allowed.
+`VersionRange(min, max *Version)` sets inclusive bounds (`nil` = unbounded on
+that side); parse version strings with `ParseVersion` (which returns an error)
+before the chain. An inverted range (`min > max`) is not rejected at
+construction — call `PolicySpec.Validate()` to detect it. The library never
+panics; it returns errors.
 
 ---
 
@@ -95,7 +99,6 @@ at construction — the footgun the old string API allowed.
 | `GoModPattern(pattern string) Detection`               | `Detection`     | Convenience for go.mod-path detection                                                           |
 | `NewReplacement(library, reason string) Replacement`   | `Replacement`   | Build a swap-in alternative value                                                               |
 | `NewCVE(id string) (CVE, error)`                       | `CVE`           | Validated CVE identifier (`CVE-YYYY-NNNN`)                                                      |
-| `MustCVE(id string) CVE`                               | `CVE`           | CVE that panics on an invalid id (for package-level init)                                       |
 
 ### Builder methods
 
@@ -162,8 +165,8 @@ at construction — the footgun the old string API allowed.
 
 - **`Suggest(r Replacement)` derives `Description` and appends the full replacement.** It appends the **whole** `Replacement` (both `Library` and `Reason`) to `Alternatives` and, when `Description` is empty, sets it to `"Replace with <library>: <reason>"`. An explicit `Description` (set before or after) is never overwritten. `Alternatives` is typed `[]Replacement` (no information loss). Use `SuggestExplicit(r)` to append without deriving `Description`.
 - **`Ban(name)` defaults to `SeverityCritical` + `CategorySecurity` + `ModeBan`.** Override with `WithSeverity` / `WithCategory` for non-security concerns.
-- **`WithCVEs(...CVE)` takes validated `CVE` values** (built via `NewCVE` / `MustCVE`); a free-form `[]string` cannot reach the spec.
-- **`VersionRange(min, max *Version)` panics on an inverted range.** `min > max` is a nonsensical range and fails fast at package-init time; use `Validate()` to catch the same invariant on specs constructed by direct field assignment.
+- **`WithCVEs(...CVE)` takes validated `CVE` values** (built via `NewCVE`); a free-form `[]string` cannot reach the spec.
+- **`VersionRange(min, max *Version)` never panics.** An inverted range (`min > max`) is detectable via `PolicySpec.Validate()` (returns `*InvertedVersionRangeError`); the library returns errors rather than panicking.
 - **`AsCompanionOnly()` sets `Mode = ModeCompanionOnly`** — the policy never emits a ban finding; it only enforces that declared companions are present. (`Mode` is the typed enforcement enum replacing the former dishonest `CompanionOnly bool`.)
 
 The full `Builder` method convention (`With-` = set/replace vs bare = append) is documented in [`docs/DOMAIN_LANGUAGE.md`](docs/DOMAIN_LANGUAGE.md).

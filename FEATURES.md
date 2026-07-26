@@ -18,16 +18,15 @@ Never rounded up. If a feature cannot be confirmed working, it is
 
 `VersionRange(minVer, maxVer *Version)` sets inclusive library-version
 constraints (NOT Go toolchain version). `nil` on either side means unbounded.
-**Inverted ranges (`min > max`) are rejected at construction** — the builder
-method panics, and `PolicySpec.Validate()` returns a concrete
+Parse version strings with `ParseVersion` (which returns an error) before the
+chain. **Inverted ranges (`min > max`) are not rejected at construction** — the
+library never panics; `PolicySpec.Validate()` returns a concrete
 `*InvertedVersionRangeError` (matched by sentinel via
-`errors.Is(err, ErrInvertedVersionRange)`) for direct-field assignment. `VersionRangeStrings(min, max string)` is the
-string convenience (empty = unbounded; parses via `MustParseVersion`, panics
-on parse error or inversion). The typed `Version` (`{Major, Minor, Patch}`)
-is stdlib-only (no semver dependency). Evidence: `version.go`,
-`builder.go:130-160`, `policy.go:130-152`, tested by `TestBuilder_VersionRange_Typed`,
-`TestBuilder_VersionRangeStrings`, `TestBuilder_VersionRange_Typed_InvertedPanics`,
-`TestBuilder_VersionRangeStrings_InvertedPanics`, `TestPolicySpec_Validate`,
+`errors.Is(err, ErrInvertedVersionRange)`) for specs built any way at all. The
+typed `Version` (`{Major, Minor, Patch}`) is stdlib-only (no semver
+dependency). Evidence: `version.go`, `builder.go`, `policy.go`, tested by
+`TestBuilder_VersionRange_Typed`, `TestBuilder_VersionRange_UnboundedMin`,
+`TestBuilder_VersionRange_InvertedDeferToValidate`, `TestPolicySpec_Validate`,
 `TestParseVersion`, `TestVersion_Compare`, `TestNewVersion`.
 
 ### Ban policy builder
@@ -98,12 +97,12 @@ types at the boundary. Evidence: `policy.go:26-63`.
 ### CVE tagging (validated)
 
 `WithCVEs(...CVE)` tags a policy with related CVE identifiers for security
-reporting. `CVE` is a branded `string` constructed via `NewCVE(id)` /
-`MustCVE(id)`, which validate the canonical MITRE form `CVE-YYYY-NNNN` (reject
-lowercase, wrong digit counts, and other schemes). A free-form `[]string`
-cannot reach the spec. Evidence: `cve.go`, tested by `TestBuilder_WithCVEs`,
-`TestNewCVE_Valid`, `TestNewCVE_Invalid`, `TestNewCVE_InvalidWrapsSentinel`,
-`TestMustCVE_PanicsOnError`, `TestMustCVE_ReturnsValid`, `ExampleCVE`.
+reporting. `CVE` is a branded `string` constructed via `NewCVE(id)`, which
+validates the canonical MITRE form `CVE-YYYY-NNNN` (reject lowercase, wrong
+digit counts, and other schemes) and returns an error on invalid input. A
+free-form `[]string` cannot reach the spec. Evidence: `cve.go`, tested by
+`TestBuilder_WithCVEs`, `TestNewCVE_Valid`, `TestNewCVE_Invalid`,
+`TestNewCVE_InvalidWrapsSentinel`, `ExampleCVE`.
 
 ### Enforcement mode (typed `Mode` enum)
 

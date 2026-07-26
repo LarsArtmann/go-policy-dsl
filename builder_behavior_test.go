@@ -144,19 +144,6 @@ func TestBehavior_BoundingByLibraryVersion(t *testing.T) {
 		}
 	})
 
-	t.Run("an inverted range is surfaced by Validate, not by panicking at construction", func(t *testing.T) {
-		t.Parallel()
-
-		high := parseVersionOrFatal(t, "2.0.0")
-		low := parseVersionOrFatal(t, "1.0.0")
-
-		spec := policydsl.Ban("golog").VersionRange(&high, &low).Spec()
-
-		if err := spec.Validate(); err == nil {
-			t.Fatalf("expected Validate to reject an inverted range, got nil")
-		}
-	})
-
 	t.Run("a spec built via the builder always validates", func(t *testing.T) {
 		t.Parallel()
 
@@ -169,8 +156,29 @@ func TestBehavior_BoundingByLibraryVersion(t *testing.T) {
 			t.Errorf("a builder-produced spec should Validate clean; got %v", err)
 		}
 	})
+}
 
-	t.Run("direct field assignment that inverts the range fails Validate", func(t *testing.T) {
+// TestBehavior_VersionRangeInversionIsCaughtByValidate groups the inversion
+// behaviours: the Builder never panics on a nonsensical min > max range, and
+// direct field assignment is likewise not rejected at construction — both are
+// surfaced as a returned *InvertedVersionRangeError by Validate.
+func TestBehavior_VersionRangeInversionIsCaughtByValidate(t *testing.T) {
+	t.Parallel()
+
+	t.Run("an inverted range built via the builder is surfaced by Validate, not by a panic", func(t *testing.T) {
+		t.Parallel()
+
+		high := parseVersionOrFatal(t, "2.0.0")
+		low := parseVersionOrFatal(t, "1.0.0")
+
+		spec := policydsl.Ban("golog").VersionRange(&high, &low).Spec()
+
+		if err := spec.Validate(); err == nil {
+			t.Fatalf("expected Validate to reject an inverted range, got nil")
+		}
+	})
+
+	t.Run("an inverted range introduced by direct field assignment fails Validate", func(t *testing.T) {
 		t.Parallel()
 
 		high := parseVersionOrFatal(t, "2.0.0")

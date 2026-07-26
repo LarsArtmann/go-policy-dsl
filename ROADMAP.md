@@ -105,8 +105,7 @@ was removed — it lied (it suppressed the ban, not the companion). Shipped in
 
 ### Branded `CVE` and `[]Replacement` — LANDED
 
-`CVEs []string` is now `[]CVE` (validated `CVE-YYYY-NNNN` via `NewCVE`/
-`MustCVE`), and `Alternatives []string` is now `[]Replacement` (each entry
+`CVEs []string` is now `[]CVE` (validated `CVE-YYYY-NNNN` via `NewCVE`), and `Alternatives []string` is now `[]Replacement` (each entry
 keeps its `Reason` — no information loss). Both eliminate stringly-typed
 footguns without adding a dependency. Shipped in `[Unreleased]` (2026-07-26).
 

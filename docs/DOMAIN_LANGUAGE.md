@@ -142,10 +142,10 @@ carries both `Library` and `Reason` (no information is discarded). Populated by
 
 A validated CVE identifier in canonical MITRE form `CVE-YYYY-NNNN...` (e.g.
 `CVE-2021-44228`). A branded `string` type so an unvalidated free-form string
-cannot reach a `PolicySpec`. Construct via `NewCVE(id)` (validated) or
-`MustCVE(id)` (panics); both reject anything that is not `CVE-` + 4 digits +
-`-` + 4+ digits. Tagged onto a policy via `WithCVEs(...CVE)`. In code: `CVE`
-(`cve.go`).
+cannot reach a `PolicySpec`. Construct via `NewCVE(id)`, which validates the
+form and returns an error on rejection; anything that is not `CVE-` + 4 digits +
+`-` + 4+ digits is refused. Tagged onto a policy via `WithCVEs(...CVE)`. In
+code: `CVE` (`cve.go`).
 
 ---
 
@@ -187,19 +187,18 @@ A parsed semantic version `{Major, Minor, Patch}` of the **library** targeted
 by the policy (NOT the Go toolchain version). The zero `Version` is the valid
 version `0.0.0`; an _unbounded_ range bound is represented by a `nil *Version`,
 not by the zero value. Construct via `NewVersion(major, minor, patch)` or
-`ParseVersion("1.2.3")` (and their `Must`-prefixed panic variants for
-package-level vars). Ordered by `Compare` / `Before` / `After` / `Equal`.
+`ParseVersion("1.2.3")` (both return errors; the library has no panic
+variants). Ordered by `Compare` / `Before` / `After` / `Equal`.
 In code: `Version` (`version.go`).
 
 ### VersionRange (builder method)
 
 `VersionRange(minVer, maxVer *Version)` sets inclusive `[min, max]` version
-constraints; `nil` on either side means unbounded. **Panics if both bounds
-are non-nil and `min > max`** — a nonsensical inverted range fails fast at
-package-init time rather than surfacing silently. `VersionRangeStrings(min,
-max string)` is the string convenience (empty = unbounded; parses via
-`MustParseVersion`, panics on parse error or inversion). In code:
-`builder.go`.
+constraints; `nil` on either side means unbounded. Parse version strings with
+`ParseVersion` before the chain (the library is panic-free, so a string
+convenience that hides a parse error behind a panic was removed). An inverted
+range (`min > max`) is **not** rejected at construction — detect it via
+`Validate()`. In code: `builder.go`.
 
 ### Validate (the structural check)
 
@@ -213,9 +212,11 @@ and returns exactly what was built.
 > **History:** `VersionRange` was renamed from `GoVersionRange` (and
 > `VersionMin`/`Max` from `GoVersionMin`/`Max`) because the old name lied —
 > it never constrained Go itself, only the library version. The fields were
-> then retyped from `string` to `*Version` (2026-07-26 review) to make the
-> inverted-range state (`min > max`) unrepresentable through the builder. See
-> `CHANGELOG.md` `[Unreleased]`.
+> then retyped from `string` to `*Version` (2026-07-26 review). The builder's
+> inversion `panic` (and the `Must*` / `VersionRangeStrings` conveniences that
+> panicked on error) were subsequently removed so the library returns errors
+> exclusively; `Validate()` is now the single source of truth for the inversion
+> invariant. See `CHANGELOG.md` `[Unreleased]`.
 
 ---
 

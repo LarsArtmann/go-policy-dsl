@@ -14,6 +14,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **BREAKING: the library is now panic-free.** All error conditions are returned,
+  never panicked. This removes the entire `Must*` family and the inversion panic:
+  - Removed `MustCVE(id)`, `MustNewVersion(...)`, `MustParseVersion(s)`. Use the
+    error-returning `NewCVE`, `NewVersion`, `ParseVersion` instead.
+  - Removed `VersionRangeStrings(min, max string)`. Parse each bound with
+    `ParseVersion` and pass `*Version` values to `VersionRange`. (The method hid
+    parse errors behind a panic; a panic-free fluent chain cannot surface a
+    parse error, so the convenience was removed rather than silently dropped or
+    re-panicked.)
+  - Removed the inversion `panic` from `VersionRange(min, max *Version)`. An
+    inverted range (`min > max`) is no longer rejected at construction; detect it
+    via `PolicySpec.Validate()`, which returns `*InvertedVersionRangeError` — now
+    the single source of truth for the inversion invariant.
+- `erraudit ./...` now reports **0 CRITICAL** findings (previously 3 accepted
+  `Must`-panic false positives).
+
 ### Added
 
 - `docs/DOMAIN_LANGUAGE.md` — ubiquitous-language glossary (Ban, Companion,
