@@ -36,7 +36,7 @@ decision. The code is better; the discipline was leaky again.
 | --- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
 | 1   | T2: replaced lying `CompanionOnly bool` with typed `Mode` (`ModeBan`/`ModeCompanionOnly`)          | `policy.go:107-162`; `Ban()` sets `ModeBan`, `AsCompanionOnly()` sets `ModeCompanionOnly`   |
 | 2   | T4: `Alternatives []string` → `[]Replacement` (full Replacement stored, no `Reason` loss)          | `policy.go:142`; `Suggest`/`WithAlternatives` retyped; `equalReplacements` helper added     |
-| 3   | T3: branded `CVE` type + `NewCVE`/`MustCVE` validating `CVE-YYYY-NNNN`, `ErrInvalidCVE` sentinel   | `cve.go`, `cve_test.go` (12 invalid cases, 4 valid, sentinel-wrap, panic, Example)          |
+| 3   | T3: branded `CVE` type + `NewCVE`/~~`MustCVE`~~ (removed `8ef645f`) validating `CVE-YYYY-NNNN`, `ErrInvalidCVE` sentinel   | `cve.go`, `cve_test.go` (12 invalid cases, 4 valid, sentinel-wrap, ~~panic~~ (panic test removed `8ef645f`), Example)          |
 | 4   | T5: `SuggestExplicit(r)` — no-magic append (no `Description` derivation) + 2 contract tests        | `builder.go`; `TestBuilder_SuggestExplicit_NoDescriptionDerivation`, `..._MixedWithSuggest` |
 | 5   | T1: `FuzzBuilder_PatternsOpaque` pinning "patterns are opaque strings" contract (3.1M execs PASS)  | `builder_fuzz_test.go` (7 seeds; every pattern entry point round-trips any string)          |
 | 6   | T6: `Require` decided **NO** (YAGNI, no consumer need) and documented                              | `ROADMAP.md` "Decided against" section                                                      |
@@ -324,3 +324,28 @@ wait for your call on the three questions before touching the versioning note,
 the unknown-`Mode` contract, or struct tags.
 
 — Crush
+
+---
+
+## Resolution (2026-07-26 10:12)
+
+This session's headline work — `Mode` enum, `[]Replacement`, branded `[]CVE`,
+`SuggestExplicit`, the opaque-pattern fuzz contract — all remains **live**.
+One symbol it lists, `MustCVE`, was later **removed** in `8ef645f` (the
+panic-free refactor); the validated `CVE` type and `NewCVE` remain.
+
+### Still open (tracked in `TODO_LIST.md`)
+
+| Item (this report) | Claim                                                          | Status                                                                                  |
+| ------------------ | -------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| §b.1               | `Mode` semantics pinning (test `Ban()` sets `ModeBan`)         | OPEN — no test yet asserts `spec.Mode == ModeBan` after `Ban(...)`                      |
+| §b.2               | `Mode` validation (reject unknown `Mode`)                      | OPEN — `Validate()` does not reject `Mode("garbage")`                                   |
+| §f.9               | CVE syntactic-only validation doc note                         | OPEN                                                                                    |
+| §f.13              | `json`/`yaml` struct tags on `PolicySpec`/`Mode`/`CVE`/`Replacement` | OPEN — routed to `TODO_LIST.md`                                                   |
+| §f.14              | CI fuzz wiring (`-fuzztime` in CI)                             | OPEN                                                                                    |
+
+### Question resolutions
+
+- **§g.1** (one `v0.2.0` or split?): resolved — all breaking changes fold into the first tag, `v0.2.0` (zero shipped consumers).
+- **§g.2** (unknown `Mode` — enforce or document?): still open — routed to `TODO_LIST.md`.
+- **§g.3** (struct tags now or leave pure?): still open — routed to `TODO_LIST.md`.

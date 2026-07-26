@@ -116,9 +116,11 @@ this session is complete.
 
 ## c) NOT STARTED (intentionally out of scope this session)
 
-- **Pre-existing diagnostic at `policy_test.go:562`**: `policydsl.CategoryMaintainability`
+- ~~**Pre-existing diagnostic at `policy_test.go:562`**: `policydsl.CategoryMaintainability`
   undefined (only `CategoryMaintenance` exists in `policy.go`). This predates my
-  work, is unrelated to the Must*/panic removal, and was flagged but not fixed.
+  work, is unrelated to the Must*/panic removal, and was flagged but not fixed.~~
+  DONE: fixed in a later commit — `policy_test.go` now uses `CategoryMaintenance`
+  correctly; the undefined reference is gone.
 - **Consumer migration** (`library-policy`): the consumer still references the
   old API surface in its `domain/policy/spec.go` migration target. Not touched
   — separate task, separate repo.
@@ -209,11 +211,12 @@ time, independent of whether erraudit is wired into CI.
 
 ### High impact (do first)
 
-1. **Fix the pre-existing `CategoryMaintainability` typo** at
+1. ~~**Fix the pre-existing `CategoryMaintainability` typo** at
    `policy_test.go:562` → `CategoryMaintenance` (or add the missing constant).
    Currently a hard compile error in that test if isolated, masked by the rest
    passing. (Out of scope this session — needs a 1-line decision: rename or
-   add?)
+   add?)~~ DONE: fixed in a later commit (`policy_test.go:561` now reads
+   `CategoryMaintenance`);
 2. **Decide `Validate()` return type**: concrete `*InvertedVersionRangeError`
    vs `error` interface (see Question 1). This is the single highest-leverage
    API decision left.

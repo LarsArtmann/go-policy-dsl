@@ -2,7 +2,15 @@
 
 **Date:** 2026-07-26 09:40 CEST
 **Session goal:** Triage and resolve `erraudit ./...` findings (3 violations: 2 CRITICAL panics, 1 WARNING generic return).
-**Outcome:** 1 finding fixed (typed error), 3 findings accepted as false positives (Must-pattern panics). Documentation drift left behind.
+**Outcome:** 1 finding fixed (typed error), ~~3 findings accepted as false positives (Must-pattern panics). Documentation drift left behind.~~ **Update 2026-07-26 10:12 (`8ef645f`):** the 3 "accepted" Must-panic findings were **removed**, not accepted — the library is now panic-free; `erraudit ./...` reports **0 violations**. See [Resolution](#resolution-2026-07-26-10-12) below.
+
+> **Update 2026-07-26 10:12:** this report's central premise — that the 3
+> CRITICAL `Must`-panic findings are "accepted false positives" — is
+> **superseded**. The user overrode that acceptance ("I do not like `Must*`
+> functions!"); `MustCVE`, `MustNewVersion`, and `MustParseVersion` were deleted
+> in `8ef645f`. `erraudit ./...` is now genuinely 0, not 0-by-suppression. The
+> typed-error work this report _did_ ship (`InvertedVersionRangeError`,
+> `Validate()` return type) remains live and correct.
 
 ---
 
@@ -32,7 +40,7 @@ A third CRITICAL panic (`cve.go:39`) appeared mid-session due to concurrent refa
 - `go vet ./...` — exit 0
 - `golangci-lint run ./...` — 0 issues
 - `golangci-lint fmt ./...` — clean
-- `erraudit ./...` — WARNING count dropped from 1 to 0; 3 CRITICAL Must-panic findings remain (accepted)
+- ~~`erraudit ./...` — WARNING count dropped from 1 to 0; 3 CRITICAL Must-panic findings remain (accepted)~~ **Update `8ef645f`:** `erraudit ./...` now reports **0 CRITICAL, 0 WARNING, 0 violations** — the 3 Must-panics were removed (the library is panic-free), not accepted.
 
 ### Researched before acting
 
@@ -241,3 +249,38 @@ You said "no suppression" for the source code. But for CI gating, `erraudit ./..
 | `AGENTS.md`      | Updated Quick Start, Validate description, Must-panic documentation      |
 
 All changes were auto-committed by the git daemon (commits `4af24d3`, `6220ac3`).
+
+---
+
+## Resolution (2026-07-26 10:12)
+
+This report's framing of the 3 `Must`-panic findings as **"accepted false
+positives"** was **overruled** by the user ("I do not like `Must*` functions!").
+A later session (`8ef645f`) deleted `MustCVE`, `MustNewVersion`, and
+`MustParseVersion` entirely, making the library panic-free. `erraudit ./...`
+now reports **0 violations** — legitimately, not by suppression.
+
+### What this report shipped (still live)
+
+- `InvertedVersionRangeError` (typed error carrying `Min`/`Max` bounds) — still
+  the `Validate()` return type.
+- `errors.Is(err, ErrInvertedVersionRange)` compatibility via the `Is()` method.
+- `TestPolicySpec_Validate_InvertedRangeErrorCarriesBounds`.
+
+### What was superseded
+
+- §g.3 ("should the 3 Must-panic findings be suppressed in CI?") — moot; the
+  findings no longer exist.
+- §f.42 ("should `MustCVE`/`MustNewVersion`/`MustParseVersion` share a common
+  `must` helper?") — moot; all three were deleted.
+- The "Session Metrics" table above is accurate **for this session's state**
+  (erraudit did report 3 at the time), but those 3 were later eliminated, not
+  left as accepted noise.
+
+### Still open (tracked in `TODO_LIST.md`)
+
+- §f.5 — add `InvertedVersionRangeError` to the AGENTS.md file-layout list (done
+  in a later session).
+- §g.1 — whether `InvertedVersionRangeError` should also implement
+  `Unwrap() error` (belt-and-suspenders with `Is()`); still undecided.
+- §f.50 — a dedicated ADR for the error model; `docs/adr/` does not yet exist.

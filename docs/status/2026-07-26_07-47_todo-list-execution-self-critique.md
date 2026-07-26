@@ -225,3 +225,41 @@ The `deduplicate-code` skill explicitly says: _"Re-run art-dupl after each refac
 **Bottom line:** the code is substantially better and substantially more tested than I found it. The process leaked again in the same places: I annotated the wrong status report, bragged about coverage, and left an HTML report describing a deleted API. The typed `Version` domain — the session's headline feature — is correct but introduces a runtime panic footgun and a serialization gap I did not think through. P0 above closes the integrity failures in under an hour. I'll wait for your call on the three questions before the next breaking change.
 
 — Crush
+
+---
+
+## Resolution (2026-07-26 10:12)
+
+### Panic footgun resolved (§d.4, §e architecture)
+
+This report's biggest architecture concern — that `VersionRange` and
+`VersionRangeStrings` **panic** on inversion, leaving no non-panicking path for
+untrusted input — was resolved in commit `8ef645f` by **removing the panics
+entirely** (rather than by adding the `ParseVersionRange` this report proposed).
+The library is now panic-free by design: `VersionRange(*Version, *Version)` no
+longer panics; inversion is detected solely by `PolicySpec.Validate()`, which
+returns `*InvertedVersionRangeError`. `VersionRangeStrings` was removed (a
+fluent chain cannot surface a parse error). `erraudit ./...` reports 0
+violations. The panic-free contract is now a documented guarantee in
+`AGENTS.md`.
+
+### HTML report (§d.3)
+
+The `docs/reviews/2026-07-26_06-46_full-code-review.html` report this session
+flagged as "describing a deleted API" has been annotated with a dated
+resolution notice.
+
+### Still open
+
+| Item (this report) | Claim                                                            | Status                                                                                                |
+| ------------------ | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| §f.3               | Add `json`/`yaml` struct tags to `Version`                       | OPEN — `Version` and `PolicySpec` still have no serialization tags; routed to `TODO_LIST.md`          |
+| §f.6               | Non-panicking `(*Version, error)` constructor path               | RESOLVED differently — panics removed entirely; `Validate()` is the single validation path            |
+| §f.7               | Exclusive version bounds (`BeforeVersion` / `AfterVersion`)     | OPEN — range is still inclusive-only; documented in `ROADMAP.md`                                      |
+| §e ADR             | Record typed-Version design rationale                            | OPEN — `docs/adr/` does not yet exist; the rationale lives only in `AGENTS.md`                        |
+
+### Question resolutions
+
+- **§g.1** (annotate or regenerate the HTML report?): resolved — annotate with a dated notice (HTML is fragile to regenerate; the `update-old-docs` skill permits a notice).
+- **§g.2** (keep panicking or return an error?): resolved — panics removed; errors returned.
+- **§g.3** (is the typed `Version` domain wanted by `library-policy`?): still open — the consumer has not yet migrated; the typed domain stays until the cutover proves otherwise.
