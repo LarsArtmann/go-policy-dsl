@@ -1,6 +1,9 @@
 package policydsl_test
 
 import (
+	"errors"
+	"fmt"
+	"strings"
 	"testing"
 
 	policydsl "github.com/larsartmann/go-policy-dsl"
@@ -37,7 +40,7 @@ func TestBuilder_FullFluentChain(t *testing.T) {
 		WithCategory(policydsl.CategoryPerformance).
 		DetectVia(policydsl.ImportPattern("gorm.io/gorm")).
 		Suggest(policydsl.NewReplacement("sqlc", "type-safe SQL")).
-		VersionRange("1.0.0", "2.0.0").
+		VersionRangeStrings("1.0.0", "2.0.0").
 		Spec()
 
 	if spec.Reason != "ORMs hide N+1 queries" {
@@ -60,8 +63,9 @@ func TestBuilder_FullFluentChain(t *testing.T) {
 		t.Errorf("unexpected alternatives: %v", spec.Alternatives)
 	}
 
-	if spec.VersionMin != "1.0.0" || spec.VersionMax != "2.0.0" {
-		t.Errorf("unexpected version range: min=%q max=%q", spec.VersionMin, spec.VersionMax)
+	if spec.VersionMin == nil || spec.VersionMin.String() != "1.0.0" ||
+		spec.VersionMax == nil || spec.VersionMax.String() != "2.0.0" {
+		t.Errorf("unexpected version range: min=%v max=%v", spec.VersionMin, spec.VersionMax)
 	}
 }
 
@@ -215,18 +219,122 @@ func TestBuilder_WithCVEs(t *testing.T) {
 	}
 }
 
-func TestBuilder_VersionRange(t *testing.T) {
+func TestBuilder_VersionRangeStrings(t *testing.T) {
 	t.Parallel()
 
-	spec := policydsl.Ban("golog").VersionRange("", "1.99.0").Spec()
+	spec := policydsl.Ban("golog").VersionRangeStrings("", "1.99.0").Spec()
 
-	if spec.VersionMin != "" {
-		t.Errorf("expected empty min, got %q", spec.VersionMin)
+	if spec.VersionMin != nil {
+		t.Errorf("expected nil min (unbounded), got %v", spec.VersionMin)
 	}
 
-	if spec.VersionMax != "1.99.0" {
-		t.Errorf("expected max 1.99.0, got %q", spec.VersionMax)
+	if spec.VersionMax == nil || spec.VersionMax.String() != "1.99.0" {
+		t.Errorf("expected max 1.99.0, got %v", spec.VersionMax)
 	}
+}
+
+// TestBuilder_VersionRangeStrings_InvertedPanics confirms the string
+// convenience panics on a nonsensical inverted range (min > max). This is the
+// footgun the typed Version domain exists to eliminate.
+func TestBuilder_VersionRangeStrings_InvertedPanics(t *testing.T) {
+	t.Parallel()
+
+	defer func() {
+		r := recover()
+		if r == nil {
+			t.Fatalf("expected panic on inverted VersionRangeStrings, got none")
+		}
+
+		msg := fmt.Sprintf("%v", r)
+		if !strings.Contains(msg, "inverted") {
+			t.Errorf("expected panic message to mention inversion, got %q", msg)
+		}
+	}()
+
+	policydsl.Ban("x").VersionRangeStrings("2.0.0", "1.0.0").Spec()
+}
+
+// TestBuilder_VersionRange_Typed exercises the typed *Version signature:
+// nil bounds are stored as nil; typed bounds are stored verbatim; an inverted
+// typed range panics.
+func TestBuilder_VersionRange_Typed(t *testing.T) {
+	t.Parallel()
+
+	min := policydsl.MustParseVersion("1.0.0")
+	max := policydsl.MustParseVersion("2.0.0")
+
+	spec := policydsl.Ban("x").VersionRange(&min, &max).Spec()
+
+	if spec.VersionMin == nil || !spec.VersionMin.Equal(min) {
+		t.Errorf("expected min %s, got %v", min, spec.VersionMin)
+	}
+
+	if spec.VersionMax == nil || !spec.VersionMax.Equal(max) {
+		t.Errorf("expected max %s, got %v", max, spec.VersionMax)
+	}
+
+	// Both nil = fully unbounded.
+	unbounded := policydsl.Ban("y").VersionRange(nil, nil).Spec()
+	if unbounded.VersionMin != nil || unbounded.VersionMax != nil {
+		t.Errorf("expected nil bounds, got min=%v max=%v", unbounded.VersionMin, unbounded.VersionMax)
+	}
+}
+
+func TestBuilder_VersionRange_Typed_InvertedPanics(t *testing.T) {
+	t.Parallel()
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Fatalf("expected panic on inverted typed VersionRange, got none")
+		}
+	}()
+
+	high := policydsl.MustParseVersion("2.0.0")
+	low := policydsl.MustParseVersion("1.0.0")
+	policydsl.Ban("x").VersionRange(&high, &low).Spec()
+}
+
+// TestPolicySpec_Validate confirms Validate catches an inverted range that
+// direct field assignment can introduce (bypassing the Builder guard).
+func TestPolicySpec_Validate(t *testing.T) {
+	t.Parallel()
+
+	t.Run("sound_spec_validates", func(t *testing.T) {
+		t.Parallel()
+
+		spec := policydsl.Ban("x").VersionRangeStrings("1.0.0", "2.0.0").Spec()
+		if err := spec.Validate(); err != nil {
+			t.Errorf("expected nil error for sound spec, got %v", err)
+		}
+	})
+
+	t.Run("inverted_range_returns_error", func(t *testing.T) {
+		t.Parallel()
+
+		high := policydsl.MustParseVersion("2.0.0")
+		low := policydsl.MustParseVersion("1.0.0")
+		spec := policydsl.PolicySpec{
+			VersionMin: &high,
+			VersionMax: &low,
+		}
+
+		err := spec.Validate()
+		if err == nil {
+			t.Fatalf("expected ErrInvertedVersionRange, got nil")
+		}
+
+		if !errors.Is(err, policydsl.ErrInvertedVersionRange) {
+			t.Errorf("expected ErrInvertedVersionRange, got %v", err)
+		}
+	})
+
+	t.Run("nil_bounds_valid", func(t *testing.T) {
+		t.Parallel()
+
+		if err := (policydsl.PolicySpec{}).Validate(); err != nil {
+			t.Errorf("zero-value spec should validate, got %v", err)
+		}
+	})
 }
 
 func TestBuilder_RequiresCompanionAndAsCompanionOnly(t *testing.T) {
