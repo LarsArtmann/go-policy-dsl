@@ -15,15 +15,18 @@ The API is not yet stable. `v1.0.0` is reached when **all** of these hold:
    `domain/policy/spec.go` onto this module and releases. This is the load-bearing
    gate — until a real consumer exercises the API, "stable" is a claim, not a
    fact.
-2. **Validation policy decided.** Whether `Spec()` stays validation-free or
-   grows a `Validate()` is settled and documented (currently: validation-free
-   by design — see `AGENTS.md`).
+2. **Validation policy decided.** `Spec()` stays validation-free by design
+   (returns exactly what was built); `PolicySpec.Validate()` checks only the
+   version-range invariant. Mode values are NOT validated (deny-by-default:
+   only `ModeCompanionOnly` suppresses the ban; see `AGENTS.md`). Struct tags
+   are deliberately absent (values, not config; see `AGENTS.md`). Both
+   decisions are settled and documented.
 3. **Stringly-typed axes reviewed.** The `CompanionOnly bool` → typed `Mode`
    enum landed in `[Unreleased]` (2026-07-26); `CVEs []string` → branded `[]CVE`
    with format validation landed the same session; `Alternatives []string` →
    `[]Replacement` (no information loss). The typed `Version` domain landed
-   earlier — `VersionMin`/`Max` are `*Version` with inversion rejected at
-   construction.
+   earlier — `VersionMin`/`Max` are `*Version` with inversion detected by
+   `Validate()` (the library is panic-free by design).
 4. **BDD + Example tests green.** User-perspective behaviour is pinned by a
    stdlib BDD-style suite (`TestBehavior_*`, deliberately NOT Ginkgo to honour
    the zero-dependency contract) and godoc `Example*` functions so refactor
@@ -102,8 +105,12 @@ construction — the library is panic-free by design — but is detected by
 The policy "mode" is now a typed enum, not a boolean flag. `ModeBan` (default)
 emits a ban and enforces companions; `ModeCompanionOnly` (set via
 `AsCompanionOnly()`) suppresses the ban. The former `CompanionOnly bool` field
-was removed — it lied (it suppressed the ban, not the companion). Shipped in
-`[Unreleased]` (2026-07-26); see `FEATURES.md` "Companion policy".
+was removed — it lied (it suppressed the ban, not the companion). The contract
+is deny-by-default: the ONLY mode that suppresses the ban is
+`ModeCompanionOnly`; every other value (empty string, `ModeBan`, unknown
+strings) is ban-active — a typo can never silently disable enforcement. Pinned
+by `TestMode_DenyByDefaultContract`. Shipped in `[Unreleased]` (2026-07-26);
+see `FEATURES.md` "Companion policy".
 
 ### Branded `CVE` and `[]Replacement` — LANDED
 
@@ -143,10 +150,12 @@ GitHub Action. Low urgency until the first consumer is ready to pin a version.
 
 ### Ecosystem hygiene — LANDED
 
-`CODEOWNERS`, issue templates, a pull-request template, and a GitHub Actions
+`CODEOWNERS`, issue templates, a pull-request template, a GitHub Actions
 CI workflow (`.github/workflows/ci.yml`) enforcing the full quality gate
 (build, vet, test -race, `golangci-lint run`, `golangci-lint fmt` drift
-check) shipped in `[Unreleased]` (2026-07-26). The `depguard` config keeps
+check) shipped in `[Unreleased]` (2026-07-26). A dedicated fuzz job runs
+both fuzz targets for 30s each on every push/PR. `.github/dependabot.yml`
+keeps GitHub Actions versions fresh automatically. The `depguard` config keeps
 the stdlib-only contract enforced at the linter level (reject any future
 non-stdlib dependency).
 

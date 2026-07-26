@@ -35,7 +35,7 @@ dependency). Evidence: `version.go`, `builder.go`, `policy.go`, tested by
 `CategorySecurity` + `ModeBan` defaults; every chainable method returns the
 `*Builder`; `Spec()` returns the immutable `PolicySpec`. Evidence:
 `builder.go`, tested by `TestBan_DefaultsToCriticalSecurity`,
-`TestBuilder_FullFluentChain`.
+`TestBan_SetsModeBan`, `TestBuilder_FullFluentChain`.
 
 ### Companion policy
 
@@ -109,10 +109,23 @@ free-form `[]string` cannot reach the spec. Evidence: `cve.go`, tested by
 `PolicySpec.Mode` (`ModeBan` | `ModeCompanionOnly`) declares what a policy
 enforces, replacing the former dishonest `CompanionOnly bool`. `Ban(...)` sets
 `ModeBan` (emit ban + enforce companions); `AsCompanionOnly()` sets
-`ModeCompanionOnly` (suppress ban, enforce only companions). The zero-value
-`Mode` (`""`) is treated as ban-active. Evidence: `policy.go`, tested by
-`TestBuilder_RequiresCompanionAndAsCompanionOnly`, `TestPolicySpec_ZeroValue`,
-`TestBehavior_RequiringACompanion`, `ExampleCompanion`.
+`ModeCompanionOnly` (suppress ban, enforce only companions). **Deny-by-default
+contract:** the ONLY mode that suppresses the ban finding is
+`ModeCompanionOnly`; every other value (empty string, `ModeBan`, unknown
+strings) is ban-active — a typo can never silently disable enforcement.
+Evidence: `policy.go`, tested by `TestBuilder_RequiresCompanionAndAsCompanionOnly`,
+`TestPolicySpec_ZeroValue`, `TestBan_SetsModeBan`,
+`TestMode_DenyByDefaultContract`, `TestBehavior_RequiringACompanion`,
+`ExampleCompanion`.
+
+### Panic-free contract
+
+The library **never panics**. Every error condition is returned, never
+panicked. No `Must*` constructors exist. This is verified at two levels:
+`erraudit ./...` (0 violations) and an in-repo regression test
+(`TestNoPanicsInNonTestSource`) that parses every non-test `.go` file via
+`go/parser` and fails if any contains a `panic(` call expression. Evidence:
+`AGENTS.md` "Panic-Free" section, `panic_free_test.go`.
 
 ### Opaque-pattern contract (fuzz-pinned)
 
