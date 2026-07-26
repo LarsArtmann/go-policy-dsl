@@ -401,6 +401,33 @@ func TestPolicySpec_Validate(t *testing.T) {
 	})
 }
 
+// TestPolicySpec_Validate_InvertedRangeErrorCarriesBounds verifies that the
+// typed *InvertedVersionRangeError returned by Validate carries the offending
+// Min/Max bounds so callers can report them programmatically.
+func TestPolicySpec_Validate_InvertedRangeErrorCarriesBounds(t *testing.T) {
+	t.Parallel()
+
+	high := policydsl.MustParseVersion("2.0.0")
+	low := policydsl.MustParseVersion("1.0.0")
+	spec := policydsl.PolicySpec{
+		VersionMin: &high,
+		VersionMax: &low,
+	}
+
+	err := spec.Validate()
+	if err == nil {
+		t.Fatalf("expected typed error, got nil")
+	}
+
+	if err.Min == nil || *err.Min != high {
+		t.Errorf("expected Min to point to %s, got %v", high, err.Min)
+	}
+
+	if err.Max == nil || *err.Max != low {
+		t.Errorf("expected Max to point to %s, got %v", low, err.Max)
+	}
+}
+
 func TestBuilder_RequiresCompanionAndAsCompanionOnly(t *testing.T) {
 	t.Parallel()
 

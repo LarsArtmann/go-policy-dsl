@@ -18,12 +18,16 @@ The API is not yet stable. `v1.0.0` is reached when **all** of these hold:
 2. **Validation policy decided.** Whether `Spec()` stays validation-free or
    grows a `Validate()` is settled and documented (currently: validation-free
    by design — see `AGENTS.md`).
-3. **Stringly-typed axes reviewed.** The `CompanionOnly` → `Mode` rename is
-   resolved (see `TODO_LIST.md`); the typed `Version` domain landed in
-   `[Unreleased]` (2026-07-26) — `VersionMin`/`Max` are now `*Version` with
-   inversion rejected at construction.
+3. **Stringly-typed axes reviewed.** The `CompanionOnly bool` → typed `Mode`
+   enum landed in `[Unreleased]` (2026-07-26); `CVEs []string` → branded `[]CVE`
+   with format validation landed the same session; `Alternatives []string` →
+   `[]Replacement` (no information loss). The typed `Version` domain landed
+   earlier — `VersionMin`/`Max` are `*Version` with inversion rejected at
+   construction.
 4. **BDD + Example tests green.** User-perspective behaviour is pinned by a
-   Ginkgo suite and godoc `Example*` functions so refactor support is honest.
+   stdlib BDD-style suite (`TestBehavior_*`, deliberately NOT Ginkgo to honour
+   the zero-dependency contract) and godoc `Example*` functions so refactor
+   support is honest.
 
 Until then: breaking changes are allowed in any `0.x` bump and are always
 listed under `CHANGELOG.md` → `Changed` with a `**BREAKING**` marker.
@@ -56,7 +60,13 @@ for ecosystem adoption.
 
 The DSL intentionally declares _what_ a policy is, not _how_ it is detected.
 Every consumer currently reinvents the matching semantics for
-`ImportPatterns` / `GoModPatterns` (literal? glob? regex?). Raw ideas:
+`ImportPatterns` / `GoModPatterns` (literal? glob? regex?).
+
+**Contract (pinned):** the DSL owns NO matching semantics — patterns are
+**opaque strings**, stored verbatim and never interpreted. This is fuzz-pinned
+by `FuzzBuilder_PatternsOpaque` (any string round-trips unchanged through every
+pattern entry point). A pattern-matching fuzz target therefore cannot live in
+the DSL (there is nothing to match against); consumers own that. Raw ideas:
 
 - **`matcher` subpackage** — a tiny stdlib-only glob matcher on import paths,
   so consumers don't reinvent it. Decide if in-scope or left to consumers.
@@ -85,10 +95,28 @@ the stringly-typed footgun where `VersionRange("2.0.0", "1.0.0")` was
 representable. Shipped in `[Unreleased]` (2026-07-26); see `FEATURES.md`
 "Version constraints".
 
-### Typed `Mode` enum (replace `CompanionOnly bool`)
+### Typed `Mode` enum (replace `CompanionOnly bool`) — LANDED
 
-See `TODO_LIST.md` [T4]. Long-term the policy "mode" (ban / companion-only /
-both) should be a typed enum, not a boolean flag. Still open.
+The policy "mode" is now a typed enum, not a boolean flag. `ModeBan` (default)
+emits a ban and enforces companions; `ModeCompanionOnly` (set via
+`AsCompanionOnly()`) suppresses the ban. The former `CompanionOnly bool` field
+was removed — it lied (it suppressed the ban, not the companion). Shipped in
+`[Unreleased]` (2026-07-26); see `FEATURES.md` "Companion policy".
+
+### Branded `CVE` and `[]Replacement` — LANDED
+
+`CVEs []string` is now `[]CVE` (validated `CVE-YYYY-NNNN` via `NewCVE`/
+`MustCVE`), and `Alternatives []string` is now `[]Replacement` (each entry
+keeps its `Reason` — no information loss). Both eliminate stringly-typed
+footguns without adding a dependency. Shipped in `[Unreleased]` (2026-07-26).
+
+### Decided against: a `Require(name)` builder
+
+A distinct "required library" policy type (`Require(...)`) was considered and
+**deliberately not added**: no consumer needs a third policy kind beyond ban
+and companion, and adding it would be speculative API surface (YAGNI). A
+phantom `Require` once appeared in the package docs by mistake and was
+removed; it will not become real unless a concrete consumer demand appears.
 
 ---
 

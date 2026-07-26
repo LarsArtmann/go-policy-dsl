@@ -11,6 +11,7 @@ go test ./...                 # all tests
 golangci-lint run ./...       # lint (uses .golangci.yml, v2 format)
 golangci-lint fmt ./...       # apply formatters (gci, goimports, gofumpt)
 go build ./...                # build check
+erraudit ./...                # hierarchical error analysis (3 Must-panic CRITICALs = accepted false positives)
 ```
 
 No `flake.nix` — this is a tiny stdlib-only library; buildflow handles CI. Module: `github.com/larsartmann/go-policy-dsl`, Go 1.26.5.
@@ -37,8 +38,9 @@ Consequence: `go-structure-linter` reports `root-package-files` (ERROR) and `int
 - **`AsCompanionOnly()` suppresses the ban entirely** — the policy never emits a ban finding; it only enforces that declared companions are present. Use this for "this library is fine, but if you use it you must also use X".
 - **`ExcludeIfTransitiveFrom(libs...)` is the false-positive guard** for indirect dependencies: if a listed parent library directly pulls in the banned lib, no violation fires.
 - **`NewReplacement(library, reason)` is the constructor**; `Replacement` is the type. The package doc example uses `NewReplacement(...)`. (An earlier doc example wrongly called `Replacement(...)` — it would not compile.)
+- **`MustNewVersion`, `MustParseVersion`, and `MustCVE` panic on error by design** (idiomatic Go `Must` pattern, like `template.Must`/`regexp.MustCompile`). They exist for package-level policy initialization with compile-time-known literals. `erraudit ./...` reports these as CRITICAL "Panic on error" findings — these are **accepted false positives**; the panic IS the documented contract and is asserted by tests. Do NOT suppress or refactor away.
 - **`VersionRange(minVer, maxVer *Version)` is inclusive on both ends** and constrains the version of the _library_ targeted by the policy (NOT the Go toolchain version). `nil` on either side means unconstrained. **Panics if both bounds are non-nil and min > max** (nonsensical inverted range — fail-fast at package init). `VersionRangeStrings(min, max string)` is the string convenience (empty = unbounded; parses via `MustParseVersion`, panics on parse error or inversion). Renamed from `GoVersionRange` (2026-07 review): the old name lied — it never constrained Go itself, only the library version. Typed `*Version` + `VersionRangeStrings` (2026-07-26 review): previously `string` fields where `("2.0.0","1.0.0")` was silently representable; the typed domain rejects inversion at construction.
-- **`Spec()` performs no validation** — it returns exactly what was built. Structural validation lives in the separate `PolicySpec.Validate() error` method (currently checks only the version-range invariant; domain rules like non-empty `Reason` remain the consumer's job).
+- **`Spec()` performs no validation** — it returns exactly what was built. Structural validation lives in `PolicySpec.Validate()`, which returns a concrete `*InvertedVersionRangeError` (carrying `Min`/`Max` pointers) rather than a generic `error`. Callers using `:=` get type-safe access to the offending bounds directly; `errors.Is(err, ErrInvertedVersionRange)` still works via the type's `Is` method. Currently checks only the version-range invariant; domain rules like non-empty `Reason` remain the consumer's job.
 
 ## Conventions
 
