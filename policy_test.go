@@ -29,6 +29,19 @@ func TestBan_DefaultsToCriticalSecurity(t *testing.T) {
 	}
 }
 
+// TestBan_SetsModeBan pins that Ban(...) explicitly sets Mode = ModeBan (not
+// the zero-value empty string). A built spec must always carry a readable mode
+// so consumers can distinguish "built via Ban" from "zero-value PolicySpec{}".
+func TestBan_SetsModeBan(t *testing.T) {
+	t.Parallel()
+
+	spec := policydsl.Ban("gorm").Spec()
+
+	if spec.Mode != policydsl.ModeBan {
+		t.Errorf("Ban(...) should set Mode = ModeBan, got %q", spec.Mode)
+	}
+}
+
 func TestBuilder_FullFluentChain(t *testing.T) {
 	t.Parallel()
 

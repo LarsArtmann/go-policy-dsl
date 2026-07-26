@@ -197,20 +197,6 @@ func TestBehavior_VersionRangeInversionIsCaughtByValidate(t *testing.T) {
 	})
 }
 
-// parseVersionOrFatal parses s, failing the test immediately on a parse error.
-// It is a test-only convenience (using t.Fatal, not panic) for fixtures where
-// the literal is known valid; it deliberately is NOT part of the exported API.
-func parseVersionOrFatal(t *testing.T, s string) policydsl.Version {
-	t.Helper()
-
-	v, err := policydsl.ParseVersion(s)
-	if err != nil {
-		t.Fatalf("unexpected ParseVersion(%q) error: %v", s, err)
-	}
-
-	return v
-}
-
 // assertSpecField is a tiny stdlib-only equality helper so the behaviour specs
 // read as plain English assertions without pulling a matchers library.
 func assertSpecField(t *testing.T, label, got, want string) {

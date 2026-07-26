@@ -11,13 +11,12 @@ func TestNewVersion(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name          string
-		major         int
-		minor         int
-		patch         int
-		want          policydsl.Version
-		wantErr       bool
-		errMustCommit bool
+		name    string
+		major   int
+		minor   int
+		patch   int
+		want    policydsl.Version
+		wantErr bool
 	}{
 		{name: "all_zero", major: 0, minor: 0, patch: 0, want: policydsl.Version{}},
 		{name: "happy", major: 1, minor: 2, patch: 3, want: policydsl.Version{Major: 1, Minor: 2, Patch: 3}},

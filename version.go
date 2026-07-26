@@ -1,6 +1,7 @@
 package policydsl
 
 import (
+	"cmp"
 	"errors"
 	"fmt"
 	"strconv"
@@ -100,11 +101,11 @@ func (v Version) String() string {
 func (v Version) Compare(other Version) int {
 	switch {
 	case v.Major != other.Major:
-		return cmpSign(v.Major - other.Major)
+		return cmp.Compare(v.Major, other.Major)
 	case v.Minor != other.Minor:
-		return cmpSign(v.Minor - other.Minor)
+		return cmp.Compare(v.Minor, other.Minor)
 	case v.Patch != other.Patch:
-		return cmpSign(v.Patch - other.Patch)
+		return cmp.Compare(v.Patch, other.Patch)
 	default:
 		return 0
 	}
@@ -119,16 +120,4 @@ func (v Version) After(other Version) bool { return v.Compare(other) > 0 }
 // Equal reports whether v and other are the same version.
 func (v Version) Equal(other Version) bool { return v.Compare(other) == 0 }
 
-// cmpSign collapses a non-zero integer difference to -1 / 0 / +1 without
-// overflowing at the extremes (subtraction of two ints can overflow; the
-// sign-detected branch below avoids relying on the raw difference magnitude).
-func cmpSign(n int) int {
-	switch {
-	case n < 0:
-		return -1
-	case n > 0:
-		return 1
-	default:
-		return 0
-	}
-}
+
