@@ -32,14 +32,8 @@ func TestBan_DefaultsToCriticalSecurity(t *testing.T) {
 func TestBuilder_FullFluentChain(t *testing.T) {
 	t.Parallel()
 
-	min, err := policydsl.ParseVersion("1.0.0")
-	if err != nil {
-		t.Fatalf("unexpected parse error: %v", err)
-	}
-	max, err := policydsl.ParseVersion("2.0.0")
-	if err != nil {
-		t.Fatalf("unexpected parse error: %v", err)
-	}
+	minVer := parseVersionOrFatal(t, "1.0.0")
+	maxVer := parseVersionOrFatal(t, "2.0.0")
 
 	spec := policydsl.Ban("gorm").
 		Because("ORMs hide N+1 queries").
@@ -47,7 +41,7 @@ func TestBuilder_FullFluentChain(t *testing.T) {
 		WithCategory(policydsl.CategoryPerformance).
 		DetectVia(policydsl.ImportPattern("gorm.io/gorm")).
 		Suggest(policydsl.NewReplacement("sqlc", "type-safe SQL")).
-		VersionRange(&min, &max).
+		VersionRange(&minVer, &maxVer).
 		Spec()
 
 	if spec.Reason != "ORMs hide N+1 queries" {
@@ -292,12 +286,9 @@ func TestBuilder_WithCVEs(t *testing.T) {
 func TestBuilder_VersionRange_UnboundedMin(t *testing.T) {
 	t.Parallel()
 
-	max, err := policydsl.ParseVersion("1.99.0")
-	if err != nil {
-		t.Fatalf("unexpected parse error: %v", err)
-	}
+	maxVer := parseVersionOrFatal(t, "1.99.0")
 
-	spec := policydsl.Ban("golog").VersionRange(nil, &max).Spec()
+	spec := policydsl.Ban("golog").VersionRange(nil, &maxVer).Spec()
 
 	if spec.VersionMin != nil {
 		t.Errorf("expected nil min (unbounded), got %v", spec.VersionMin)
@@ -315,14 +306,8 @@ func TestBuilder_VersionRange_UnboundedMin(t *testing.T) {
 func TestBuilder_VersionRange_InvertedDeferToValidate(t *testing.T) {
 	t.Parallel()
 
-	high, err := policydsl.ParseVersion("2.0.0")
-	if err != nil {
-		t.Fatalf("unexpected parse error: %v", err)
-	}
-	low, err := policydsl.ParseVersion("1.0.0")
-	if err != nil {
-		t.Fatalf("unexpected parse error: %v", err)
-	}
+	high := parseVersionOrFatal(t, "2.0.0")
+	low := parseVersionOrFatal(t, "1.0.0")
 
 	// Construction must not panic.
 	spec := policydsl.Ban("x").VersionRange(&high, &low).Spec()
@@ -344,14 +329,8 @@ func TestBuilder_VersionRange_InvertedDeferToValidate(t *testing.T) {
 func TestBuilder_VersionRange_Typed(t *testing.T) {
 	t.Parallel()
 
-	minVer, err := policydsl.ParseVersion("1.0.0")
-	if err != nil {
-		t.Fatalf("unexpected parse error: %v", err)
-	}
-	maxVer, err := policydsl.ParseVersion("2.0.0")
-	if err != nil {
-		t.Fatalf("unexpected parse error: %v", err)
-	}
+	minVer := parseVersionOrFatal(t, "1.0.0")
+	maxVer := parseVersionOrFatal(t, "2.0.0")
 
 	spec := policydsl.Ban("x").VersionRange(&minVer, &maxVer).Spec()
 
@@ -378,15 +357,10 @@ func TestPolicySpec_Validate(t *testing.T) {
 	t.Run("sound_spec_validates", func(t *testing.T) {
 		t.Parallel()
 
-		min, err := policydsl.ParseVersion("1.0.0")
-		if err != nil {
-			t.Fatalf("unexpected parse error: %v", err)
-		}
-		max, err := policydsl.ParseVersion("2.0.0")
-		if err != nil {
-			t.Fatalf("unexpected parse error: %v", err)
-		}
-		spec := policydsl.Ban("x").VersionRange(&min, &max).Spec()
+		minVer := parseVersionOrFatal(t, "1.0.0")
+		maxVer := parseVersionOrFatal(t, "2.0.0")
+
+		spec := policydsl.Ban("x").VersionRange(&minVer, &maxVer).Spec()
 		if err := spec.Validate(); err != nil {
 			t.Errorf("expected nil error for sound spec, got %v", err)
 		}
@@ -395,26 +369,21 @@ func TestPolicySpec_Validate(t *testing.T) {
 	t.Run("inverted_range_returns_error", func(t *testing.T) {
 		t.Parallel()
 
-		high, err := policydsl.ParseVersion("2.0.0")
-		if err != nil {
-			t.Fatalf("unexpected parse error: %v", err)
-		}
-		low, err := policydsl.ParseVersion("1.0.0")
-		if err != nil {
-			t.Fatalf("unexpected parse error: %v", err)
-		}
+		high := parseVersionOrFatal(t, "2.0.0")
+		low := parseVersionOrFatal(t, "1.0.0")
+
 		spec := policydsl.PolicySpec{
 			VersionMin: &high,
 			VersionMax: &low,
 		}
 
-		err = spec.Validate()
-		if err == nil {
+		validateErr := spec.Validate()
+		if validateErr == nil {
 			t.Fatalf("expected ErrInvertedVersionRange, got nil")
 		}
 
-		if !errors.Is(err, policydsl.ErrInvertedVersionRange) {
-			t.Errorf("expected ErrInvertedVersionRange, got %v", err)
+		if !errors.Is(validateErr, policydsl.ErrInvertedVersionRange) {
+			t.Errorf("expected ErrInvertedVersionRange, got %v", validateErr)
 		}
 	})
 
@@ -433,14 +402,9 @@ func TestPolicySpec_Validate(t *testing.T) {
 func TestPolicySpec_Validate_InvertedRangeErrorCarriesBounds(t *testing.T) {
 	t.Parallel()
 
-	high, err := policydsl.ParseVersion("2.0.0")
-	if err != nil {
-		t.Fatalf("unexpected parse error: %v", err)
-	}
-	low, err := policydsl.ParseVersion("1.0.0")
-	if err != nil {
-		t.Fatalf("unexpected parse error: %v", err)
-	}
+	high := parseVersionOrFatal(t, "2.0.0")
+	low := parseVersionOrFatal(t, "1.0.0")
+
 	spec := policydsl.PolicySpec{
 		VersionMin: &high,
 		VersionMax: &low,

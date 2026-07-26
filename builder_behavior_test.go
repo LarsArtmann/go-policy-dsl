@@ -131,12 +131,9 @@ func TestBehavior_BoundingByLibraryVersion(t *testing.T) {
 	t.Run("an unbounded-then-capped range stores nil min and a parsed max", func(t *testing.T) {
 		t.Parallel()
 
-		max, err := policydsl.ParseVersion("1.99.0")
-		if err != nil {
-			t.Fatalf("unexpected parse error: %v", err)
-		}
+		maxVer := parseVersionOrFatal(t, "1.99.0")
 
-		spec := policydsl.Ban("golog").VersionRange(nil, &max).Spec()
+		spec := policydsl.Ban("golog").VersionRange(nil, &maxVer).Spec()
 
 		if spec.VersionMin != nil {
 			t.Errorf("expected nil (unbounded) min, got %v", spec.VersionMin)
@@ -150,14 +147,8 @@ func TestBehavior_BoundingByLibraryVersion(t *testing.T) {
 	t.Run("an inverted range is surfaced by Validate, not by panicking at construction", func(t *testing.T) {
 		t.Parallel()
 
-		high, err := policydsl.ParseVersion("2.0.0")
-		if err != nil {
-			t.Fatalf("unexpected parse error: %v", err)
-		}
-		low, err := policydsl.ParseVersion("1.0.0")
-		if err != nil {
-			t.Fatalf("unexpected parse error: %v", err)
-		}
+		high := parseVersionOrFatal(t, "2.0.0")
+		low := parseVersionOrFatal(t, "1.0.0")
 
 		spec := policydsl.Ban("golog").VersionRange(&high, &low).Spec()
 
@@ -169,16 +160,10 @@ func TestBehavior_BoundingByLibraryVersion(t *testing.T) {
 	t.Run("a spec built via the builder always validates", func(t *testing.T) {
 		t.Parallel()
 
-		min, err := policydsl.ParseVersion("1.0.0")
-		if err != nil {
-			t.Fatalf("unexpected parse error: %v", err)
-		}
-		max, err := policydsl.ParseVersion("2.0.0")
-		if err != nil {
-			t.Fatalf("unexpected parse error: %v", err)
-		}
+		minVer := parseVersionOrFatal(t, "1.0.0")
+		maxVer := parseVersionOrFatal(t, "2.0.0")
 
-		spec := policydsl.Ban("golog").VersionRange(&min, &max).Spec()
+		spec := policydsl.Ban("golog").VersionRange(&minVer, &maxVer).Spec()
 
 		if err := spec.Validate(); err != nil {
 			t.Errorf("a builder-produced spec should Validate clean; got %v", err)
@@ -188,25 +173,34 @@ func TestBehavior_BoundingByLibraryVersion(t *testing.T) {
 	t.Run("direct field assignment that inverts the range fails Validate", func(t *testing.T) {
 		t.Parallel()
 
-		high, err := policydsl.ParseVersion("2.0.0")
-		if err != nil {
-			t.Fatalf("unexpected parse error: %v", err)
-		}
-		low, err := policydsl.ParseVersion("1.0.0")
-		if err != nil {
-			t.Fatalf("unexpected parse error: %v", err)
-		}
+		high := parseVersionOrFatal(t, "2.0.0")
+		low := parseVersionOrFatal(t, "1.0.0")
+
 		inverted := policydsl.PolicySpec{VersionMin: &high, VersionMax: &low}
 
-		err = inverted.Validate()
-		if err == nil {
+		validateErr := inverted.Validate()
+		if validateErr == nil {
 			t.Fatalf("expected Validate to reject an inverted range, got nil")
 		}
 
-		if !errors.Is(err, policydsl.ErrInvertedVersionRange) {
-			t.Errorf("expected ErrInvertedVersionRange, got %v", err)
+		if !errors.Is(validateErr, policydsl.ErrInvertedVersionRange) {
+			t.Errorf("expected ErrInvertedVersionRange, got %v", validateErr)
 		}
 	})
+}
+
+// parseVersionOrFatal parses s, failing the test immediately on a parse error.
+// It is a test-only convenience (using t.Fatal, not panic) for fixtures where
+// the literal is known valid; it deliberately is NOT part of the exported API.
+func parseVersionOrFatal(t *testing.T, s string) policydsl.Version {
+	t.Helper()
+
+	v, err := policydsl.ParseVersion(s)
+	if err != nil {
+		t.Fatalf("unexpected ParseVersion(%q) error: %v", s, err)
+	}
+
+	return v
 }
 
 // assertSpecField is a tiny stdlib-only equality helper so the behaviour specs

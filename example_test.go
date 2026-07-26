@@ -32,10 +32,10 @@ func ExampleBan() {
 // ExampleBan_versionRange shows a version-bounded ban: only library versions
 // below 2.x are banned, and the inversion guard means the range is sound.
 func ExampleBan_versionRange() {
-	max, _ := policydsl.ParseVersion("1.99.0")
+	maxVer, _ := policydsl.ParseVersion("1.99.0")
 	spec := policydsl.Ban("golog").
 		Because("v1.x has a memory leak fixed in v2").
-		VersionRange(nil, &max).
+		VersionRange(nil, &maxVer).
 		Spec()
 
 	if spec.VersionMin == nil {
