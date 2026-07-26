@@ -70,11 +70,15 @@ var SamberDoRequiresAuditlog = policydsl.Ban("samber/do").
 ```go
 var BannedOldGolog = policydsl.Ban("golog").
     Because("v1.x has a memory leak fixed in v2").
-    VersionRange("", "1.99.0"). // ban only library versions below 2.x
+    VersionRangeStrings("", "1.99.0"). // ban only library versions below 2.x
     GoModPatterns("github.com/foo/golog").
     ExcludeIfTransitiveFrom("bar"). // OK if bar pulls it in directly
     Spec()
 ```
+
+`VersionRangeStrings(min, max)` parses both bounds (empty = unbounded). The typed
+form `VersionRange(*Version, *Version)` rejects an inverted range (`min > max`)
+at construction — the footgun the old string API allowed.
 
 ---
 

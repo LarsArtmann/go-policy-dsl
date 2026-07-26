@@ -14,6 +14,21 @@ Never rounded up. If a feature cannot be confirmed working, it is
 
 ## FULLY_FUNCTIONAL
 
+### Version constraints
+
+`VersionRange(minVer, maxVer *Version)` sets inclusive library-version
+constraints (NOT Go toolchain version). `nil` on either side means unbounded.
+**Inverted ranges (`min > max`) are rejected at construction** — the builder
+method panics, and `PolicySpec.Validate()` returns `ErrInvertedVersionRange`
+for direct-field assignment. `VersionRangeStrings(min, max string)` is the
+string convenience (empty = unbounded; parses via `MustParseVersion`, panics
+on parse error or inversion). The typed `Version` (`{Major, Minor, Patch}`)
+is stdlib-only (no semver dependency). Evidence: `version.go`,
+`builder.go:130-160`, `policy.go:130-152`, tested by `TestBuilder_VersionRange_Typed`,
+`TestBuilder_VersionRangeStrings`, `TestBuilder_VersionRange_Typed_InvertedPanics`,
+`TestBuilder_VersionRangeStrings_InvertedPanics`, `TestPolicySpec_Validate`,
+`TestParseVersion`, `TestVersion_Compare`, `TestNewVersion`.
+
 ### Ban policy builder
 
 `Ban(name)` starts a banned-library policy with `SeverityCritical` +
@@ -68,36 +83,17 @@ reporting. Evidence: `builder.go:108`, tested by `TestBuilder_WithCVEs`.
 
 ---
 
-## PARTIALLY_FUNCTIONAL
-
-### Version constraints
-
-`VersionRange(min, max)` sets inclusive library-version constraints (NOT Go
-toolchain version). Empty means unbounded on that side. **Known gap:**
-`VersionMin` / `VersionMax` are `string`-typed, so the nonsensical inverted
-range `VersionRange("2.0.0", "1.0.0")` (min > max) is representable and is
-not rejected. A typed `Version` domain that rejects inversion at construction
-is sketched in `ROADMAP.md`. Evidence: `builder.go:114-122`,
-`policy.go:118-122`, tested by `TestBuilder_VersionRange` (only the happy path).
-
----
-
 ## PLANNED
 
-### Validation in `Spec()`
+### Domain validation in `Validate()` (beyond structural)
 
-`Spec()` performs zero validation — a `Ban("x")` with no `Because`, no
-detection patterns, and no overrides silently produces a `PolicySpec`. This
-is **deliberate** (documented in `AGENTS.md`): the DSL declares what a policy
-IS; the consumer validates. Revisit when the first consumer (`library-policy`)
-migrates. Tracked in `TODO_LIST.md`.
-
-### Typed `Version` domain
-
-A hand-rolled semver-lite `type Version struct{ Major, Minor, Patch int }`
-with a constructor that rejects inversion (min > max) and non-numeric input.
-Would eliminate the stringly-typed inversion footgun without pulling a semver
-dependency (keeps the stdlib-only contract). Tracked in `ROADMAP.md`.
+`Spec()` performs zero validation and `Validate()` currently checks only the
+structural version-range invariant. Domain rules — a `Ban("x")` with no
+`Because`, no detection patterns, no overrides — are still **deliberately**
+not enforced (documented in `AGENTS.md`): the DSL declares what a policy IS;
+the consumer validates domain fitness. Expanding `Validate()` to cover domain
+rules is a future decision, deferred until the first consumer (`library-policy`)
+migrates and the real required-field set is known. Tracked in `TODO_LIST.md`.
 
 ### Ginkgo BDD suite
 

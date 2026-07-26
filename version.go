@@ -84,9 +84,15 @@ func ParseVersion(s string) (Version, error) {
 	return Version{Major: major, Minor: minor, Patch: patch}, nil
 }
 
-// parseVersionComponent parses one non-negative integer component of a
-// version string, producing a descriptive error on failure.
+// parseVersionComponent parses one unsigned integer component of a version
+// string, producing a descriptive error on failure. A leading sign (+1, -1)
+// is rejected explicitly — version components are never signed — so the
+// parsed int is guaranteed non-negative without a uint->int conversion.
 func parseVersionComponent(raw, name, original string) (int, error) {
+	if raw == "" || raw[0] == '+' || raw[0] == '-' {
+		return 0, fmt.Errorf("%w: component %s of %q", ErrInvalidVersion, name, original)
+	}
+
 	n, err := strconv.Atoi(raw)
 	if err != nil || n < 0 {
 		return 0, fmt.Errorf("%w: component %s of %q", ErrInvalidVersion, name, original)

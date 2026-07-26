@@ -132,13 +132,13 @@ func (b *Builder) WithCVEs(cves ...string) *Builder {
 // unbounded. Panics if both bounds are non-nil and min > max (a nonsensical
 // inverted range) — this is a programmer error that should fail fast at
 // package-level policy initialization, not surface silently at runtime.
-func (b *Builder) VersionRange(min, max *Version) *Builder {
-	if min != nil && max != nil && min.After(*max) {
-		panic(fmt.Errorf("%w: min %s > max %s", ErrInvertedVersionRange, min, max))
+func (b *Builder) VersionRange(minVer, maxVer *Version) *Builder {
+	if minVer != nil && maxVer != nil && minVer.After(*maxVer) {
+		panic(fmt.Errorf("%w: min %s > max %s", ErrInvertedVersionRange, minVer, maxVer))
 	}
 
-	b.spec.VersionMin = min
-	b.spec.VersionMax = max
+	b.spec.VersionMin = minVer
+	b.spec.VersionMax = maxVer
 
 	return b
 }

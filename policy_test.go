@@ -260,17 +260,17 @@ func TestBuilder_VersionRangeStrings_InvertedPanics(t *testing.T) {
 func TestBuilder_VersionRange_Typed(t *testing.T) {
 	t.Parallel()
 
-	min := policydsl.MustParseVersion("1.0.0")
-	max := policydsl.MustParseVersion("2.0.0")
+	minVer := policydsl.MustParseVersion("1.0.0")
+	maxVer := policydsl.MustParseVersion("2.0.0")
 
-	spec := policydsl.Ban("x").VersionRange(&min, &max).Spec()
+	spec := policydsl.Ban("x").VersionRange(&minVer, &maxVer).Spec()
 
-	if spec.VersionMin == nil || !spec.VersionMin.Equal(min) {
-		t.Errorf("expected min %s, got %v", min, spec.VersionMin)
+	if spec.VersionMin == nil || !spec.VersionMin.Equal(minVer) {
+		t.Errorf("expected min %s, got %v", minVer, spec.VersionMin)
 	}
 
-	if spec.VersionMax == nil || !spec.VersionMax.Equal(max) {
-		t.Errorf("expected max %s, got %v", max, spec.VersionMax)
+	if spec.VersionMax == nil || !spec.VersionMax.Equal(maxVer) {
+		t.Errorf("expected max %s, got %v", maxVer, spec.VersionMax)
 	}
 
 	// Both nil = fully unbounded.

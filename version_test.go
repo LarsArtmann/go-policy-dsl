@@ -21,7 +21,13 @@ func TestNewVersion(t *testing.T) {
 	}{
 		{name: "all_zero", major: 0, minor: 0, patch: 0, want: policydsl.Version{}},
 		{name: "happy", major: 1, minor: 2, patch: 3, want: policydsl.Version{Major: 1, Minor: 2, Patch: 3}},
-		{name: "large", major: 12, minor: 345, patch: 6789, want: policydsl.Version{Major: 12, Minor: 345, Patch: 6789}},
+		{
+			name:  "large",
+			major: 12,
+			minor: 345,
+			patch: 6789,
+			want:  policydsl.Version{Major: 12, Minor: 345, Patch: 6789},
+		},
 		{name: "negative_major", major: -1, wantErr: true},
 		{name: "negative_minor", minor: -1, wantErr: true},
 		{name: "negative_patch", patch: -1, wantErr: true},
@@ -189,6 +195,7 @@ func TestVersion_RelationHelpers(t *testing.T) {
 
 	low := policydsl.Version{1, 0, 0}
 	high := policydsl.Version{2, 0, 0}
+	lowCopy := low
 
 	if !low.Before(high) {
 		t.Errorf("%v.Before(%v) should be true", low, high)
@@ -206,8 +213,8 @@ func TestVersion_RelationHelpers(t *testing.T) {
 		t.Errorf("%v.After(%v) should be false", low, high)
 	}
 
-	if !low.Equal(low) {
-		t.Errorf("%v.Equal(%v) should be true", low, low)
+	if !low.Equal(lowCopy) {
+		t.Errorf("%v.Equal(%v) should be true", low, lowCopy)
 	}
 
 	if low.Equal(high) {
@@ -218,14 +225,16 @@ func TestVersion_RelationHelpers(t *testing.T) {
 func TestVersion_ParseRoundTrip(t *testing.T) {
 	t.Parallel()
 
-	for _, s := range []string{"0.0.0", "1.0.0", "1.2.3", "12.345.6789"} {
-		v, err := policydsl.ParseVersion(s)
+	versionStrings := []string{"0.0.0", "1.0.0", "1.2.3", "12.345.6789"}
+
+	for _, versionStr := range versionStrings {
+		parsed, err := policydsl.ParseVersion(versionStr)
 		if err != nil {
-			t.Fatalf("ParseVersion(%q): %v", s, err)
+			t.Fatalf("ParseVersion(%q): %v", versionStr, err)
 		}
 
-		if got := v.String(); got != s {
-			t.Errorf("round-trip mismatch: input %q → Version → %q", s, got)
+		if rendered := parsed.String(); rendered != versionStr {
+			t.Errorf("round-trip mismatch: input %q -> Version -> %q", versionStr, rendered)
 		}
 	}
 }
