@@ -107,7 +107,7 @@ var BannedOldGolog = policydsl.Ban("golog").
 | `Suggest(r)`                       | Adds a recommended replacement                           |
 | `WithAlternatives(alts...)`        | Sets alternative libraries directly                      |
 | `WithCVEs(cves...)`                | Tags with related CVE IDs                                |
-| `VersionRange(min, max)`           | Inclusive library version constraints (not Go version)    |
+| `VersionRange(min, max)`           | Inclusive library version constraints (not Go version)   |
 | `RequiresCompanion(c)`             | Adds a required companion spec                           |
 | `AsCompanionOnly()`                | Never ban; only enforce companions                       |
 | `Spec()`                           | Returns the finished `PolicySpec`                        |
