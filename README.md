@@ -88,12 +88,14 @@ at construction — the footgun the old string API allowed.
 
 | Function                                               | Returns         | Purpose                                                                             |
 | ------------------------------------------------------ | --------------- | ----------------------------------------------------------------------------------- |
-| `Ban(name string) *Builder`                            | `*Builder`      | Start a banned-library policy (defaults to `SeverityCritical` + `CategorySecurity`) |
+| `Ban(name string) *Builder`                            | `*Builder`      | Start a banned-library policy (defaults to `SeverityCritical` + `CategorySecurity` + `ModeBan`) |
 | `Companion(lib, pattern, reason string) CompanionSpec` | `CompanionSpec` | Build a required-companion spec (defaults to `SeverityModerate`)                    |
 | `CompanionWithSeverity(...)`                           | `CompanionSpec` | Companion with custom severity                                                      |
 | `ImportPattern(pattern string) Detection`              | `Detection`     | Convenience for source-import detection                                             |
 | `GoModPattern(pattern string) Detection`               | `Detection`     | Convenience for go.mod-path detection                                               |
 | `NewReplacement(library, reason string) Replacement`   | `Replacement`   | Build a swap-in alternative value                                                   |
+| `NewCVE(id string) (CVE, error)`                       | `CVE`           | Validated CVE identifier (`CVE-YYYY-NNNN`)                                          |
+| `MustCVE(id string) CVE`                               | `CVE`           | CVE that panics on an invalid id (for package-level init)                           |
 
 ### Builder methods
 
@@ -108,12 +110,13 @@ at construction — the footgun the old string API allowed.
 | `ExcludeIfContains(p...)`          | Suppressions: if string appears, no violation            |
 | `ExcludeIfTransitiveFrom(libs...)` | Parent libs that justify transitive presence             |
 | `WithDescription(desc)`            | Detailed description for reporting                       |
-| `Suggest(r)`                       | Adds a recommended replacement                           |
-| `WithAlternatives(alts...)`        | Sets alternative libraries directly                      |
-| `WithCVEs(cves...)`                | Tags with related CVE IDs                                |
+| `Suggest(r)`                       | Adds a recommended replacement (full `Replacement`)      |
+| `SuggestExplicit(r)`               | Adds a replacement WITHOUT deriving `Description`        |
+| `WithAlternatives(alts...)`        | Sets `[]Replacement` alternatives directly (set)         |
+| `WithCVEs(cves...)`                | Tags with validated `CVE` values                         |
 | `VersionRange(min, max)`           | Inclusive library version constraints (not Go version)   |
 | `RequiresCompanion(c)`             | Adds a required companion spec                           |
-| `AsCompanionOnly()`                | Never ban; only enforce companions                       |
+| `AsCompanionOnly()`                | Sets `Mode = ModeCompanionOnly` (never ban; enforce companions) |
 | `Spec()`                           | Returns the finished `PolicySpec`                        |
 
 ### Types
@@ -122,9 +125,12 @@ at construction — the footgun the old string API allowed.
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `Severity`      | `SeverityCritical` / `SeverityHigh` / `SeverityModerate` / `SeverityLow` / `SeverityInfo`                                                                                |
 | `Category`      | `CategorySecurity` / `CategoryPerformance` / `CategoryMaintainability` / `CategoryCorrectness` / `CategoryLicensing` / `CategoryCompatibility` / `CategoryConfiguration` |
+| `Mode`          | `ModeBan` (default: emit ban + enforce companions) / `ModeCompanionOnly` (suppress ban, enforce only companions)                                                         |
 | `Detection`     | How a violation is found: `ImportPatterns`, `GoModPatterns`, `ExcludeIfContains`, `ExcludeIfTransitiveFrom`                                                              |
 | `Replacement`   | Recommended swap-in: `Library`, `Reason`                                                                                                                                 |
 | `CompanionSpec` | Required companion library                                                                                                                                               |
+| `CVE`           | Validated `CVE-YYYY-NNNN` identifier (branded `string`)                                                                                                                  |
+| `Version`       | Parsed semver-lite `{Major, Minor, Patch}` for inclusive version bounds                                                                                                  |
 | `PolicySpec`    | The finished declarative policy value                                                                                                                                    |
 
 ---
@@ -150,14 +156,15 @@ at construction — the footgun the old string API allowed.
   ```
 
 - **No execution model.** The DSL declares _what_ a policy is; the consumer (`library-policy`, your CI check, etc.) decides _how_ to detect and report violations. In particular, the matching semantics for `ImportPatterns` / `GoModPatterns` (literal substring, glob, regex?) are defined by the consumer, NOT by the DSL — the patterns are opaque `[]string` so each tool can pick its matcher.
-- **Validation is split.** `Spec()` performs no validation (returns exactly what was built). Structural validation lives in the separate `PolicySpec.Validate() error` (currently checks the version-range invariant; domain rules like non-empty `Reason` remain the consumer's job).
+- **Validation is split.** `Spec()` performs no validation (returns exactly what was built). Structural validation lives in the separate `PolicySpec.Validate() *InvertedVersionRangeError` (a concrete typed error carrying the offending bounds; matched by sentinel via `errors.Is(err, ErrInvertedVersionRange)`). Domain rules like non-empty `Reason` remain the consumer's job.
 
 ## Surprising behaviours (intentional, pinned by tests)
 
-- **`Suggest(r Replacement)` derives `Description`.** When `Description` is empty, `Suggest` sets it to `"Replace with <library>: <reason>"`. An explicit `Description` (set before or after) is never overwritten. Repeated `Suggest` calls only append to `Alternatives`.
-- **`Ban(name)` defaults to `SeverityCritical` + `CategorySecurity`.** Override with `WithSeverity` / `WithCategory` for non-security concerns.
+- **`Suggest(r Replacement)` derives `Description` and appends the full replacement.** It appends the **whole** `Replacement` (both `Library` and `Reason`) to `Alternatives` and, when `Description` is empty, sets it to `"Replace with <library>: <reason>"`. An explicit `Description` (set before or after) is never overwritten. `Alternatives` is typed `[]Replacement` (no information loss). Use `SuggestExplicit(r)` to append without deriving `Description`.
+- **`Ban(name)` defaults to `SeverityCritical` + `CategorySecurity` + `ModeBan`.** Override with `WithSeverity` / `WithCategory` for non-security concerns.
+- **`WithCVEs(...CVE)` takes validated `CVE` values** (built via `NewCVE` / `MustCVE`); a free-form `[]string` cannot reach the spec.
 - **`VersionRange(min, max *Version)` panics on an inverted range.** `min > max` is a nonsensical range and fails fast at package-init time; use `Validate()` to catch the same invariant on specs constructed by direct field assignment.
-- **`AsCompanionOnly()` suppresses the ban entirely** — the policy never emits a ban finding; it only enforces that declared companions are present.
+- **`AsCompanionOnly()` sets `Mode = ModeCompanionOnly`** — the policy never emits a ban finding; it only enforces that declared companions are present. (`Mode` is the typed enforcement enum replacing the former dishonest `CompanionOnly bool`.)
 
 The full `Builder` method convention (`With-` = set/replace vs bare = append) is documented in [`docs/DOMAIN_LANGUAGE.md`](docs/DOMAIN_LANGUAGE.md).
 

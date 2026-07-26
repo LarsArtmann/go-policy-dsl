@@ -28,9 +28,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `VersionRangeStrings(min, max string)` builder method — the string
   convenience form of `VersionRange` (empty = unbounded; parses via
   `MustParseVersion`, panics on parse error or inversion).
-- `PolicySpec.Validate() error` — structural validation entry point.
-  Currently checks only the version-range invariant; domain rules remain the
-  consumer's job. `Spec()` itself stays validation-free.
+- `PolicySpec.Validate()` — structural validation entry point returning a
+  concrete `*InvertedVersionRangeError` (carrying the offending `Min`/`Max`
+  bounds; matched by sentinel via `errors.Is(err, ErrInvertedVersionRange)`).
+  Checks only the version-range invariant; domain rules remain the consumer's
+  job. `Spec()` itself stays validation-free.
 - Contract-locking tests for the surprising `Suggest` → `Description`
   side-effect (auto-derive when empty; preserve when explicit; append-only on
   repeated calls).
@@ -56,6 +58,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   pkg.go.dev renders runnable, compile-verified examples.
 - `FuzzParseVersion` — fuzz target asserting the parser never panics on
   arbitrary input and every parsed version round-trips through `String`.
+- `Mode` typed enum (`ModeBan` / `ModeCompanionOnly`) replacing the former
+  dishonest `CompanionOnly bool` field — it suppressed the _ban_, not the
+  companion. `Ban(...)` sets `ModeBan`; `AsCompanionOnly()` sets
+  `ModeCompanionOnly`. The zero-value `Mode` (`""`) is treated as ban-active.
+- `CVE` branded type (`cve.go`) with `NewCVE(id)` / `MustCVE(id)` validating
+  the canonical MITRE form `CVE-YYYY-NNNN`, and `ErrInvalidCVE`. An
+  unvalidated free-form string can no longer reach a spec.
+- `SuggestExplicit(r Replacement)` builder method — the no-magic counterpart
+  to `Suggest`: appends a replacement without deriving `Description`.
+- `FuzzBuilder_PatternsOpaque` — fuzz target pinning the contract that
+  detection patterns are opaque strings (stored verbatim, never interpreted);
+  the DSL owns no matching semantics.
+- `ExampleCVE` godoc example; CVE validation tests (`TestNewCVE_Valid`,
+  `TestNewCVE_Invalid`, `TestNewCVE_InvalidWrapsSentinel`, `TestMustCVE_*`).
 - GitHub Actions CI workflow (`.github/workflows/ci.yml`) enforcing the full
   gate: build, vet, test -race, `golangci-lint run`, and `golangci-lint fmt`
   as a required drift check.
@@ -79,6 +95,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   switching `VersionRange(a, b)` calls to `VersionRangeStrings(a, b)` (the
   drop-in string convenience) or to the typed `VersionRange` with parsed
   `*Version` values.
+- **BREAKING:** replaced `PolicySpec.CompanionOnly bool` with a typed `Mode`
+  enum (`ModeBan` / `ModeCompanionOnly`). The old name lied — it suppressed the
+  ban, not the companion. `AsCompanionOnly()` now sets `Mode = ModeCompanionOnly`;
+  consumers read `spec.Mode != ModeCompanionOnly` for ban-active. Zero shipped
+  consumers, so the rename is safe.
+- **BREAKING:** retyped `PolicySpec.Alternatives` from `[]string` to
+  `[]Replacement`, and `WithAlternatives(...string)` to
+  `WithAlternatives(...Replacement)`. `Suggest` now appends the **full**
+  `Replacement` (both `Library` and `Reason`) instead of discarding the reason.
+  This eliminates silent information loss; access `alt.Library` where you read a
+  bare name before.
+- **BREAKING:** retyped `PolicySpec.CVEs` from `[]string` to `[]CVE`, and
+  `WithCVEs(...string)` to `WithCVEs(...CVE)`. Build CVEs via `NewCVE(id)` /
+  `MustCVE(id)` (validates `CVE-YYYY-NNNN`); invalid identifiers can no longer
+  reach a spec.
+- `Validate()` now returns a concrete `*InvertedVersionRangeError` (with
+  `Min`/`Max` fields) instead of a generic wrapped `error`; `errors.Is(err,
+  ErrInvertedVersionRange)` still works via the type's `Is` method.
 - Rewrote the test suite as an external `policydsl_test` package with
   `t.Parallel()` on every test, so the suite exercises only the exported API
   (the same surface real consumers use) and is race-clean.
