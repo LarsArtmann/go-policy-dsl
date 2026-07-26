@@ -45,6 +45,7 @@ func FuzzBuilder_PatternsOpaque(f *testing.F) {
 
 		assertStoredOnce := func(label string, got []string) {
 			t.Helper()
+
 			if len(got) != 1 || got[0] != pattern {
 				t.Errorf("%s: expected [%q] stored verbatim once, got %v", label, pattern, got)
 			}
@@ -58,12 +59,14 @@ func FuzzBuilder_PatternsOpaque(f *testing.F) {
 		// The single-pattern convenience constructors must round-trip too.
 		importDetection := policydsl.ImportPattern(pattern)
 		assertStoredOnce("ImportPattern", importDetection.ImportPatterns)
+
 		if len(importDetection.GoModPatterns) != 0 {
 			t.Errorf("ImportPattern should not set GoModPatterns, got %v", importDetection.GoModPatterns)
 		}
 
 		goModDetection := policydsl.GoModPattern(pattern)
 		assertStoredOnce("GoModPattern", goModDetection.GoModPatterns)
+
 		if len(goModDetection.ImportPatterns) != 0 {
 			t.Errorf("GoModPattern should not set ImportPatterns, got %v", goModDetection.ImportPatterns)
 		}

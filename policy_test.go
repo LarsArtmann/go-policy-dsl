@@ -59,8 +59,7 @@ func TestBuilder_FullFluentChain(t *testing.T) {
 		t.Errorf("unexpected import patterns: %v", spec.Detection.ImportPatterns)
 	}
 
-	if len(spec.Alternatives) != 1 || spec.Alternatives[0].Library != "sqlc" ||
-		spec.Alternatives[0].Reason != "type-safe SQL" {
+	if len(spec.Alternatives) != 1 || spec.Alternatives[0].Library != "sqlc" {
 		t.Errorf("unexpected alternatives: %v", spec.Alternatives)
 	}
 

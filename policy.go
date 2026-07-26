@@ -162,8 +162,34 @@ type PolicySpec struct {
 	Mode Mode
 }
 
-// ErrInvertedVersionRange is returned by Validate when VersionMin > VersionMax.
+// ErrInvertedVersionRange is the sentinel matched by errors.Is when Validate
+// finds VersionMin > VersionMax. The structured form returned by Validate is
+// *InvertedVersionRangeError, which also carries the offending bounds.
 var ErrInvertedVersionRange = errors.New("policydsl: version range is inverted (min > max)")
+
+// InvertedVersionRangeError is returned by Validate when VersionMin > VersionMax.
+// It carries the offending bounds so callers can report them programmatically
+// without parsing the error message. Validate returns the concrete type
+// directly, so callers that use := get type-safe access to Min and Max with no
+// need for errors.AsType. Match by sentinel with errors.Is(err,
+// ErrInvertedVersionRange).
+type InvertedVersionRangeError struct {
+	Min *Version
+	Max *Version
+}
+
+// Error implements error. The message references ErrInvertedVersionRange so the
+// string form is self-describing.
+func (e *InvertedVersionRangeError) Error() string {
+	return fmt.Sprintf("%s: min %s > max %s", ErrInvertedVersionRange, e.Min, e.Max)
+}
+
+// Is reports whether this error is the inverted-version-range sentinel, so
+// errors.Is(err, ErrInvertedVersionRange) continues to work even though
+// Validate returns the concrete type.
+func (e *InvertedVersionRangeError) Is(target error) bool {
+	return target == ErrInvertedVersionRange
+}
 
 // Validate checks the structural invariants of the spec. It does NOT enforce
 // domain rules (a policy with no Reason, no detection patterns, etc. is still
@@ -171,10 +197,12 @@ var ErrInvertedVersionRange = errors.New("policydsl: version range is inverted (
 // the version-range ordering, which direct field assignment can violate but
 // the fluent Builder prevents.
 //
-// Returns nil when the spec is structurally sound.
-func (s PolicySpec) Validate() error {
+// Returns nil when the spec is structurally sound; returns
+// *InvertedVersionRangeError (with Min/Max populated) when the range is
+// inverted.
+func (s PolicySpec) Validate() *InvertedVersionRangeError {
 	if s.VersionMin != nil && s.VersionMax != nil && s.VersionMin.After(*s.VersionMax) {
-		return fmt.Errorf("%w: min %s > max %s", ErrInvertedVersionRange, s.VersionMin, s.VersionMax)
+		return &InvertedVersionRangeError{Min: s.VersionMin, Max: s.VersionMax}
 	}
 
 	return nil
