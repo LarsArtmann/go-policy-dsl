@@ -32,10 +32,12 @@ Consequence: `go-structure-linter` reports `root-package-files` (ERROR) and `int
 
 ## Surprising Behaviors
 
-- **`Suggest(r Replacement)` has a side effect beyond adding the alternative.** It appends `r.Library` to `Alternatives` AND, if `Description` is empty, sets `Description` to `"Replace with <library>: <reason>"`. Callers that set `Description` explicitly after `Suggest` will overwrite this.
-- **`Ban(name)` defaults to `SeverityCritical` + `CategorySecurity`.** Override with `WithSeverity` / `WithCategory` for non-security concerns, or the ban is over-rated.
+- **`Suggest(r Replacement)` has a side effect beyond adding the alternative.** It appends the **full** `Replacement` (Library AND Reason) to `Alternatives` AND, if `Description` is empty, sets `Description` to `"Replace with <library>: <reason>"`. Callers that set `Description` explicitly after `Suggest` will overwrite this. **`SuggestExplicit(r)`** is the no-magic variant: it appends to `Alternatives` but never derives `Description`.
+- **`Alternatives` is `[]Replacement`, not `[]string`.** Each entry keeps its `Reason` (no information loss). `WithAlternatives(...Replacement)` replaces the slice wholesale; `Suggest`/`SuggestExplicit` append.
+- **`WithCVEs(...CVE)` takes validated `CVE` values.** `CVE` is a branded `string` constructed via `NewCVE(id)`/`MustCVE(id)` (validates `CVE-YYYY-NNNN`). A free-form `[]string` cannot reach the spec.
+- **`Ban(name)` defaults to `SeverityCritical` + `CategorySecurity` + `ModeBan`.** Override with `WithSeverity` / `WithCategory` for non-security concerns, or the ban is over-rated.
 - **`Companion(...)` defaults to `SeverityModerate`** (use `CompanionWithSeverity` to override).
-- **`AsCompanionOnly()` suppresses the ban entirely** — the policy never emits a ban finding; it only enforces that declared companions are present. Use this for "this library is fine, but if you use it you must also use X".
+- **`AsCompanionOnly()` sets `Mode = ModeCompanionOnly`** (the policy never emits a ban finding; it only enforces that declared companions are present). The field is the typed `Mode` enum (`ModeBan` / `ModeCompanionOnly`), NOT the former dishonest `CompanionOnly bool`. The zero-value `Mode` (`""`) is treated as ban-active. Use this for "this library is fine, but if you use it you must also use X".
 - **`ExcludeIfTransitiveFrom(libs...)` is the false-positive guard** for indirect dependencies: if a listed parent library directly pulls in the banned lib, no violation fires.
 - **`NewReplacement(library, reason)` is the constructor**; `Replacement` is the type. The package doc example uses `NewReplacement(...)`. (An earlier doc example wrongly called `Replacement(...)` — it would not compile.)
 - **`MustNewVersion`, `MustParseVersion`, and `MustCVE` panic on error by design** (idiomatic Go `Must` pattern, like `template.Must`/`regexp.MustCompile`). They exist for package-level policy initialization with compile-time-known literals. `erraudit ./...` reports these as CRITICAL "Panic on error" findings — these are **accepted false positives**; the panic IS the documented contract and is asserted by tests. Do NOT suppress or refactor away.
@@ -45,8 +47,8 @@ Consequence: `go-structure-linter` reports `root-package-files` (ERROR) and `int
 ## Conventions
 
 - Fluent `Builder` returned by every chainable method; `Spec()` terminates the chain and returns the immutable `PolicySpec`.
-- Constructor helpers (`ImportPattern`, `GoModPattern`, `Companion`, `NewReplacement`, `NewVersion`, `ParseVersion`) are package-level functions, not methods.
-- File layout: `policy.go` = public types/constants/`Validate`; `builder.go` = the fluent `Builder` + constructor helpers; `version.go` = the typed `Version` domain (stdlib-only semver-lite). Tests beside the code (`policy_test.go`, `version_test.go`, `builder_behavior_test.go`, `zero_value_test.go`, `example_test.go`).
+- Constructor helpers (`ImportPattern`, `GoModPattern`, `Companion`, `NewReplacement`, `NewVersion`, `ParseVersion`, `NewCVE`) are package-level functions, not methods.
+- File layout: `policy.go` = public types/constants/`Validate`/`Mode`/`InvertedVersionRangeError`; `builder.go` = the fluent `Builder` + constructor helpers; `version.go` = the typed `Version` domain (stdlib-only semver-lite); `cve.go` = the branded `CVE` domain (`CVE-YYYY-NNNN` validation). Tests beside the code (`policy_test.go`, `version_test.go`, `cve_test.go`, `builder_behavior_test.go`, `builder_fuzz_test.go`, `zero_value_test.go`, `example_test.go`).
 
 ## Consumers
 

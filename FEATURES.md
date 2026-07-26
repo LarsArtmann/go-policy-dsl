@@ -19,8 +19,9 @@ Never rounded up. If a feature cannot be confirmed working, it is
 `VersionRange(minVer, maxVer *Version)` sets inclusive library-version
 constraints (NOT Go toolchain version). `nil` on either side means unbounded.
 **Inverted ranges (`min > max`) are rejected at construction** — the builder
-method panics, and `PolicySpec.Validate()` returns `ErrInvertedVersionRange`
-for direct-field assignment. `VersionRangeStrings(min, max string)` is the
+method panics, and `PolicySpec.Validate()` returns a concrete
+`*InvertedVersionRangeError` (matched by sentinel via
+`errors.Is(err, ErrInvertedVersionRange)`) for direct-field assignment. `VersionRangeStrings(min, max string)` is the
 string convenience (empty = unbounded; parses via `MustParseVersion`, panics
 on parse error or inversion). The typed `Version` (`{Major, Minor, Patch}`)
 is stdlib-only (no semver dependency). Evidence: `version.go`,
@@ -32,18 +33,20 @@ is stdlib-only (no semver dependency). Evidence: `version.go`,
 ### Ban policy builder
 
 `Ban(name)` starts a banned-library policy with `SeverityCritical` +
-`CategorySecurity` defaults; every chainable method returns the `*Builder`;
-`Spec()` returns the immutable `PolicySpec`. Evidence: `builder.go:12`,
-tested by `TestBan_DefaultsToCriticalSecurity`, `TestBuilder_FullFluentChain`.
+`CategorySecurity` + `ModeBan` defaults; every chainable method returns the
+`*Builder`; `Spec()` returns the immutable `PolicySpec`. Evidence:
+`builder.go`, tested by `TestBan_DefaultsToCriticalSecurity`,
+`TestBuilder_FullFluentChain`.
 
 ### Companion policy
 
 `RequiresCompanion(CompanionSpec)` adds required companion libraries.
-`AsCompanionOnly()` suppresses the ban so the policy only enforces companion
-presence. `Companion(...)` defaults to `SeverityModerate`;
-`CompanionWithSeverity(...)` overrides. Evidence: `builder.go:124-137`,
-`builder.go:157-174`, tested by `TestBuilder_RequiresCompanionAndAsCompanionOnly`,
-`TestCompanion_DefaultSeverity`, `TestCompanionWithSeverity_Overrides`.
+`AsCompanionOnly()` sets `Mode = ModeCompanionOnly` so the policy only
+enforces companion presence (see the typed `Mode` enum below).
+`Companion(...)` defaults to `SeverityModerate`; `CompanionWithSeverity(...)`
+overrides. Evidence: `builder.go`, tested by
+`TestBuilder_RequiresCompanionAndAsCompanionOnly`, `TestCompanion_DefaultSeverity`,
+`TestCompanionWithSeverity_Overrides`.
 
 ### Detection model
 
@@ -58,14 +61,19 @@ ExcludeIfTransitiveFrom}` declares how a consumer finds a violation.
 
 ### Replacement suggestion
 
-`Suggest(NewReplacement(library, reason))` appends the library to
-`Alternatives` AND, when `Description` is empty, derives `Description` from
-the replacement. An explicit `Description` is never overwritten; repeated
-`Suggest` calls only append to `Alternatives`. `WithAlternatives(...)`
-replaces the slice wholesale (set semantics). Evidence: `builder.go:90-105`,
-tested by `TestBuilder_Suggest_SetsDescription`,
+`Suggest(NewReplacement(library, reason))` appends the **full** `Replacement`
+(both `Library` and `Reason`) to `Alternatives` AND, when `Description` is
+empty, derives `Description` from the replacement. An explicit `Description`
+is never overwritten; repeated `Suggest` calls only append. `SuggestExplicit(r)`
+is the no-magic variant that appends without deriving `Description`.
+`WithAlternatives(...Replacement)` replaces the slice wholesale (set semantics).
+`Alternatives` is typed `[]Replacement` so each entry keeps its `Reason` (no
+information loss). Evidence: `builder.go`, tested by
+`TestBuilder_Suggest_SetsDescription`,
 `TestBuilder_Suggest_PreservesExplicitDescription`,
 `TestBuilder_Suggest_MultipleAppendsAlternatives`,
+`TestBuilder_SuggestExplicit_NoDescriptionDerivation`,
+`TestBuilder_SuggestExplicit_MixedWithSuggest`,
 `TestBuilder_WithAlternatives_Replaces`.
 
 ### Behaviour suite (BDD-style, stdlib)
@@ -87,10 +95,39 @@ but a reader of go.mod cannot see that exemption). Evidence:
 DSL stays dependency-free. Consumers bridge to their own severity/category
 types at the boundary. Evidence: `policy.go:26-63`.
 
-### CVE tagging
+### CVE tagging (validated)
 
-`WithCVEs(...)` tags a policy with related CVE identifiers for security
-reporting. Evidence: `builder.go:108`, tested by `TestBuilder_WithCVEs`.
+`WithCVEs(...CVE)` tags a policy with related CVE identifiers for security
+reporting. `CVE` is a branded `string` constructed via `NewCVE(id)` /
+`MustCVE(id)`, which validate the canonical MITRE form `CVE-YYYY-NNNN` (reject
+lowercase, wrong digit counts, and other schemes). A free-form `[]string`
+cannot reach the spec. Evidence: `cve.go`, tested by `TestBuilder_WithCVEs`,
+`TestNewCVE_Valid`, `TestNewCVE_Invalid`, `TestNewCVE_InvalidWrapsSentinel`,
+`TestMustCVE_PanicsOnError`, `TestMustCVE_ReturnsValid`, `ExampleCVE`.
+
+### Enforcement mode (typed `Mode` enum)
+
+`PolicySpec.Mode` (`ModeBan` | `ModeCompanionOnly`) declares what a policy
+enforces, replacing the former dishonest `CompanionOnly bool`. `Ban(...)` sets
+`ModeBan` (emit ban + enforce companions); `AsCompanionOnly()` sets
+`ModeCompanionOnly` (suppress ban, enforce only companions). The zero-value
+`Mode` (`""`) is treated as ban-active. Evidence: `policy.go`, tested by
+`TestBuilder_RequiresCompanionAndAsCompanionOnly`, `TestPolicySpec_ZeroValue`,
+`TestBehavior_RequiringACompanion`, `ExampleCompanion`.
+
+### Opaque-pattern contract (fuzz-pinned)
+
+The DSL owns NO matching semantics — detection patterns are opaque strings
+stored verbatim and never interpreted (literal / glob / regex is the consumer's
+decision). `FuzzBuilder_PatternsOpaque` pins this: any string round-trips
+unchanged through every pattern entry point. Evidence: `builder_fuzz_test.go`.
+
+### Godoc examples
+
+`Example*` functions (`ExampleBan`, `ExampleBan_versionRange`,
+`ExampleCompanion`, `ExampleVersion`, `ExamplePolicySpec_Validate`,
+`ExampleCVE`) are compile-verified by `go test` and rendered on pkg.go.dev so
+documented usage cannot silently rot. Evidence: `example_test.go`, `cve_test.go`.
 
 ---
 
@@ -104,10 +141,4 @@ structural version-range invariant. Domain rules — a `Ban("x")` with no
 not enforced (documented in `AGENTS.md`): the DSL declares what a policy IS;
 the consumer validates domain fitness. Expanding `Validate()` to cover domain
 rules is a future decision, deferred until the first consumer (`library-policy`)
-migrates and the real required-field set is known. Tracked in `TODO_LIST.md`.
-
-### godoc `Example*` functions
-
-`func ExampleBan()` / `func ExampleCompanion()` so pkg.go.dev renders
-runnable, compile-verified examples and `go test` catches regressions in
-documented usage. Tracked in `TODO_LIST.md`.
+migrates and the real required-field set is known.
