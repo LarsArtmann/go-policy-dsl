@@ -10,6 +10,12 @@ here. Vague or unbounded ideas belong in `ROADMAP.md`, not here.
 > the current code. Items already shipped were dropped; their entries live in
 > `CHANGELOG.md` `[Unreleased]`. Decisions deferred to the user are marked
 > **(decision needed)**.
+>
+> **Numbering:** `[T1]`–`[T6]` shipped in prior sessions (see `CHANGELOG.md`
+> `[Unreleased]` — opaque-pattern fuzz, typed `Mode`, branded `CVE`,
+> `[]Replacement`, `SuggestExplicit`, `Require` rejected). `[T7]` is the
+> external-blocked consumer-migration item (kept at the bottom). New items
+> continue from `[T8]`.
 
 ---
 

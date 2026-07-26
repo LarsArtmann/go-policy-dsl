@@ -89,11 +89,13 @@ execution model without a deliberate decision recorded here first.
 ### Typed `Version` domain — LANDED
 
 A hand-rolled semver-lite type (`Version{Major, Minor, Patch int}`) with
-constructors that reject inversion (`min > max`) and non-numeric / signed
-input — no semver dependency, so the stdlib-only contract holds. Eliminated
-the stringly-typed footgun where `VersionRange("2.0.0", "1.0.0")` was
-representable. Shipped in `[Unreleased]` (2026-07-26); see `FEATURES.md`
-"Version constraints".
+constructors that reject non-numeric / signed input — no semver dependency, so
+the stdlib-only contract holds. Replaced the stringly-typed `VersionMin/Max`
+fields with `*Version`, making the bounds explicit (an unbounded side is `nil`,
+not the empty string). Inversion (`min > max`) is **not** rejected at
+construction — the library is panic-free by design — but is detected by
+`PolicySpec.Validate()`, which returns `*InvertedVersionRangeError`. Shipped in
+`[Unreleased]` (2026-07-26); see `FEATURES.md` "Version constraints".
 
 ### Typed `Mode` enum (replace `CompanionOnly bool`) — LANDED
 
@@ -160,5 +162,6 @@ widens; pkg.go.dev + README cover the current audience.
 
 ### `Severity` ↔ `finding.Severity` bridge examples
 
-See `TODO_LIST.md` [T9]. A runnable bridge sample makes the
-dependency-free-`Severity` design concrete for consumer authors.
+A runnable bridge sample makes the dependency-free-`Severity` design concrete
+for consumer authors (the README has one; a godoc `Example*` would round out
+the surface). Low urgency until the first consumer cutover.
