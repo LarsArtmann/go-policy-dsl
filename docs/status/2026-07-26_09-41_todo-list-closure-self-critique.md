@@ -32,17 +32,17 @@ decision. The code is better; the discipline was leaky again.
 
 ## a) FULLY DONE ✅
 
-| #   | Item                                                                                               | Evidence                                                                                    |
-| --- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| 1   | T2: replaced lying `CompanionOnly bool` with typed `Mode` (`ModeBan`/`ModeCompanionOnly`)          | `policy.go:107-162`; `Ban()` sets `ModeBan`, `AsCompanionOnly()` sets `ModeCompanionOnly`   |
-| 2   | T4: `Alternatives []string` → `[]Replacement` (full Replacement stored, no `Reason` loss)          | `policy.go:142`; `Suggest`/`WithAlternatives` retyped; `equalReplacements` helper added     |
-| 3   | T3: branded `CVE` type + `NewCVE`/~~`MustCVE`~~ (removed `8ef645f`) validating `CVE-YYYY-NNNN`, `ErrInvalidCVE` sentinel   | `cve.go`, `cve_test.go` (12 invalid cases, 4 valid, sentinel-wrap, ~~panic~~ (panic test removed `8ef645f`), Example)          |
-| 4   | T5: `SuggestExplicit(r)` — no-magic append (no `Description` derivation) + 2 contract tests        | `builder.go`; `TestBuilder_SuggestExplicit_NoDescriptionDerivation`, `..._MixedWithSuggest` |
-| 5   | T1: `FuzzBuilder_PatternsOpaque` pinning "patterns are opaque strings" contract (3.1M execs PASS)  | `builder_fuzz_test.go` (7 seeds; every pattern entry point round-trips any string)          |
-| 6   | T6: `Require` decided **NO** (YAGNI, no consumer need) and documented                              | `ROADMAP.md` "Decided against" section                                                      |
-| 7   | T7: verified blocked-on-external directly (`go.mod` + `rg --include=*.go` = zero imports)          | `TODO_LIST.md` annotated with ADR 0006 + the cutover status reports as evidence             |
-| 8   | Six docs synced: CHANGELOG, FEATURES, DOMAIN_LANGUAGE, AGENTS, README, ROADMAP, TODO_LIST          | all BREAKING entries + Added entries; stale `Validate() error` corrected to typed return    |
-| 9   | Full gate green at the end: build / vet / `test -race` / `golangci-lint run` / `golangci-lint fmt` | 0 issues; `fmt` no drift                                                                    |
+| #   | Item                                                                                                                     | Evidence                                                                                                              |
+| --- | ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| 1   | T2: replaced lying `CompanionOnly bool` with typed `Mode` (`ModeBan`/`ModeCompanionOnly`)                                | `policy.go:107-162`; `Ban()` sets `ModeBan`, `AsCompanionOnly()` sets `ModeCompanionOnly`                             |
+| 2   | T4: `Alternatives []string` → `[]Replacement` (full Replacement stored, no `Reason` loss)                                | `policy.go:142`; `Suggest`/`WithAlternatives` retyped; `equalReplacements` helper added                               |
+| 3   | T3: branded `CVE` type + `NewCVE`/~~`MustCVE`~~ (removed `8ef645f`) validating `CVE-YYYY-NNNN`, `ErrInvalidCVE` sentinel | `cve.go`, `cve_test.go` (12 invalid cases, 4 valid, sentinel-wrap, ~~panic~~ (panic test removed `8ef645f`), Example) |
+| 4   | T5: `SuggestExplicit(r)` — no-magic append (no `Description` derivation) + 2 contract tests                              | `builder.go`; `TestBuilder_SuggestExplicit_NoDescriptionDerivation`, `..._MixedWithSuggest`                           |
+| 5   | T1: `FuzzBuilder_PatternsOpaque` pinning "patterns are opaque strings" contract (3.1M execs PASS)                        | `builder_fuzz_test.go` (7 seeds; every pattern entry point round-trips any string)                                    |
+| 6   | T6: `Require` decided **NO** (YAGNI, no consumer need) and documented                                                    | `ROADMAP.md` "Decided against" section                                                                                |
+| 7   | T7: verified blocked-on-external directly (`go.mod` + `rg --include=*.go` = zero imports)                                | `TODO_LIST.md` annotated with ADR 0006 + the cutover status reports as evidence                                       |
+| 8   | Six docs synced: CHANGELOG, FEATURES, DOMAIN_LANGUAGE, AGENTS, README, ROADMAP, TODO_LIST                                | all BREAKING entries + Added entries; stale `Validate() error` corrected to typed return                              |
+| 9   | Full gate green at the end: build / vet / `test -race` / `golangci-lint run` / `golangci-lint fmt`                       | 0 issues; `fmt` no drift                                                                                              |
 
 ---
 
@@ -336,13 +336,13 @@ panic-free refactor); the validated `CVE` type and `NewCVE` remain.
 
 ### Still open (tracked in `TODO_LIST.md`)
 
-| Item (this report) | Claim                                                          | Status                                                                                  |
-| ------------------ | -------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| §b.1               | `Mode` semantics pinning (test `Ban()` sets `ModeBan`)         | OPEN — no test yet asserts `spec.Mode == ModeBan` after `Ban(...)`                      |
-| §b.2               | `Mode` validation (reject unknown `Mode`)                      | OPEN — `Validate()` does not reject `Mode("garbage")`                                   |
-| §f.9               | CVE syntactic-only validation doc note                         | OPEN                                                                                    |
-| §f.13              | `json`/`yaml` struct tags on `PolicySpec`/`Mode`/`CVE`/`Replacement` | OPEN — routed to `TODO_LIST.md`                                                   |
-| §f.14              | CI fuzz wiring (`-fuzztime` in CI)                             | OPEN                                                                                    |
+| Item (this report) | Claim                                                                | Status                                                             |
+| ------------------ | -------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| §b.1               | `Mode` semantics pinning (test `Ban()` sets `ModeBan`)               | OPEN — no test yet asserts `spec.Mode == ModeBan` after `Ban(...)` |
+| §b.2               | `Mode` validation (reject unknown `Mode`)                            | OPEN — `Validate()` does not reject `Mode("garbage")`              |
+| §f.9               | CVE syntactic-only validation doc note                               | OPEN                                                               |
+| §f.13              | `json`/`yaml` struct tags on `PolicySpec`/`Mode`/`CVE`/`Replacement` | OPEN — routed to `TODO_LIST.md`                                    |
+| §f.14              | CI fuzz wiring (`-fuzztime` in CI)                                   | OPEN                                                               |
 
 ### Question resolutions
 

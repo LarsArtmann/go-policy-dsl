@@ -171,11 +171,11 @@ Ordered by impact × ease (Pareto), grouped.
 
 ## State Snapshot
 
-| Check                      | Result                                                          |
-| -------------------------- | --------------------------------------------------------------- |
-| `go test ./...`            | PASS                                                            |
-| `golangci-lint run ./...`  | 0 issues                                                        |
-| `branching-flow all .`     | 27 issues (down from 29; 2 context issues fixed, rest accepted) |
-| `branching-flow context .` | 0 issues (was 2)                                                |
+| Check                      | Result                                                                                                                                                        |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `go test ./...`            | PASS                                                                                                                                                          |
+| `golangci-lint run ./...`  | 0 issues                                                                                                                                                      |
+| `branching-flow all .`     | 27 issues (down from 29; 2 context issues fixed, rest accepted)                                                                                               |
+| `branching-flow context .` | 0 issues (was 2)                                                                                                                                              |
 | `erraudit ./...`           | ~~**NOT RE-RUN THIS SESSION** (open item)~~ confirmed **0 violations** in a later docs-health pass (panic-free guarantee holds after the `version.go` change) |
-| Git                        | Uncommitted change in `version.go`                              |
+| Git                        | Uncommitted change in `version.go`                                                                                                                            |

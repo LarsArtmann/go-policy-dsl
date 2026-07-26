@@ -60,7 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (validates `CVE-YYYY-NNNN`); invalid identifiers can no longer reach a spec.
 - `Validate()` now returns a concrete `*InvertedVersionRangeError` (with
   `Min`/`Max` fields) instead of a generic wrapped `error`; `errors.Is(err,
-  ErrInvertedVersionRange)` still works via the type's `Is` method. Callers
+ErrInvertedVersionRange)` still works via the type's `Is` method. Callers
   using `:=` get type-safe access to the offending bounds directly.
 - Rewrote the test suite as an external `policydsl_test` package with
   `t.Parallel()` on every test, so the suite exercises only the exported API
