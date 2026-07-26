@@ -11,7 +11,7 @@ go test ./...                 # all tests
 golangci-lint run ./...       # lint (uses .golangci.yml, v2 format)
 golangci-lint fmt ./...       # apply formatters (gci, goimports, gofumpt)
 go build ./...                # build check
-erraudit ./...                # hierarchical error analysis (3 Must-panic CRITICALs = accepted false positives)
+erraudit ./...                # hierarchical error analysis (0 violations — the library is panic-free)
 ```
 
 No `flake.nix` — this is a tiny stdlib-only library; buildflow handles CI. Module: `github.com/larsartmann/go-policy-dsl`, Go 1.26.5.
@@ -30,18 +30,21 @@ Consequence: `go-structure-linter` reports `root-package-files` (ERROR) and `int
 - `Category` is likewise a `string` alias for the same reason.
 - No execution model: the DSL declares what a policy _is_; the consumer decides how to detect and report violations. `Spec()` performs no validation — it returns exactly what was built.
 
+## Architecture Decision: Panic-Free (Errors Returned, Never Panicked)
+
+The library **never panics**. Every error condition — invalid CVE, invalid/negative version, malformed version string, inverted version range — is **returned** as a value, never panicked. There are deliberately no `Must*` constructors (no `MustCVE`, `MustNewVersion`, `MustParseVersion`) and no `VersionRangeStrings` convenience. Rationale: the fluent `Builder` chain cannot propagate a returned error mid-chain, so any method that can fail lives _outside_ the chain as a free function returning `(T, error)` (`NewCVE`, `NewVersion`, `ParseVersion`). The one structural invariant an assembled `PolicySpec` can still violate — an inverted version range — is checked by `PolicySpec.Validate()`, the **single source of truth** for that invariant (`*InvertedVersionRangeError`). `erraudit ./...` reports 0 violations. Do NOT re-introduce `Must*` functions or construction-time panics; the panic-free contract is now a documented guarantee, asserted by tests.
+
 ## Surprising Behaviors
 
 - **`Suggest(r Replacement)` has a side effect beyond adding the alternative.** It appends the **full** `Replacement` (Library AND Reason) to `Alternatives` AND, if `Description` is empty, sets `Description` to `"Replace with <library>: <reason>"`. Callers that set `Description` explicitly after `Suggest` will overwrite this. **`SuggestExplicit(r)`** is the no-magic variant: it appends to `Alternatives` but never derives `Description`.
 - **`Alternatives` is `[]Replacement`, not `[]string`.** Each entry keeps its `Reason` (no information loss). `WithAlternatives(...Replacement)` replaces the slice wholesale; `Suggest`/`SuggestExplicit` append.
-- **`WithCVEs(...CVE)` takes validated `CVE` values.** `CVE` is a branded `string` constructed via `NewCVE(id)`/`MustCVE(id)` (validates `CVE-YYYY-NNNN`). A free-form `[]string` cannot reach the spec.
+- **`WithCVEs(...CVE)` takes validated `CVE` values.** `CVE` is a branded `string` constructed via `NewCVE(id)` (validates `CVE-YYYY-NNNN`, returns an error). A free-form `[]string` cannot reach the spec.
 - **`Ban(name)` defaults to `SeverityCritical` + `CategorySecurity` + `ModeBan`.** Override with `WithSeverity` / `WithCategory` for non-security concerns, or the ban is over-rated.
 - **`Companion(...)` defaults to `SeverityModerate`** (use `CompanionWithSeverity` to override).
 - **`AsCompanionOnly()` sets `Mode = ModeCompanionOnly`** (the policy never emits a ban finding; it only enforces that declared companions are present). The field is the typed `Mode` enum (`ModeBan` / `ModeCompanionOnly`), NOT the former dishonest `CompanionOnly bool`. The zero-value `Mode` (`""`) is treated as ban-active. Use this for "this library is fine, but if you use it you must also use X".
 - **`ExcludeIfTransitiveFrom(libs...)` is the false-positive guard** for indirect dependencies: if a listed parent library directly pulls in the banned lib, no violation fires.
 - **`NewReplacement(library, reason)` is the constructor**; `Replacement` is the type. The package doc example uses `NewReplacement(...)`. (An earlier doc example wrongly called `Replacement(...)` — it would not compile.)
-- **`MustNewVersion`, `MustParseVersion`, and `MustCVE` panic on error by design** (idiomatic Go `Must` pattern, like `template.Must`/`regexp.MustCompile`). They exist for package-level policy initialization with compile-time-known literals. `erraudit ./...` reports these as CRITICAL "Panic on error" findings — these are **accepted false positives**; the panic IS the documented contract and is asserted by tests. Do NOT suppress or refactor away.
-- **`VersionRange(minVer, maxVer *Version)` is inclusive on both ends** and constrains the version of the _library_ targeted by the policy (NOT the Go toolchain version). `nil` on either side means unconstrained. **Panics if both bounds are non-nil and min > max** (nonsensical inverted range — fail-fast at package init). `VersionRangeStrings(min, max string)` is the string convenience (empty = unbounded; parses via `MustParseVersion`, panics on parse error or inversion). Renamed from `GoVersionRange` (2026-07 review): the old name lied — it never constrained Go itself, only the library version. Typed `*Version` + `VersionRangeStrings` (2026-07-26 review): previously `string` fields where `("2.0.0","1.0.0")` was silently representable; the typed domain rejects inversion at construction.
+- **`VersionRange(minVer, maxVer *Version)` is inclusive on both ends** and constrains the version of the _library_ targeted by the policy (NOT the Go toolchain version). `nil` on either side means unconstrained. **Never panics on an inverted range** — detect `min > max` via `PolicySpec.Validate()`. Parse version strings with `ParseVersion` (returns an error) before the chain; there is no string-convenience builder method. Renamed from `GoVersionRange` (2026-07 review): the old name lied — it never constrained Go itself, only the library version.
 - **`Spec()` performs no validation** — it returns exactly what was built. Structural validation lives in `PolicySpec.Validate()`, which returns a concrete `*InvertedVersionRangeError` (carrying `Min`/`Max` pointers) rather than a generic `error`. Callers using `:=` get type-safe access to the offending bounds directly; `errors.Is(err, ErrInvertedVersionRange)` still works via the type's `Is` method. Currently checks only the version-range invariant; domain rules like non-empty `Reason` remain the consumer's job.
 
 ## Conventions
