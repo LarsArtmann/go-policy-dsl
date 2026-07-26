@@ -136,6 +136,23 @@ func (b *Builder) WithAlternatives(alts ...Replacement) *Builder {
 	return b
 }
 
+// WithAlternativeStrings sets the recommended replacement libraries by raw
+// module path, wrapping each in a Replacement with an empty Reason. This is
+// the string-convenience counterpart to WithAlternatives (which takes full
+// Replacement values). Set/replace semantics. Use Suggest or SuggestExplicit
+// when you want to attach a reason to each alternative.
+func (b *Builder) WithAlternativeStrings(libraries ...string) *Builder {
+	alts := make([]Replacement, 0, len(libraries))
+
+	for _, lib := range libraries {
+		alts = append(alts, Replacement{Library: lib})
+	}
+
+	b.spec.Alternatives = alts
+
+	return b
+}
+
 // WithCVEs tags the policy with related, validated CVE identifiers for
 // security reporting. Each CVE is constructed via NewCVE / MustCVE so an
 // invalid identifier cannot reach the spec.

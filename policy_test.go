@@ -537,11 +537,14 @@ func TestSeverity_ConstantValues(t *testing.T) {
 	t.Parallel()
 
 	want := map[policydsl.Severity]string{
-		policydsl.SeverityCritical: "critical",
-		policydsl.SeverityHigh:     "high",
-		policydsl.SeverityModerate: "moderate",
-		policydsl.SeverityLow:      "low",
-		policydsl.SeverityInfo:     "info",
+		policydsl.SeverityCritical:    "critical",
+		policydsl.SeverityHigh:        "high",
+		policydsl.SeverityModerate:    "moderate",
+		policydsl.SeverityLow:         "low",
+		policydsl.SeverityInfo:        "info",
+		policydsl.SeverityRecommended: "recommended",
+		policydsl.SeverityDeprecated:  "deprecated",
+		policydsl.SeverityObsolete:    "obsolete",
 	}
 
 	for severity, expected := range want {
@@ -557,13 +560,15 @@ func TestCategory_ConstantValues(t *testing.T) {
 	t.Parallel()
 
 	want := map[policydsl.Category]string{
-		policydsl.CategorySecurity:        "security",
-		policydsl.CategoryPerformance:     "performance",
-		policydsl.CategoryMaintainability: "maintainability",
-		policydsl.CategoryCorrectness:     "correctness",
-		policydsl.CategoryLicensing:       "licensing",
-		policydsl.CategoryCompatibility:   "compatibility",
-		policydsl.CategoryConfiguration:   "configuration",
+		policydsl.CategorySecurity:      "security",
+		policydsl.CategoryPerformance:   "performance",
+		policydsl.CategoryMaintenance:   "maintenance",
+		policydsl.CategoryDeprecation:   "deprecation",
+		policydsl.CategoryArchitecture:  "architecture",
+		policydsl.CategoryCorrectness:   "correctness",
+		policydsl.CategoryLicensing:     "licensing",
+		policydsl.CategoryCompatibility: "compatibility",
+		policydsl.CategoryConfiguration: "configuration",
 	}
 
 	for category, expected := range want {
