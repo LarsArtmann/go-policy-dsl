@@ -123,9 +123,13 @@ type CompanionSpec struct {
 // ban, not the companion. A typed enum is honest, reads as a question at call
 // sites (`spec.Mode == ModeCompanionOnly`), and is extensible.
 //
-// The zero value is the empty Mode, which consumers MUST treat as ban-active
-// (the default). `Ban(...)` sets `ModeBan` explicitly so a built spec always
-// carries a readable mode; `AsCompanionOnly()` sets `ModeCompanionOnly`.
+// Contract: the ONLY mode that suppresses the ban finding is ModeCompanionOnly.
+// Every other value — including the zero-value empty string, ModeBan, and any
+// unknown string — is ban-active. This deny-by-default semantics means a
+// garbage Mode (e.g. Mode("typo")) never silently disables enforcement; the
+// worst case is an over-active ban, never a missed one. `Ban(...)` sets
+// ModeBan explicitly so a built spec always carries a readable mode;
+// `AsCompanionOnly()` sets ModeCompanionOnly.
 type Mode string
 
 const (

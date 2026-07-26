@@ -119,5 +119,3 @@ func (v Version) After(other Version) bool { return v.Compare(other) > 0 }
 
 // Equal reports whether v and other are the same version.
 func (v Version) Equal(other Version) bool { return v.Compare(other) == 0 }
-
-

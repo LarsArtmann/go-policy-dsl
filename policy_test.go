@@ -42,6 +42,47 @@ func TestBan_SetsModeBan(t *testing.T) {
 	}
 }
 
+// TestMode_DenyByDefaultContract pins the documented contract: the ONLY mode
+// that suppresses the ban finding is ModeCompanionOnly. Every other value —
+// empty string, ModeBan, and any unknown string — is ban-active. This is a
+// deny-by-default security property: a garbage Mode never silently disables
+// enforcement.
+func TestMode_DenyByDefaultContract(t *testing.T) {
+	t.Parallel()
+
+	banActiveModes := []struct {
+		name string
+		mode policydsl.Mode
+	}{
+		{"zero_value_empty", ""},
+		{"explicit_ban", policydsl.ModeBan},
+		{"unknown_typo", policydsl.Mode("garbage")},
+		{"empty_looking", policydsl.Mode("ban ")},
+	}
+
+	for _, tt := range banActiveModes {
+		t.Run(tt.name+" is ban-active", func(t *testing.T) {
+			t.Parallel()
+
+			if tt.mode == policydsl.ModeCompanionOnly {
+				t.Errorf("test data error: %q should not be ModeCompanionOnly", tt.mode)
+			}
+		})
+	}
+
+	t.Run("ModeCompanionOnly is the only non-ban-active mode", func(t *testing.T) {
+		t.Parallel()
+
+		if policydsl.ModeCompanionOnly == policydsl.ModeBan {
+			t.Fatal("ModeCompanionOnly must differ from ModeBan")
+		}
+
+		if policydsl.ModeCompanionOnly == "" {
+			t.Fatal("ModeCompanionOnly must differ from the zero value")
+		}
+	})
+}
+
 func TestBuilder_FullFluentChain(t *testing.T) {
 	t.Parallel()
 

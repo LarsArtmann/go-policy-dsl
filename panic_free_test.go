@@ -42,6 +42,7 @@ func TestNoPanicsInNonTestSource(t *testing.T) {
 		path := filepath.Join(dir, name)
 
 		fset := token.NewFileSet()
+
 		file, parseErr := parser.ParseFile(fset, path, nil, parser.ParseComments)
 		if parseErr != nil {
 			t.Fatalf("could not parse %s: %v", name, parseErr)
