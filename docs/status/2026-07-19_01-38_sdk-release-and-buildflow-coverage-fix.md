@@ -133,9 +133,9 @@ warning rather than a cheerful "Yes — the bug is fixed."
 6. **CHANGELOG hygiene:** when shipping a user-visible fix (LICENSE change, doc fix),
    CHANGELOG should get a real entry in the same commit, not stay as auto-generated
    boilerplate.
-7. **Test coverage of go-policy-dsl itself is thin** — 6 tests, ~30 LoC of test for ~175 LoC
+7. ~~**Test coverage of go-policy-dsl itself is thin** — 6 tests, ~30 LoC of test for ~175 LoC
    of source. `Suggest`'s side-effect, `WithCVEs`, `GoVersionRange`, `WithAlternatives`,
-   `ExcludeIfContains`, `CompanionWithSeverity`, `GoModPattern` have no direct test.
+   `ExcludeIfContains`, `CompanionWithSeverity`, `GoModPattern` have no direct test.~~ DONE: 413b9f0 (Suggest side-effect, WithCVEs, WithAlternatives, ExcludeIfContains, ExcludeIfTransitiveFrom, CompanionWithSeverity, GoModPattern all tested); note `GoVersionRange` was renamed to `VersionRange` in 2f5abeb — see Resolution appendix;
 8. **No `flake.nix` in go-policy-dsl** violates the global AGENTS.md mandate ("Never use
    Makefile — use `flake.nix` for all build/task automation in LarsArtmann projects"). I
    noticed and skipped it; that's tech debt left on the floor.
@@ -160,10 +160,10 @@ warning rather than a cheerful "Yes — the bug is fixed."
 ### go-policy-dsl — correctness & tests
 
 6. Add `func ExampleBan()` and `func ExampleCompanion()` example tests so godoc stays compile-verified.
-7. Direct tests for `Suggest` side-effect (Description auto-set when empty, not overwritten when set).
-8. Direct tests for `WithCVEs`, `WithAlternatives`, `GoVersionRange`, `ExcludeIfContains`.
-9. Test `CompanionWithSeverity` overrides the Moderate default.
-10. Test `GoModPattern` constructor.
+7. ~~Direct tests for `Suggest` side-effect (Description auto-set when empty, not overwritten when set).~~ DONE: 413b9f0;
+8. ~~Direct tests for `WithCVEs`, `WithAlternatives`, `GoVersionRange`, `ExcludeIfContains`.~~ DONE: 413b9f0 (`GoVersionRange` renamed to `VersionRange` in 2f5abeb);
+9. ~~Test `CompanionWithSeverity` overrides the Moderate default.~~ DONE: 413b9f0;
+10. ~~Test `GoModPattern` constructor.~~ DONE: 413b9f0;
 11. Test `Ban(...).DetectVia(GoModPattern(...))` composition.
 12. Table-driven test covering all `Severity` and `Category` constants' string values (guards against accidental rename).
 13. Pin coverage % and add it to AGENTS.md "Status" line.
@@ -244,3 +244,42 @@ warning rather than a cheerful "Yes — the bug is fixed."
 ---
 
 _End of report. Awaiting instructions._
+
+---
+
+## Resolution (2026-07-26)
+
+This report's `GoVersionRange` / `GoVersionMin` / `GoVersionMax` references are
+**stale**: those public symbols were renamed to `VersionRange` / `VersionMin` /
+`VersionMax` in commit `2f5abeb` ("overhaul builder, policy core"). The old
+names lied — they constrained the _library_ version, never the Go toolchain
+version. Read `VersionRange` wherever this report says `GoVersionRange`.
+
+Verified items resolved since this report:
+
+| Item (this report) | Claim | Status |
+| --- | --- | --- |
+| §e.7 | "Test coverage thin; Suggest/WithCVEs/GoVersionRange/WithAlternatives/ExcludeIfContains/CompanionWithSeverity/GoModPattern have no direct test" | DONE: `413b9f0` — all now have direct tests in `policy_test.go` |
+| §f.7 | Suggest side-effect tests | DONE: `413b9f0` |
+| §f.8 | WithCVEs/WithAlternatives/GoVersionRange/ExcludeIfContains tests | DONE: `413b9f0` |
+| §f.9 | CompanionWithSeverity override test | DONE: `413b9f0` |
+| §f.10 | GoModPattern constructor test | DONE: `413b9f0` |
+
+Still open at this annotation (tracked in the repo's `TODO_LIST.md`):
+
+- §f.6 godoc `Example*` tests — open
+- §f.11 `Ban(...).DetectVia(GoModPattern(...))` composition test — open
+- §f.12 table-driven Severity/Category constants test — open
+- §f.13 coverage % pinning — open (note: coverage on branchless setter code is a weak signal; see 2026-07-26 self-critique §d.3)
+- §f.14 `flake.nix` — open (this repo intentionally has none; stdlib-only library, buildflow handles CI — documented in project `AGENTS.md`)
+- §f.15 Ginkgo BDD suite — open
+
+BuildFlow-side items (§f.1–5, §f.31–35) belong to the `BuildFlow` repo, not
+this one; check there for their status. The BuildFlow fix provenance is out of
+scope for this file.
+
+Question §g.3 (`Spec()` validation policy) is resolved by decision: **`Spec()`
+stays validation-free; validation is the consumer's job.** This is documented
+in project `AGENTS.md` ("`Spec()` performs no validation — it returns exactly
+what was built") and will be revisited when the first consumer (`library-policy`)
+migrates.
