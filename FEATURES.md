@@ -68,6 +68,17 @@ tested by `TestBuilder_Suggest_SetsDescription`,
 `TestBuilder_Suggest_MultipleAppendsAlternatives`,
 `TestBuilder_WithAlternatives_Replaces`.
 
+### Behaviour suite (BDD-style, stdlib)
+
+User-perspective behaviour specs that read top-down as sentences
+(`TestBehavior_BuildingABan` / `TestBehavior_SuggestingAReplacement` /
+`TestBehavior_RequiringACompanion` / `TestBehavior_BoundingByLibraryVersion`).
+Written in the stdlib `testing` package — NOT Ginkgo — because the library's
+"stdlib-only, zero dependencies" contract would be contradicted by a
+`require github.com/onsi/ginkgo/v2` in `go.mod` (depguard exempts `_test.go`,
+but a reader of go.mod cannot see that exemption). Evidence:
+`builder_behavior_test.go`.
+
 ### Severity and Category enums
 
 `Severity` (`critical` / `high` / `moderate` / `low` / `info`) and
@@ -94,12 +105,6 @@ not enforced (documented in `AGENTS.md`): the DSL declares what a policy IS;
 the consumer validates domain fitness. Expanding `Validate()` to cover domain
 rules is a future decision, deferred until the first consumer (`library-policy`)
 migrates and the real required-field set is known. Tracked in `TODO_LIST.md`.
-
-### Ginkgo BDD suite
-
-User-perspective behaviour tests for the fluent chain ("building a ban reads
-like prose"). Sibling libraries (`go-error-family`) use Ginkgo for this.
-Tracked in `TODO_LIST.md`.
 
 ### godoc `Example*` functions
 

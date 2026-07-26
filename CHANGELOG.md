@@ -17,16 +17,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `docs/DOMAIN_LANGUAGE.md` — ubiquitous-language glossary (Ban, Companion,
-  Detection, Replacement, Severity, Category, PolicySpec).
+  Detection, Replacement, Severity, Category, PolicySpec, Version).
 - `FEATURES.md` — honest feature inventory by status.
 - `TODO_LIST.md` — short/mid-term actionable tasks.
 - `ROADMAP.md` — long-term direction and the path to v1.0.0.
+- `Version` type — a stdlib-only parsed semver-lite value
+  (`{Major, Minor, Patch}`) with `NewVersion`, `ParseVersion`, their `Must`
+  panic variants, and `String` / `Compare` / `Before` / `After` / `Equal`.
+  Enables compile-time-checked version bounds with no semver dependency.
+- `VersionRangeStrings(min, max string)` builder method — the string
+  convenience form of `VersionRange` (empty = unbounded; parses via
+  `MustParseVersion`, panics on parse error or inversion).
+- `PolicySpec.Validate() error` — structural validation entry point.
+  Currently checks only the version-range invariant; domain rules remain the
+  consumer's job. `Spec()` itself stays validation-free.
 - Contract-locking tests for the surprising `Suggest` → `Description`
   side-effect (auto-derive when empty; preserve when explicit; append-only on
   repeated calls).
 - Table-driven test covering the four append-style detection helpers
   (`ImportPatterns`, `GoModPatterns`, `ExcludeIfContains`,
   `ExcludeIfTransitiveFrom`).
+- Comprehensive `Version` type tests: `NewVersion`, `ParseVersion` (16 cases
+  including sign rejection), `Compare`, relation helpers, round-trip.
+- `VersionRange` typed + inversion tests, `Validate` inversion tests.
+- BDD-style behaviour suite (stdlib, not Ginkgo) covering the fluent chain
+  from the user perspective: `TestBehavior_BuildingABan`,
+  `TestBehavior_SuggestingAReplacement`, `TestBehavior_RequiringACompanion`,
+  `TestBehavior_BoundingByLibraryVersion`.
 - `depguard` exclusion for `_test.go` so the external test package
   (`policydsl_test`) compiles cleanly.
 - `golangci-lint fmt` formatters configured (`gci`, `goimports`, `gofumpt`,
@@ -41,6 +58,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   adoption target, `library-policy`, has its own independent copy in
   `domain/policy/spec.go` and does not import this module), so the rename is
   safe.
+- **BREAKING:** retyped `PolicySpec.VersionMin` / `VersionMax` from `string`
+  to `*Version`, and `Builder.VersionRange` from `(string, string)` to
+  `(*Version, *Version)`. The old string API allowed the nonsensical inverted
+  range `("2.0.0", "1.0.0")` to be silently represented; the typed domain
+  rejects `min > max` at construction (panic) and via `Validate()` (error).
+  `nil` on either side means unbounded (was the empty string). Migrate by
+  switching `VersionRange(a, b)` calls to `VersionRangeStrings(a, b)` (the
+  drop-in string convenience) or to the typed `VersionRange` with parsed
+  `*Version` values.
 - Rewrote the test suite as an external `policydsl_test` package with
   `t.Parallel()` on every test, so the suite exercises only the exported API
   (the same surface real consumers use) and is race-clean.

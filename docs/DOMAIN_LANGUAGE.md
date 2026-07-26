@@ -153,20 +153,41 @@ is fine, but if you use it you must also use X". Set via `AsCompanionOnly()`.
 
 ## Version constraints
 
-### VersionRange
+### Version
 
-Inclusive `[min, max]` version constraints on the **library** targeted by the
-policy (NOT the Go toolchain version). Empty string on either side means
-unbounded on that side. Set via `VersionRange(min, max)`.
+A parsed semantic version `{Major, Minor, Patch}` of the **library** targeted
+by the policy (NOT the Go toolchain version). The zero `Version` is the valid
+version `0.0.0`; an _unbounded_ range bound is represented by a `nil *Version`,
+not by the zero value. Construct via `NewVersion(major, minor, patch)` or
+`ParseVersion("1.2.3")` (and their `Must`-prefixed panic variants for
+package-level vars). Ordered by `Compare` / `Before` / `After` / `Equal`.
+In code: `Version` (`version.go`).
 
-> **History:** this was renamed from `GoVersionRange` (and `GoVersionMin` /
-> `GoVersionMax`) because the old name lied — it never constrained Go itself,
-> only the library version. See `CHANGELOG.md` `[Unreleased]`.
+### VersionRange (builder method)
 
-> **Open question:** `VersionMin` / `VersionMax` are `string`-typed, so the
-> nonsensical inverted range `("2.0.0", "1.0.0")` is representable. A typed
-> `Version` domain that rejects inversion at construction is sketched in
-> `ROADMAP.md`.
+`VersionRange(minVer, maxVer *Version)` sets inclusive `[min, max]` version
+constraints; `nil` on either side means unbounded. **Panics if both bounds
+are non-nil and `min > max`** — a nonsensical inverted range fails fast at
+package-init time rather than surfacing silently. `VersionRangeStrings(min,
+max string)` is the string convenience (empty = unbounded; parses via
+`MustParseVersion`, panics on parse error or inversion). In code:
+`builder.go`.
+
+### Validate (the structural check)
+
+`PolicySpec.Validate() error` checks the structural invariants a spec must
+satisfy regardless of domain. Currently the only such invariant is the
+version-range ordering (`min <= max`). It does NOT enforce domain rules (a
+spec with no `Reason`, no detection patterns, etc. still validates) — those
+are the consumer's job, by design. `Spec()` itself remains validation-free
+and returns exactly what was built.
+
+> **History:** `VersionRange` was renamed from `GoVersionRange` (and
+> `VersionMin`/`Max` from `GoVersionMin`/`Max`) because the old name lied —
+> it never constrained Go itself, only the library version. The fields were
+> then retyped from `string` to `*Version` (2026-07-26 review) to make the
+> inverted-range state (`min > max`) unrepresentable through the builder. See
+> `CHANGELOG.md` `[Unreleased]`.
 
 ---
 

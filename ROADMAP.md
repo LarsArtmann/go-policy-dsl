@@ -18,8 +18,10 @@ The API is not yet stable. `v1.0.0` is reached when **all** of these hold:
 2. **Validation policy decided.** Whether `Spec()` stays validation-free or
    grows a `Validate()` is settled and documented (currently: validation-free
    by design — see `AGENTS.md`).
-3. **Stringly-typed axes reviewed.** The typed `Version` domain and the
-   `CompanionOnly` → `Mode` rename are resolved (see `TODO_LIST.md`).
+3. **Stringly-typed axes reviewed.** The `CompanionOnly` → `Mode` rename is
+   resolved (see `TODO_LIST.md`); the typed `Version` domain landed in
+   `[Unreleased]` (2026-07-26) — `VersionMin`/`Max` are now `*Version` with
+   inversion rejected at construction.
 4. **BDD + Example tests green.** User-perspective behaviour is pinned by a
    Ginkgo suite and godoc `Example*` functions so refactor support is honest.
 
@@ -74,18 +76,19 @@ execution model without a deliberate decision recorded here first.
 
 ## Direction: type safety
 
-### Typed `Version` domain
+### Typed `Version` domain — LANDED
 
-A hand-rolled semver-lite type (`Version{Major, Minor, Patch int}`) with a
-constructor that rejects inversion (`min > max`) and non-numeric input — no
-semver dependency, so the stdlib-only contract holds. Eliminates the
-stringly-typed footgun where `VersionRange("2.0.0", "1.0.0")` is
-representable. If the sketch holds, graduates to `TODO_LIST.md`.
+A hand-rolled semver-lite type (`Version{Major, Minor, Patch int}`) with
+constructors that reject inversion (`min > max`) and non-numeric / signed
+input — no semver dependency, so the stdlib-only contract holds. Eliminated
+the stringly-typed footgun where `VersionRange("2.0.0", "1.0.0")` was
+representable. Shipped in `[Unreleased]` (2026-07-26); see `FEATURES.md`
+"Version constraints".
 
 ### Typed `Mode` enum (replace `CompanionOnly bool`)
 
 See `TODO_LIST.md` [T4]. Long-term the policy "mode" (ban / companion-only /
-both) should be a typed enum, not a boolean flag.
+both) should be a typed enum, not a boolean flag. Still open.
 
 ---
 

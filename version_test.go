@@ -251,3 +251,43 @@ func signum(n int) int {
 		return 0
 	}
 }
+
+// FuzzParseVersion asserts the parser never panics on arbitrary input and
+// that every successfully-parsed version round-trips through String back to a
+// re-parseable value. This is the DSL's only pure-logic parsing surface, so it
+// earns a fuzz target; Detection-pattern matching is deliberately left to
+// consumers (see TODO_LIST "fuzz tests for Detection").
+func FuzzParseVersion(f *testing.F) {
+	// Seed corpus: canonical forms plus the malformed shapes the unit tests
+	// already pin, so the fuzzer starts from interesting neighbours.
+	for _, seed := range []string{
+		"1.2.3", "v0.0.0", "12.345.6789",
+		"", "1.2", "1.2.3.4", "a.b.c", "1.-2.3", "v1.2.3-rc1", "latest",
+	} {
+		f.Add(seed)
+	}
+
+	f.Fuzz(func(t *testing.T, input string) {
+		parsed, err := policydsl.ParseVersion(input)
+		if err != nil {
+			// Invalid input MUST return an error, never panic.
+			return
+		}
+
+		// Valid input MUST round-trip: String output re-parses to the same value.
+		rendered := parsed.String()
+		reparsed, reparsedErr := policydsl.ParseVersion(rendered)
+		if reparsedErr != nil {
+			t.Fatalf("round-trip parse failed: input %q -> %q -> error %v", input, rendered, reparsedErr)
+		}
+
+		if reparsed != parsed {
+			t.Fatalf("round-trip mismatch: input %q -> %v -> %v", input, parsed, reparsed)
+		}
+
+		// Non-negativity invariant (defence in depth; ParseVersion enforces it).
+		if parsed.Major < 0 || parsed.Minor < 0 || parsed.Patch < 0 {
+			t.Fatalf("negative component from %q: %v", input, parsed)
+		}
+	})
+}
