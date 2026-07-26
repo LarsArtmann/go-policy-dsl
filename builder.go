@@ -2,6 +2,20 @@ package policydsl
 
 // Builder provides a fluent API for constructing PolicySpecs. Created via
 // Ban(name) or Companion(...). Each method returns the Builder so calls chain.
+//
+// Method-naming convention (enforced by tests and docs, not the type system):
+//
+//	With<X>(...)        — SET / REPLACE the field wholesale (e.g. WithSeverity,
+//	                      WithDescription, WithAlternatives, WithCVEs).
+//	<X>(...)  (bare)    — APPEND to a slice field (e.g. ImportPatterns,
+//	                      GoModPatterns, ExcludeIfContains, Suggest,
+//	                      RequiresCompanion).
+//	DetectVia(d)        — REPLACE the whole Detection struct.
+//	As<X>()             — SET a mode flag (e.g. AsCompanionOnly).
+//	Spec()              — TERMINATE the chain, return the immutable value.
+//
+// When adding a new method, pick the form that matches its semantics so the
+// convention stays predictable at call sites.
 type Builder struct {
 	spec PolicySpec
 }
