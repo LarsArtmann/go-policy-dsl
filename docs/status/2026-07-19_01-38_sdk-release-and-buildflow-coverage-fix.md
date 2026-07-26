@@ -265,14 +265,25 @@ Verified items resolved since this report:
 | §f.9               | CompanionWithSeverity override test                                                                                                             | DONE: `413b9f0`                                                 |
 | §f.10              | GoModPattern constructor test                                                                                                                   | DONE: `413b9f0`                                                 |
 
-Still open at this annotation (tracked in the repo's `TODO_LIST.md`):
+Items resolved after the 2026-07-26 annotation (closed in later sessions):
 
-- §f.6 godoc `Example*` tests — open
-- §f.11 `Ban(...).DetectVia(GoModPattern(...))` composition test — open
-- §f.12 table-driven Severity/Category constants test — open
-- §f.13 coverage % pinning — open (note: coverage on branchless setter code is a weak signal; see 2026-07-26 self-critique §d.3)
-- §f.14 `flake.nix` — open (this repo intentionally has none; stdlib-only library, buildflow handles CI — documented in project `AGENTS.md`)
-- §f.15 Ginkgo BDD suite — open
+- ~~§f.6 godoc `Example*` tests — open~~ DONE: `02caad9` (`ExampleBan`, `ExampleBan_versionRange`, `ExampleCompanion`, `ExampleVersion`, `ExamplePolicySpec_Validate` in `example_test.go`; `ExampleCVE` in `cve_test.go`);
+- ~~§f.11 `Ban(...).DetectVia(GoModPattern(...))` composition test — open~~ DONE: `3d770cf` (`TestBuilder_DetectVia_GoModPattern_Composition`);
+- ~~§f.12 table-driven Severity/Category constants test — open~~ DONE: `3d770cf` (`TestSeverity_ConstantValues`, `TestCategory_ConstantValues`);
+- ~~§f.15 Ginkgo BDD suite — open~~ DONE: `1093c03` — shipped as a **stdlib** `TestBehavior_*` suite (`builder_behavior_test.go`), deliberately NOT Ginkgo to honour the zero-dependency contract;
+
+Still open at this update (tracked in `TODO_LIST.md`):
+
+- §f.13 coverage % pinning — open (and a weak signal: the library is ~branchless setter code; see the 2026-07-26 self-critiques' repeated warning against citing coverage as a quality headline);
+- §f.14 `flake.nix` — open (this repo intentionally has none; stdlib-only library, buildflow/CI handles the gate — documented in project `AGENTS.md`);
+
+> **Update 2026-07-26 10:12 (commit `8ef645f`):** the library is now
+> **panic-free**. Every `Must*` constructor this report mentions
+> (`MustNewVersion`, `MustParseVersion`, `MustCVE`) and the
+> `VersionRangeStrings` convenience were **removed** — error conditions are
+> returned, never panicked. The `*Version` retyping this report anticipated
+> shipped, but inversion is no longer rejected at construction (no panic);
+> detect it via `PolicySpec.Validate()`. See `CHANGELOG.md` `[Unreleased]`.
 
 BuildFlow-side items (§f.1–5, §f.31–35) belong to the `BuildFlow` repo, not
 this one; check there for their status. The BuildFlow fix provenance is out of

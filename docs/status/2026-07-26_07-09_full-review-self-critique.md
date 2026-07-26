@@ -12,6 +12,16 @@ I ran a full-code-review, fixed three real defects (a naming lie on the public A
 
 **Then I patted myself on the back.** Looking again, I left at least three new lies in the repo, took two easy outs disguised as "deferred"/"accepted tradeoff", bragged about a meaningless 100% coverage figure, and never verified that my headline rename was actually safe for the named consumer. Details below. The code is better than I found it; the _discipline_ around the code was sloppy.
 
+> **Update 2026-07-26 10:12 (commits `1a1819e`, `2f5abeb`, `8ef645f`):** nearly
+> every item in this report's `## c) NOT STARTED` table has since **shipped**,
+> and several `## f)` P2 items too. The typed `Version` domain (§c.6) landed;
+> the four core docs (§c.3) were created; the BDD suite (§c.4 / §f.16) shipped
+> as a stdlib `TestBehavior_*` suite; `CHANGELOG` (§c.1) and the 2026-07-19
+> annotation (§c.2) were written; the `golangci-lint fmt` CI gate (§c.7) shipped.
+> The library also went **panic-free** (`8ef645f`): the `Must*` constructors and
+> `VersionRangeStrings` this report anticipated were later removed. Full
+> item-by-item status in [Resolution](#resolution-2026-07-26) below.
+
 ---
 
 ## a) FULLY DONE ✅
@@ -114,9 +124,9 @@ I ran a full-code-review, fixed three real defects (a naming lie on the public A
 
 **🟡 P2 — real engineering improvements (~½ day)**
 
-14. Sketch the typed `Version` domain design (no semver dep; reject min>max at construction).
-15. If the sketch holds, implement it behind `VersionRange` and update tests.
-16. Add Ginkgo BDD tests for the fluent chain (user-perspective: "building a ban reads like prose").
+14. ~~Sketch the typed `Version` domain design (no semver dep; reject min>max at construction).~~ DONE: `1a1819e` (`version.go` — `Version{Major,Minor,Patch}`, `NewVersion`/`ParseVersion`, `Compare`/`Before`/`After`/`Equal`); inversion later moved from construction-time panic to `Validate()` in `8ef645f`;
+15. ~~If the sketch holds, implement it behind `VersionRange` and update tests.~~ DONE: `1a1819e`, `2f5abeb` (`Builder.VersionRange(*Version, *Version)`, `PolicySpec.VersionMin/Max` retyped to `*Version`);
+16. ~~Add Ginkgo BDD tests for the fluent chain (user-perspective: "building a ban reads like prose").~~ DONE: `1093c03` — shipped as a **stdlib** `TestBehavior_*` suite (`builder_behavior_test.go`), deliberately NOT Ginkgo to honour the zero-dependency contract;
 17. Add property/fuzz tests for `Detection` pattern matching semantics (once a consumer defines matching, the DSL needs contract tests).
 18. Add a `PolicySpec.Validate()` method? Currently `Spec()` returns whatever was built — decide if validation belongs in the DSL or the consumer. Document the decision either way.
 19. Add `Example*` test functions (godoc-renderable) so pkg.go.dev shows runnable examples.
@@ -173,3 +183,39 @@ I ran a full-code-review, fixed three real defects (a naming lie on the public A
 **Bottom line:** the code is better, the process was leaky. Three new lies entered the repo (uncommitted README diff, stale 2026-07-19 report, unverified "safe rename"). The P0 list above closes them in under an hour. I'll wait for your call on the three questions before touching anything else.
 
 — Crush
+
+---
+
+## Resolution (2026-07-26)
+
+This report's `## c) NOT STARTED` table and several `## f)` items were acted on
+by later sessions on 2026-07-26. The rename (`GoVersionRange` → `VersionRange`)
+and retype (`string` → `*Version`) it describes shipped and were then
+superseded once more by the panic-free refactor (`8ef645f`). Item-by-item:
+
+| Item (this report) | Claim                                                                              | Status                                                                                                                                                  | Commit    |
+| ------------------ | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| §c.1               | `CHANGELOG.md` entry for the rename + doc fixes                                    | DONE — `CHANGELOG.md` `[Unreleased]` now documents every breaking change                                                                                | `6220ac3` |
+| §c.2               | Annotate the now-lying `docs/status/2026-07-19_*.md`                               | DONE — `## Resolution (2026-07-26)` appendix added (and re-updated for the panic-free change)                                                            | `d7905c8` |
+| §c.3               | `docs/DOMAIN_LANGUAGE.md`, `FEATURES.md`, `TODO_LIST.md`, `ROADMAP.md`             | DONE — all four created and kept current                                                                                                                | `6220ac3` |
+| §c.4 / §f.16       | BDD tests (Ginkgo) for the fluent chain                                            | DONE — stdlib `TestBehavior_*` suite (NOT Ginkgo; zero-dep contract)                                                                                    | `1093c03` |
+| §c.5               | `deduplicate-code` / `docs-health` delegation                                      | DONE — art-dupl reported 0 clone groups; `docs-health` run across sessions                                                                              | `3d770cf` |
+| §c.6 / §f.14-15    | Sketching a typed `Version` domain                                                 | DONE — `Version{Major,Minor,Patch}` shipped; inversion enforcement later moved to `Validate()` (panic-free)                                             | `1a1819e` |
+| §c.7               | Final `golangci-lint fmt` gate                                                     | DONE — `golangci-lint fmt` drift check wired into CI (`.github/workflows/ci.yml`)                                                                       | `25cc06d` |
+| §f.18              | Add a `PolicySpec.Validate()` method?                                              | DONE — `Validate() *InvertedVersionRangeError` (structural version-range invariant only)                                                                | `392f3f8` |
+| §f.19              | Add `Example*` test functions                                                      | DONE — `ExampleBan`, `ExampleBan_versionRange`, `ExampleCompanion`, `ExampleVersion`, `ExamplePolicySpec_Validate`, `ExampleCVE`                        | `02caad9` |
+| §f.33              | Rename dishonest `CompanionOnly bool` to a typed `Mode` enum                       | DONE — `ModeBan` / `ModeCompanionOnly`                                                                                                                  | `3d770cf` |
+| §f.41              | `CVEs []string` → typed `CVE` with validation                                      | DONE — branded `CVE` + `NewCVE` validating `CVE-YYYY-NNNN`                                                                                              | `250fcf3` |
+| §f.42              | `Alternatives []string` vs `Replacement{...}` — consolidate                        | DONE — `Alternatives` is now `[]Replacement` (no information loss)                                                                                      | `3d770cf` |
+
+### Question resolutions
+
+- **§g.1** (`library-policy` references the old names?): resolved — verified the consumer does NOT import this module (`rg` = 0 hits); the rename was safe.
+- **§g.2** (ship as `0.2.0` or fold into `0.1.0`?): resolved — versioning policy set to `v0.2.0` as the first tag (module never tagged `v0.1.0`); see `CHANGELOG.md` header.
+- **§g.3** (annotate or rewrite the stale 2026-07-19 report?): resolved — annotate (non-destructive), per the `update-old-docs` skill; the rewrite-vs-annotate split is now the project convention (living docs rewrite; snapshots annotate).
+
+### Still open (tracked in `TODO_LIST.md`)
+
+- §f.17 property/fuzz tests for `Detection` pattern matching — depends on whether the DSL ships a `matcher` subpackage (see `ROADMAP.md`); deferred.
+- §f.20 semver policy for the batch of breaking changes — the first tag is still pending (`v0.2.0`).
+- §e "A typed `Version` domain is worth a real sketch" — shipped, but the design rationale (why `*Version`, why no pre-release metadata, why inclusive-only bounds) is still unrecorded as an ADR (`docs/adr/` does not yet exist).

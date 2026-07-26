@@ -18,6 +18,15 @@ I shipped the whole list — typed `Version` domain, BDD-style behaviour suite, 
 
 The discipline improvements the prior report demanded ("Verify, don't assume", "Treat deferred as a debt ticket", "Close the formatter loop") I largely honoured. The discipline improvements about **honesty in reporting** ("Stop using coverage % as a flex", "Old status reports rot the moment reality moves") I did NOT. Net: better code, leaky process, repeated integrity failures of the same shape.
 
+> **Update 2026-07-26 10:12 (commit `8ef645f`):** the `Must*` panic variants,
+> `VersionRangeStrings`, and the inversion `panic` this report lists as
+> **shipped** (§a.6, §a.7) were **removed** in a later session — the library is
+> now panic-free by design. Inversion is detected by `Validate()`, not by a
+> construction-time panic. The §e "panic footgun" architecture concern is
+> therefore resolved (by removal, not by the `ParseVersionRange` the report
+> proposed). The §a.6/§a.7 rows below are struck where they describe the
+> removed API. Full status in [Resolution](#resolution-2026-07-26-10-12) below.
+
 ---
 
 ## a) FULLY DONE ✅
@@ -29,8 +38,8 @@ The discipline improvements the prior report demanded ("Verify, don't assume", "
 | 3   | Rewrote `CHANGELOG.md` with a real `[Unreleased]` entry (rename, retype, Version, Validate, tests, CI, templates)                                                                                              | `CHANGELOG.md`                                                                                                             |
 | 4   | Created `docs/DOMAIN_LANGUAGE.md`, `FEATURES.md`, `TODO_LIST.md`, `ROADMAP.md`                                                                                                                                 | all present, cross-linked, status vocabulary honest                                                                        |
 | 5   | Added `Builder` method-naming convention comment block in code                                                                                                                                                 | `builder.go:3-19`                                                                                                          |
-| 6   | Designed + implemented the typed `Version` domain (`version.go`): `Version{Major,Minor,Patch}`, `NewVersion`, `ParseVersion`, `Must*` variants, `Compare`/`Before`/`After`/`Equal`, sign rejection, round-trip | `version.go`, `policy.go:130-152` (`Validate`), `builder.go:130-160`                                                       |
-| 7   | Retyped `PolicySpec.VersionMin/Max` `string` → `*Version`; `VersionRange` panics on inversion; added `VersionRangeStrings` convenience                                                                         | `policy.go:130-131`, `builder.go:124-152`                                                                                  |
+| 6   | Designed + implemented the typed `Version` domain (`version.go`): `Version{Major,Minor,Patch}`, `NewVersion`, `ParseVersion`, ~~`Must*` variants~~ (removed `8ef645f`), `Compare`/`Before`/`After`/`Equal`, sign rejection, round-trip | `version.go`, `policy.go:130-152` (`Validate`), `builder.go:130-160`                                                       |
+| 7   | Retyped `PolicySpec.VersionMin/Max` `string` → `*Version`; ~~`VersionRange` panics on inversion~~ (panic removed `8ef645f`); ~~added `VersionRangeStrings` convenience~~ (removed `8ef645f`); `VersionRange` now defers inversion to `Validate()`                                                                         | `policy.go:130-131`, `builder.go:124-152`                                                                                  |
 | 8   | Added `PolicySpec.Validate() error` (structural invariant check) + `ErrInvertedVersionRange`                                                                                                                   | `policy.go:138-152`                                                                                                        |
 | 9   | Wrote BDD-style behaviour suite (4 `TestBehavior_*` functions, 13 specs) in stdlib `testing` — NOT Ginkgo, to honour the zero-dep contract                                                                     | `builder_behavior_test.go`                                                                                                 |
 | 10  | Added `FuzzParseVersion` (6.6M executions, 0 failures; round-trip + non-negativity invariants)                                                                                                                 | `version_test.go`                                                                                                          |
