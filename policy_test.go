@@ -32,13 +32,22 @@ func TestBan_DefaultsToCriticalSecurity(t *testing.T) {
 func TestBuilder_FullFluentChain(t *testing.T) {
 	t.Parallel()
 
+	min, err := policydsl.ParseVersion("1.0.0")
+	if err != nil {
+		t.Fatalf("unexpected parse error: %v", err)
+	}
+	max, err := policydsl.ParseVersion("2.0.0")
+	if err != nil {
+		t.Fatalf("unexpected parse error: %v", err)
+	}
+
 	spec := policydsl.Ban("gorm").
 		Because("ORMs hide N+1 queries").
 		WithSeverity(policydsl.SeverityHigh).
 		WithCategory(policydsl.CategoryPerformance).
 		DetectVia(policydsl.ImportPattern("gorm.io/gorm")).
 		Suggest(policydsl.NewReplacement("sqlc", "type-safe SQL")).
-		VersionRangeStrings("1.0.0", "2.0.0").
+		VersionRange(&min, &max).
 		Spec()
 
 	if spec.Reason != "ORMs hide N+1 queries" {
@@ -399,7 +408,7 @@ func TestPolicySpec_Validate(t *testing.T) {
 			VersionMax: &low,
 		}
 
-		err := spec.Validate()
+		err = spec.Validate()
 		if err == nil {
 			t.Fatalf("expected ErrInvertedVersionRange, got nil")
 		}

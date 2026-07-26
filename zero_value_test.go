@@ -137,8 +137,8 @@ func TestVersion_ZeroValue(t *testing.T) {
 	}
 
 	// It compares equal to an explicit 0.0.0.
-	explicit := policydsl.MustNewVersion(0, 0, 0)
+	explicit, _ := policydsl.NewVersion(0, 0, 0)
 	if !v.Equal(explicit) {
-		t.Errorf("zero Version should Equal MustNewVersion(0,0,0); got %v vs %v", v, explicit)
+		t.Errorf("zero Version should Equal NewVersion(0,0,0); got %v vs %v", v, explicit)
 	}
 }

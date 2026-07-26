@@ -32,9 +32,10 @@ func ExampleBan() {
 // ExampleBan_versionRange shows a version-bounded ban: only library versions
 // below 2.x are banned, and the inversion guard means the range is sound.
 func ExampleBan_versionRange() {
+	max, _ := policydsl.ParseVersion("1.99.0")
 	spec := policydsl.Ban("golog").
 		Because("v1.x has a memory leak fixed in v2").
-		VersionRangeStrings("", "1.99.0").
+		VersionRange(nil, &max).
 		Spec()
 
 	if spec.VersionMin == nil {
@@ -71,7 +72,7 @@ func ExampleCompanion() {
 // ExampleVersion demonstrates parsing, comparison, and rendering.
 func ExampleVersion() {
 	v, _ := policydsl.ParseVersion("v1.2.3")
-	other := policydsl.MustNewVersion(2, 0, 0)
+	other, _ := policydsl.NewVersion(2, 0, 0)
 
 	fmt.Println(v)
 	fmt.Println(v.Before(other))
@@ -85,8 +86,8 @@ func ExampleVersion() {
 // ExamplePolicySpec_Validate shows that an inverted version range — which
 // direct field assignment can introduce — is caught by Validate.
 func ExamplePolicySpec_Validate() {
-	high := policydsl.MustParseVersion("2.0.0")
-	low := policydsl.MustParseVersion("1.0.0")
+	high, _ := policydsl.ParseVersion("2.0.0")
+	low, _ := policydsl.ParseVersion("1.0.0")
 	inverted := policydsl.PolicySpec{VersionMin: &high, VersionMax: &low}
 
 	err := inverted.Validate()
