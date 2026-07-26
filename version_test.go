@@ -276,6 +276,7 @@ func FuzzParseVersion(f *testing.F) {
 
 		// Valid input MUST round-trip: String output re-parses to the same value.
 		rendered := parsed.String()
+
 		reparsed, reparsedErr := policydsl.ParseVersion(rendered)
 		if reparsedErr != nil {
 			t.Fatalf("round-trip parse failed: input %q -> %q -> error %v", input, rendered, reparsedErr)

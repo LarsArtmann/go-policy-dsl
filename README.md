@@ -131,16 +131,41 @@ at construction — the footgun the old string API allowed.
 
 ## Design notes
 
-- **Stdlib only.** The DSL depends on nothing outside the standard library, so any tool — a CLI, an LSP server, a CI check, a golangci-lint plugin — can adopt it without coupling.
+- **Stdlib only.** The DSL depends on nothing outside the standard library, so any tool — a CLI, an LSP server, a CI check, a golangci-lint plugin — can adopt it without coupling. `go.mod` has zero `require` entries (the test suite is stdlib-only too, by choice).
 - **Values, not configuration files.** Policies live in your source tree as Go vars, getting full IDE refactor support, type checking, and grep-ability. YAML is supported only at consumer boundaries (e.g. `library-policy` emits YAML for backward compat).
-- **The `Severity` type is a `string`, not `finding.Severity`.** This keeps the DSL dependency-free. Consumers bridge the two at the boundary.
-- **No execution model.** The DSL declares _what_ a policy is; the consumer (`library-policy`, your CI check, etc.) decides _how_ to detect and report violations.
+- **The `Severity` type is a `string`, not `finding.Severity`.** This keeps the DSL dependency-free. Consumers bridge the two at the boundary:
+
+  ```go
+  import "yourorg/finding"
+
+  func toFindingSeverity(s policydsl.Severity) finding.Severity {
+      switch s {
+      case policydsl.SeverityCritical: return finding.SeverityCritical
+      case policydsl.SeverityHigh:     return finding.SeverityHigh
+      case policydsl.SeverityModerate: return finding.SeverityModerate
+      case policydsl.SeverityLow:      return finding.SeverityLow
+      default:                         return finding.SeverityInfo
+      }
+  }
+  ```
+
+- **No execution model.** The DSL declares _what_ a policy is; the consumer (`library-policy`, your CI check, etc.) decides _how_ to detect and report violations. In particular, the matching semantics for `ImportPatterns` / `GoModPatterns` (literal substring, glob, regex?) are defined by the consumer, NOT by the DSL — the patterns are opaque `[]string` so each tool can pick its matcher.
+- **Validation is split.** `Spec()` performs no validation (returns exactly what was built). Structural validation lives in the separate `PolicySpec.Validate() error` (currently checks the version-range invariant; domain rules like non-empty `Reason` remain the consumer's job).
+
+## Surprising behaviours (intentional, pinned by tests)
+
+- **`Suggest(r Replacement)` derives `Description`.** When `Description` is empty, `Suggest` sets it to `"Replace with <library>: <reason>"`. An explicit `Description` (set before or after) is never overwritten. Repeated `Suggest` calls only append to `Alternatives`.
+- **`Ban(name)` defaults to `SeverityCritical` + `CategorySecurity`.** Override with `WithSeverity` / `WithCategory` for non-security concerns.
+- **`VersionRange(min, max *Version)` panics on an inverted range.** `min > max` is a nonsensical range and fails fast at package-init time; use `Validate()` to catch the same invariant on specs constructed by direct field assignment.
+- **`AsCompanionOnly()` suppresses the ban entirely** — the policy never emits a ban finding; it only enforces that declared companions are present.
+
+The full `Builder` method convention (`With-` = set/replace vs bare = append) is documented in [`docs/DOMAIN_LANGUAGE.md`](docs/DOMAIN_LANGUAGE.md).
 
 ---
 
 ## Consumers
 
-- [`library-policy`](https://github.com/LarsArtmann/library-policy) — primary consumer (governance CLI + server + golangci plugin). Its `domain/policy/spec.go` is the migration target.
+- [`library-policy`](https://github.com/LarsArtmann/library-policy) — primary consumer (governance CLI + server + golangci plugin). Its `domain/policy/spec.go` is the migration target. (It does NOT yet import this module — it has its own independent copy; migration is the first adoption target.)
 
 Planned:
 
@@ -148,7 +173,7 @@ Planned:
 
 ## Status
 
-Early. API is stable for the `Ban`/`Builder`/`Spec` core; the companion API may evolve. Zero consumers yet — `library-policy` migration is the first adoption target.
+Early. The `Ban` / `Builder` / `Spec` core, the typed `Version` domain, and the companion API are implemented and tested. The API is **not yet stable** (pre-1.0; see `CHANGELOG.md` for breaking changes). Zero consumers shipped — `library-policy` migration is the first adoption target. See `ROADMAP.md` for the path to `v1.0.0`.
 
 ## License
 
