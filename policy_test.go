@@ -417,6 +417,71 @@ func TestNewReplacement(t *testing.T) {
 	}
 }
 
+// TestBuilder_DetectVia_GoModPattern_Composition pins the common composition
+// Ban(...).DetectVia(GoModPattern(...)) — the convenience constructor feeds
+// the replace-semantics setter and only the go.mod pattern survives.
+func TestBuilder_DetectVia_GoModPattern_Composition(t *testing.T) {
+	t.Parallel()
+
+	spec := policydsl.Ban("foo").
+		ImportPatterns("should-be-overwritten").
+		DetectVia(policydsl.GoModPattern("github.com/foo/bar")).
+		Spec()
+
+	if len(spec.Detection.GoModPatterns) != 1 || spec.Detection.GoModPatterns[0] != "github.com/foo/bar" {
+		t.Errorf("expected single go.mod pattern github.com/foo/bar, got %v", spec.Detection.GoModPatterns)
+	}
+
+	// DetectVia replaces the whole Detection struct, so the prior ImportPatterns
+	// call is discarded.
+	if len(spec.Detection.ImportPatterns) != 0 {
+		t.Errorf("DetectVia should have replaced prior ImportPatterns, got %v", spec.Detection.ImportPatterns)
+	}
+}
+
+// TestSeverity_ConstantValues pins the string value of every Severity
+// constant. These values are the wire format consumers bridge against, so an
+// accidental rename or value change MUST be caught here.
+func TestSeverity_ConstantValues(t *testing.T) {
+	t.Parallel()
+
+	want := map[policydsl.Severity]string{
+		policydsl.SeverityCritical: "critical",
+		policydsl.SeverityHigh:     "high",
+		policydsl.SeverityModerate: "moderate",
+		policydsl.SeverityLow:      "low",
+		policydsl.SeverityInfo:     "info",
+	}
+
+	for severity, expected := range want {
+		if string(severity) != expected {
+			t.Errorf("Severity constant %q = %q, want %q", severity, severity, expected)
+		}
+	}
+}
+
+// TestCategory_ConstantValues pins the string value of every Category
+// constant. Same rationale as TestSeverity_ConstantValues.
+func TestCategory_ConstantValues(t *testing.T) {
+	t.Parallel()
+
+	want := map[policydsl.Category]string{
+		policydsl.CategorySecurity:        "security",
+		policydsl.CategoryPerformance:     "performance",
+		policydsl.CategoryMaintainability: "maintainability",
+		policydsl.CategoryCorrectness:     "correctness",
+		policydsl.CategoryLicensing:       "licensing",
+		policydsl.CategoryCompatibility:   "compatibility",
+		policydsl.CategoryConfiguration:   "configuration",
+	}
+
+	for category, expected := range want {
+		if string(category) != expected {
+			t.Errorf("Category constant %q = %q, want %q", category, category, expected)
+		}
+	}
+}
+
 // equalStrings is a tiny stdlib-only slice comparison (test-only) so the suite
 // stays dependency-free, matching the library's zero-dep contract.
 func equalStrings(got, want []string) bool {

@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality-gate:
+    name: Build, test, vet, lint, fmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Install golangci-lint
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh |
+            sh -s -- -b /usr/local/bin v2.0.2
+
+      - name: go build
+        run: go build ./...
+
+      - name: go vet
+        run: go vet ./...
+
+      - name: go test -race
+        run: go test ./... -race -count=1
+
+      - name: golangci-lint run
+        run: golangci-lint run ./...
+
+      # Formatter gate: fail if `golangci-lint fmt` would change anything.
+      # This is the LAST step so formatter drift never lands on master.
+      - name: golangci-lint fmt --check
+        run: |
+          golangci-lint fmt ./...
+          if ! git diff --exit-code -- . ; then
+            echo "::error::golangci-lint fmt produced changes — run it locally and commit"
+            git diff -- .
+            exit 1
+          fi

@@ -112,11 +112,14 @@ post-publish.
 Tag → pkg.go.dev update. Decide between a manual tag-and-push flow or a
 GitHub Action. Low urgency until the first consumer is ready to pin a version.
 
-### CODEOWNERS, issue/PR templates, license-scan gate
+### Ecosystem hygiene — LANDED
 
-Ecosystem hygiene. Add `CODEOWNERS`, issue/PR templates, and a `depguard`
-gate that keeps the stdlib-only contract enforced (reject any future non-stdlib
-dependency). The depguard config already enforces this at the linter level.
+`CODEOWNERS`, issue templates, a pull-request template, and a GitHub Actions
+CI workflow (`.github/workflows/ci.yml`) enforcing the full quality gate
+(build, vet, test -race, `golangci-lint run`, `golangci-lint fmt` drift
+check) shipped in `[Unreleased]` (2026-07-26). The `depguard` config keeps
+the stdlib-only contract enforced at the linter level (reject any future
+non-stdlib dependency).
 
 ---
 

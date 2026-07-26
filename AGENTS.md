@@ -43,8 +43,8 @@ Consequence: `go-structure-linter` reports `root-package-files` (ERROR) and `int
 ## Conventions
 
 - Fluent `Builder` returned by every chainable method; `Spec()` terminates the chain and returns the immutable `PolicySpec`.
-- Constructor helpers (`ImportPattern`, `GoModPattern`, `Companion`, `NewReplacement`) are package-level functions, not methods.
-- File layout: `policy.go` = all public types/constants; `builder.go` = the fluent `Builder` + constructor helpers. Tests beside the code.
+- Constructor helpers (`ImportPattern`, `GoModPattern`, `Companion`, `NewReplacement`, `NewVersion`, `ParseVersion`) are package-level functions, not methods.
+- File layout: `policy.go` = public types/constants/`Validate`; `builder.go` = the fluent `Builder` + constructor helpers; `version.go` = the typed `Version` domain (stdlib-only semver-lite). Tests beside the code (`policy_test.go`, `version_test.go`, `builder_behavior_test.go`, `zero_value_test.go`, `example_test.go`).
 
 ## Consumers
 

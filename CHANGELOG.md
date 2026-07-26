@@ -48,6 +48,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`policydsl_test`) compiles cleanly.
 - `golangci-lint fmt` formatters configured (`gci`, `goimports`, `gofumpt`,
   `golines` at 120 cols).
+- Zero-value tests pinning the meaning of an unbuilt `PolicySpec`,
+  `Detection`, `CompanionSpec`, `Replacement`, and `Version` (the public
+  contract consumers construct against literally).
+- godoc `Example*` functions (`ExampleBan`, `ExampleBan_versionRange`,
+  `ExampleCompanion`, `ExampleVersion`, `ExamplePolicySpec_Validate`) so
+  pkg.go.dev renders runnable, compile-verified examples.
+- `FuzzParseVersion` — fuzz target asserting the parser never panics on
+  arbitrary input and every parsed version round-trips through `String`.
+- GitHub Actions CI workflow (`.github/workflows/ci.yml`) enforcing the full
+  gate: build, vet, test -race, `golangci-lint run`, and `golangci-lint fmt`
+  as a required drift check.
+- `CODEOWNERS`, issue templates, and a pull-request template.
 
 ### Changed
 

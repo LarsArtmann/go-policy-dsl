@@ -1,0 +1,5 @@
+# CODEOWNERS — default owner for every file in the repo.
+# Per the repo's stdlib-only, single-root-package layout, the whole tree has
+# one owner. Add per-path rules below when the project grows sub-packages.
+
+*       @LarsArtmann
