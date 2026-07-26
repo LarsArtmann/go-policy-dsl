@@ -48,13 +48,13 @@ Rates how serious a violation is. A `string` alias (NOT the consumer's
 `finding.Severity`) so the DSL stays dependency-free. Consumers bridge
 `Severity` → their own severity type at the boundary.
 
-| Value               | Meaning                                                        |
-| ------------------- | -------------------------------------------------------------- |
-| `SeverityCritical`  | Blocks: production incident waiting to happen                 |
-| `SeverityHigh`      | Strong warning: fix before merge unless explicitly justified   |
-| `SeverityModerate`  | Recommendation worth acting on, not blocking                  |
-| `SeverityLow`       | Informational                                                 |
-| `SeverityInfo`      | Neutral observation (e.g. a detected companion that is present) |
+| Value              | Meaning                                                         |
+| ------------------ | --------------------------------------------------------------- |
+| `SeverityCritical` | Blocks: production incident waiting to happen                   |
+| `SeverityHigh`     | Strong warning: fix before merge unless explicitly justified    |
+| `SeverityModerate` | Recommendation worth acting on, not blocking                    |
+| `SeverityLow`      | Informational                                                   |
+| `SeverityInfo`     | Neutral observation (e.g. a detected companion that is present) |
 
 In code: `Severity` (`policy.go:26`) and the constants (`policy.go:28-49`).
 
@@ -193,13 +193,13 @@ and returns exactly what was built.
 
 ## Builder method convention
 
-| Prefix / form                | Semantics                                | Examples                                   |
-| ---------------------------- | ---------------------------------------- | ------------------------------------------ |
-| `With<X>(...)`               | **Set / replace** the field wholesale    | `WithSeverity`, `WithCategory`, `WithDescription`, `WithAlternatives`, `WithCVEs` |
-| Bare verb / noun (`<X>(...)`) | **Append** to a slice field              | `ImportPatterns`, `GoModPatterns`, `ExcludeIfContains`, `ExcludeIfTransitiveFrom`, `RequiresCompanion`, `Suggest` |
-| `DetectVia(d)`               | **Replace** the whole `Detection` struct | —                                          |
-| `As<X>()`                    | **Set a mode flag**                       | `AsCompanionOnly`                          |
-| `Spec()`                     | **Terminate** the chain, return the value | —                                          |
+| Prefix / form                 | Semantics                                 | Examples                                                                                                          |
+| ----------------------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `With<X>(...)`                | **Set / replace** the field wholesale     | `WithSeverity`, `WithCategory`, `WithDescription`, `WithAlternatives`, `WithCVEs`                                 |
+| Bare verb / noun (`<X>(...)`) | **Append** to a slice field               | `ImportPatterns`, `GoModPatterns`, `ExcludeIfContains`, `ExcludeIfTransitiveFrom`, `RequiresCompanion`, `Suggest` |
+| `DetectVia(d)`                | **Replace** the whole `Detection` struct  | —                                                                                                                 |
+| `As<X>()`                     | **Set a mode flag**                       | `AsCompanionOnly`                                                                                                 |
+| `Spec()`                      | **Terminate** the chain, return the value | —                                                                                                                 |
 
 This convention is enforced only by tests and doc comments, not by the type
 system. Contributors adding a new method should pick the form that matches its

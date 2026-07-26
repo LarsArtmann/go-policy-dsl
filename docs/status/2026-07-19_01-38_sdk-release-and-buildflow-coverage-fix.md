@@ -257,13 +257,13 @@ version. Read `VersionRange` wherever this report says `GoVersionRange`.
 
 Verified items resolved since this report:
 
-| Item (this report) | Claim | Status |
-| --- | --- | --- |
-| §e.7 | "Test coverage thin; Suggest/WithCVEs/GoVersionRange/WithAlternatives/ExcludeIfContains/CompanionWithSeverity/GoModPattern have no direct test" | DONE: `413b9f0` — all now have direct tests in `policy_test.go` |
-| §f.7 | Suggest side-effect tests | DONE: `413b9f0` |
-| §f.8 | WithCVEs/WithAlternatives/GoVersionRange/ExcludeIfContains tests | DONE: `413b9f0` |
-| §f.9 | CompanionWithSeverity override test | DONE: `413b9f0` |
-| §f.10 | GoModPattern constructor test | DONE: `413b9f0` |
+| Item (this report) | Claim                                                                                                                                           | Status                                                          |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| §e.7               | "Test coverage thin; Suggest/WithCVEs/GoVersionRange/WithAlternatives/ExcludeIfContains/CompanionWithSeverity/GoModPattern have no direct test" | DONE: `413b9f0` — all now have direct tests in `policy_test.go` |
+| §f.7               | Suggest side-effect tests                                                                                                                       | DONE: `413b9f0`                                                 |
+| §f.8               | WithCVEs/WithAlternatives/GoVersionRange/ExcludeIfContains tests                                                                                | DONE: `413b9f0`                                                 |
+| §f.9               | CompanionWithSeverity override test                                                                                                             | DONE: `413b9f0`                                                 |
+| §f.10              | GoModPattern constructor test                                                                                                                   | DONE: `413b9f0`                                                 |
 
 Still open at this annotation (tracked in the repo's `TODO_LIST.md`):
 
