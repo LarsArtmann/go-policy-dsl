@@ -51,6 +51,18 @@ const (
 	// SeverityInfo is a neutral observation (e.g. a detected companion that
 	// should be present alongside a chosen library).
 	SeverityInfo Severity = "info"
+
+	// SeverityRecommended is a non-blocking suggestion (e.g. a better-maintained
+	// alternative exists). Consumers surface these as advisory, not as failures.
+	SeverityRecommended Severity = "recommended"
+
+	// SeverityDeprecated marks a library or pattern that is officially deprecated
+	// by its maintainers. Not immediately dangerous but slated for removal.
+	SeverityDeprecated Severity = "deprecated"
+
+	// SeverityObsolete marks a library or pattern that is end-of-life or
+	// superseded. Consumers should flag for removal planning.
+	SeverityObsolete Severity = "obsolete"
 )
 
 // Category classifies WHY a policy exists, so consumers can filter and report
@@ -58,13 +70,15 @@ const (
 type Category string
 
 const (
-	CategorySecurity        Category = "security"
-	CategoryPerformance     Category = "performance"
-	CategoryMaintainability Category = "maintainability"
-	CategoryCorrectness     Category = "correctness"
-	CategoryLicensing       Category = "licensing"
-	CategoryCompatibility   Category = "compatibility"
-	CategoryConfiguration   Category = "configuration"
+	CategorySecurity      Category = "security"
+	CategoryPerformance   Category = "performance"
+	CategoryMaintenance   Category = "maintenance"
+	CategoryDeprecation   Category = "deprecation"
+	CategoryArchitecture  Category = "architecture"
+	CategoryCorrectness   Category = "correctness"
+	CategoryLicensing     Category = "licensing"
+	CategoryCompatibility Category = "compatibility"
+	CategoryConfiguration Category = "configuration"
 )
 
 // Detection declares how a policy violation is found. A policy may declare
