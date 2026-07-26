@@ -837,6 +837,27 @@
           <p class="hero-subtitle">Deep review of every source/test file in a stdlib-only Go policy DSL. 7 findings: 3 critical naming/correctness fixes applied on the spot, 100% statement coverage restored, lint back to 0 issues.</p>
         </div>
 
+        <!-- Resolution notice (added 2026-07-26): this audit describes a
+             pre-rename API snapshot. Do not edit the findings below; read them
+             as a historical record. -->
+        <div style="border-left: 3px solid var(--warning); background: var(--amber-light); padding: 0.9rem 1.2rem; margin: 1rem 0; max-width: 80ch;">
+          <strong style="color: var(--warning); font-family: var(--font-mono); font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase;">Update &middot; 2026-07-26</strong>
+          <p style="margin-top: 0.5rem; color: var(--text);">
+            This audit captured the API at a single point in time. The rename it
+            proposes &mdash; <code>GoVersionRange</code> &rarr; <code>VersionRange</code>
+            (and <code>GoVersionMin/Max</code> &rarr; <code>VersionMin/Max</code>) &mdash;
+            <strong>shipped</strong>, then was superseded twice more: the bounds were
+            retyped <code>string</code> &rarr; <code>*Version</code>, and the library
+            went <strong>panic-free</strong> (the <code>Must*</code> constructors and
+            <code>VersionRangeStrings</code> were removed). Wherever this report shows
+            <code>GoVersionRange(min, max string)</code>, the current API is
+            <code>VersionRange(min, max *Version)</code> with inversion detected by
+            <code>PolicySpec.Validate()</code>, not at construction. See
+            <code>CHANGELOG.md</code> &rarr; <code>[Unreleased]</code> for the full
+            breaking-change history.
+          </p>
+        </div>
+
         <!-- Inline TOC (alternative to sidebar; pick one) -->
         <nav class="toc">
           <h3>Contents</h3>
