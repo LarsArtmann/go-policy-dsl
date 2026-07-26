@@ -2,8 +2,6 @@ package policydsl_test
 
 import (
 	"errors"
-	"fmt"
-	"strings"
 	"testing"
 
 	policydsl "github.com/larsartmann/go-policy-dsl"
@@ -266,10 +264,9 @@ func TestBuilder_WithAlternatives_Replaces(t *testing.T) {
 func TestBuilder_WithCVEs(t *testing.T) {
 	t.Parallel()
 
-	spec := policydsl.Ban("log4j").WithCVEs(
-		policydsl.MustCVE("CVE-2021-44228"),
-		policydsl.MustCVE("CVE-2021-45046"),
-	).Spec()
+	cve1, _ := policydsl.NewCVE("CVE-2021-44228")
+	cve2, _ := policydsl.NewCVE("CVE-2021-45046")
+	spec := policydsl.Ban("log4j").WithCVEs(cve1, cve2).Spec()
 
 	want := []policydsl.CVE{"CVE-2021-44228", "CVE-2021-45046"}
 	if len(spec.CVEs) != len(want) {
@@ -283,10 +280,15 @@ func TestBuilder_WithCVEs(t *testing.T) {
 	}
 }
 
-func TestBuilder_VersionRangeStrings(t *testing.T) {
+func TestBuilder_VersionRange_UnboundedMin(t *testing.T) {
 	t.Parallel()
 
-	spec := policydsl.Ban("golog").VersionRangeStrings("", "1.99.0").Spec()
+	max, err := policydsl.ParseVersion("1.99.0")
+	if err != nil {
+		t.Fatalf("unexpected parse error: %v", err)
+	}
+
+	spec := policydsl.Ban("golog").VersionRange(nil, &max).Spec()
 
 	if spec.VersionMin != nil {
 		t.Errorf("expected nil min (unbounded), got %v", spec.VersionMin)
@@ -297,25 +299,34 @@ func TestBuilder_VersionRangeStrings(t *testing.T) {
 	}
 }
 
-// TestBuilder_VersionRangeStrings_InvertedPanics confirms the string
-// convenience panics on a nonsensical inverted range (min > max). This is the
-// footgun the typed Version domain exists to eliminate.
-func TestBuilder_VersionRangeStrings_InvertedPanics(t *testing.T) {
+// TestBuilder_VersionRange_InvertedDeferToValidate confirms the Builder does
+// NOT panic on an inverted range (it is panic-free by design); the inversion is
+// instead surfaced by PolicySpec.Validate(). This is the regression guard for
+// the "errors are returned, not panicked" contract.
+func TestBuilder_VersionRange_InvertedDeferToValidate(t *testing.T) {
 	t.Parallel()
 
-	defer func() {
-		r := recover()
-		if r == nil {
-			t.Fatalf("expected panic on inverted VersionRangeStrings, got none")
-		}
+	high, err := policydsl.ParseVersion("2.0.0")
+	if err != nil {
+		t.Fatalf("unexpected parse error: %v", err)
+	}
+	low, err := policydsl.ParseVersion("1.0.0")
+	if err != nil {
+		t.Fatalf("unexpected parse error: %v", err)
+	}
 
-		msg := fmt.Sprintf("%v", r)
-		if !strings.Contains(msg, "inverted") {
-			t.Errorf("expected panic message to mention inversion, got %q", msg)
-		}
-	}()
+	// Construction must not panic.
+	spec := policydsl.Ban("x").VersionRange(&high, &low).Spec()
 
-	policydsl.Ban("x").VersionRangeStrings("2.0.0", "1.0.0").Spec()
+	// Validation surfaces the inversion as a returned error.
+	validateErr := spec.Validate()
+	if validateErr == nil {
+		t.Fatalf("expected Validate to reject inverted range, got nil")
+	}
+
+	if !errors.Is(validateErr, policydsl.ErrInvertedVersionRange) {
+		t.Errorf("expected ErrInvertedVersionRange, got %v", validateErr)
+	}
 }
 
 // TestBuilder_VersionRange_Typed exercises the typed *Version signature:
@@ -324,8 +335,14 @@ func TestBuilder_VersionRangeStrings_InvertedPanics(t *testing.T) {
 func TestBuilder_VersionRange_Typed(t *testing.T) {
 	t.Parallel()
 
-	minVer := policydsl.MustParseVersion("1.0.0")
-	maxVer := policydsl.MustParseVersion("2.0.0")
+	minVer, err := policydsl.ParseVersion("1.0.0")
+	if err != nil {
+		t.Fatalf("unexpected parse error: %v", err)
+	}
+	maxVer, err := policydsl.ParseVersion("2.0.0")
+	if err != nil {
+		t.Fatalf("unexpected parse error: %v", err)
+	}
 
 	spec := policydsl.Ban("x").VersionRange(&minVer, &maxVer).Spec()
 
@@ -344,20 +361,6 @@ func TestBuilder_VersionRange_Typed(t *testing.T) {
 	}
 }
 
-func TestBuilder_VersionRange_Typed_InvertedPanics(t *testing.T) {
-	t.Parallel()
-
-	defer func() {
-		if r := recover(); r == nil {
-			t.Fatalf("expected panic on inverted typed VersionRange, got none")
-		}
-	}()
-
-	high := policydsl.MustParseVersion("2.0.0")
-	low := policydsl.MustParseVersion("1.0.0")
-	policydsl.Ban("x").VersionRange(&high, &low).Spec()
-}
-
 // TestPolicySpec_Validate confirms Validate catches an inverted range that
 // direct field assignment can introduce (bypassing the Builder guard).
 func TestPolicySpec_Validate(t *testing.T) {
@@ -366,7 +369,15 @@ func TestPolicySpec_Validate(t *testing.T) {
 	t.Run("sound_spec_validates", func(t *testing.T) {
 		t.Parallel()
 
-		spec := policydsl.Ban("x").VersionRangeStrings("1.0.0", "2.0.0").Spec()
+		min, err := policydsl.ParseVersion("1.0.0")
+		if err != nil {
+			t.Fatalf("unexpected parse error: %v", err)
+		}
+		max, err := policydsl.ParseVersion("2.0.0")
+		if err != nil {
+			t.Fatalf("unexpected parse error: %v", err)
+		}
+		spec := policydsl.Ban("x").VersionRange(&min, &max).Spec()
 		if err := spec.Validate(); err != nil {
 			t.Errorf("expected nil error for sound spec, got %v", err)
 		}
@@ -375,8 +386,14 @@ func TestPolicySpec_Validate(t *testing.T) {
 	t.Run("inverted_range_returns_error", func(t *testing.T) {
 		t.Parallel()
 
-		high := policydsl.MustParseVersion("2.0.0")
-		low := policydsl.MustParseVersion("1.0.0")
+		high, err := policydsl.ParseVersion("2.0.0")
+		if err != nil {
+			t.Fatalf("unexpected parse error: %v", err)
+		}
+		low, err := policydsl.ParseVersion("1.0.0")
+		if err != nil {
+			t.Fatalf("unexpected parse error: %v", err)
+		}
 		spec := policydsl.PolicySpec{
 			VersionMin: &high,
 			VersionMax: &low,
@@ -407,24 +424,30 @@ func TestPolicySpec_Validate(t *testing.T) {
 func TestPolicySpec_Validate_InvertedRangeErrorCarriesBounds(t *testing.T) {
 	t.Parallel()
 
-	high := policydsl.MustParseVersion("2.0.0")
-	low := policydsl.MustParseVersion("1.0.0")
+	high, err := policydsl.ParseVersion("2.0.0")
+	if err != nil {
+		t.Fatalf("unexpected parse error: %v", err)
+	}
+	low, err := policydsl.ParseVersion("1.0.0")
+	if err != nil {
+		t.Fatalf("unexpected parse error: %v", err)
+	}
 	spec := policydsl.PolicySpec{
 		VersionMin: &high,
 		VersionMax: &low,
 	}
 
-	err := spec.Validate()
-	if err == nil {
+	typedErr := spec.Validate()
+	if typedErr == nil {
 		t.Fatalf("expected typed error, got nil")
 	}
 
-	if err.Min == nil || *err.Min != high {
-		t.Errorf("expected Min to point to %s, got %v", high, err.Min)
+	if typedErr.Min == nil || *typedErr.Min != high {
+		t.Errorf("expected Min to point to %s, got %v", high, typedErr.Min)
 	}
 
-	if err.Max == nil || *err.Max != low {
-		t.Errorf("expected Max to point to %s, got %v", low, err.Max)
+	if typedErr.Max == nil || *typedErr.Max != low {
+		t.Errorf("expected Max to point to %s, got %v", low, typedErr.Max)
 	}
 }
 

@@ -12,8 +12,6 @@ package policydsl_test
 
 import (
 	"errors"
-	"fmt"
-	"strings"
 	"testing"
 
 	policydsl "github.com/larsartmann/go-policy-dsl"
@@ -133,7 +131,12 @@ func TestBehavior_BoundingByLibraryVersion(t *testing.T) {
 	t.Run("an unbounded-then-capped range stores nil min and a parsed max", func(t *testing.T) {
 		t.Parallel()
 
-		spec := policydsl.Ban("golog").VersionRangeStrings("", "1.99.0").Spec()
+		max, err := policydsl.ParseVersion("1.99.0")
+		if err != nil {
+			t.Fatalf("unexpected parse error: %v", err)
+		}
+
+		spec := policydsl.Ban("golog").VersionRange(nil, &max).Spec()
 
 		if spec.VersionMin != nil {
 			t.Errorf("expected nil (unbounded) min, got %v", spec.VersionMin)
@@ -144,18 +147,38 @@ func TestBehavior_BoundingByLibraryVersion(t *testing.T) {
 		}
 	})
 
-	t.Run("an inverted range is rejected at construction (fail-fast)", func(t *testing.T) {
+	t.Run("an inverted range is surfaced by Validate, not by panicking at construction", func(t *testing.T) {
 		t.Parallel()
 
-		defer expectInversionPanic(t)
+		high, err := policydsl.ParseVersion("2.0.0")
+		if err != nil {
+			t.Fatalf("unexpected parse error: %v", err)
+		}
+		low, err := policydsl.ParseVersion("1.0.0")
+		if err != nil {
+			t.Fatalf("unexpected parse error: %v", err)
+		}
 
-		policydsl.Ban("golog").VersionRangeStrings("2.0.0", "1.0.0").Spec()
+		spec := policydsl.Ban("golog").VersionRange(&high, &low).Spec()
+
+		if err := spec.Validate(); err == nil {
+			t.Fatalf("expected Validate to reject an inverted range, got nil")
+		}
 	})
 
 	t.Run("a spec built via the builder always validates", func(t *testing.T) {
 		t.Parallel()
 
-		spec := policydsl.Ban("golog").VersionRangeStrings("1.0.0", "2.0.0").Spec()
+		min, err := policydsl.ParseVersion("1.0.0")
+		if err != nil {
+			t.Fatalf("unexpected parse error: %v", err)
+		}
+		max, err := policydsl.ParseVersion("2.0.0")
+		if err != nil {
+			t.Fatalf("unexpected parse error: %v", err)
+		}
+
+		spec := policydsl.Ban("golog").VersionRange(&min, &max).Spec()
 
 		if err := spec.Validate(); err != nil {
 			t.Errorf("a builder-produced spec should Validate clean; got %v", err)
@@ -165,11 +188,17 @@ func TestBehavior_BoundingByLibraryVersion(t *testing.T) {
 	t.Run("direct field assignment that inverts the range fails Validate", func(t *testing.T) {
 		t.Parallel()
 
-		high := policydsl.MustParseVersion("2.0.0")
-		low := policydsl.MustParseVersion("1.0.0")
+		high, err := policydsl.ParseVersion("2.0.0")
+		if err != nil {
+			t.Fatalf("unexpected parse error: %v", err)
+		}
+		low, err := policydsl.ParseVersion("1.0.0")
+		if err != nil {
+			t.Fatalf("unexpected parse error: %v", err)
+		}
 		inverted := policydsl.PolicySpec{VersionMin: &high, VersionMax: &low}
 
-		err := inverted.Validate()
+		err = inverted.Validate()
 		if err == nil {
 			t.Fatalf("expected Validate to reject an inverted range, got nil")
 		}
@@ -178,23 +207,6 @@ func TestBehavior_BoundingByLibraryVersion(t *testing.T) {
 			t.Errorf("expected ErrInvertedVersionRange, got %v", err)
 		}
 	})
-}
-
-// expectInversionPanic is a deferred helper that asserts the surrounding
-// function panicked with a message mentioning "inverted". It centralizes the
-// recover-and-assert dance so each fail-fast spec reads cleanly.
-func expectInversionPanic(t *testing.T) {
-	t.Helper()
-
-	recovered := recover()
-	if recovered == nil {
-		t.Fatalf("expected a panic on inverted VersionRangeStrings, got none")
-	}
-
-	message := strings.ToLower(fmt.Sprintf("%v", recovered))
-	if !strings.Contains(message, "inverted") {
-		t.Errorf("expected panic message to mention inversion, got %q", recovered)
-	}
 }
 
 // assertSpecField is a tiny stdlib-only equality helper so the behaviour specs

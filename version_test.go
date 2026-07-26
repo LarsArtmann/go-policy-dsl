@@ -61,18 +61,6 @@ func TestNewVersion(t *testing.T) {
 	}
 }
 
-func TestMustNewVersion_PanicsOnNegative(t *testing.T) {
-	t.Parallel()
-
-	defer func() {
-		if r := recover(); r == nil {
-			t.Fatalf("expected panic on negative version, got none")
-		}
-	}()
-
-	policydsl.MustNewVersion(-1, 0, 0)
-}
-
 func TestParseVersion(t *testing.T) {
 	t.Parallel()
 
@@ -126,18 +114,6 @@ func TestParseVersion(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestMustParseVersion_PanicsOnError(t *testing.T) {
-	t.Parallel()
-
-	defer func() {
-		if r := recover(); r == nil {
-			t.Fatalf("expected panic on malformed version, got none")
-		}
-	}()
-
-	policydsl.MustParseVersion("not-a-version")
 }
 
 func TestVersion_String(t *testing.T) {

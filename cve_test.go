@@ -68,27 +68,6 @@ func TestNewCVE_InvalidWrapsSentinel(t *testing.T) {
 	}
 }
 
-func TestMustCVE_PanicsOnError(t *testing.T) {
-	t.Parallel()
-
-	defer func() {
-		if r := recover(); r == nil {
-			t.Fatalf("expected MustCVE to panic on an invalid identifier, got none")
-		}
-	}()
-
-	policydsl.MustCVE("nope")
-}
-
-func TestMustCVE_ReturnsValid(t *testing.T) {
-	t.Parallel()
-
-	cve := policydsl.MustCVE("CVE-2021-44228")
-	if cve.String() != "CVE-2021-44228" {
-		t.Errorf("unexpected CVE: %q", cve)
-	}
-}
-
 func ExampleCVE() {
 	cve, _ := policydsl.NewCVE("CVE-2021-44228")
 	fmt.Println(cve)
