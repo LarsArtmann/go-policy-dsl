@@ -21,6 +21,11 @@
 // pulling in a heavyweight framework.
 package policydsl
 
+import (
+	"errors"
+	"fmt"
+)
+
 // Severity rates how serious a policy violation is. Maps to finding.Severity
 // at the consumer boundary.
 type Severity string
@@ -115,13 +120,35 @@ type PolicySpec struct {
 	Alternatives []string
 	CVEs         []string
 
-	// VersionMin and VersionMax constrain the version of the library this policy
-	// targets (NOT the Go toolchain version). Inclusive on both ends; empty
-	// means unconstrained on that side.
-	VersionMin string
-	VersionMax string
+	// VersionMin and VersionMax constrain the version of the library this
+	// policy targets (NOT the Go toolchain version). Inclusive on both ends;
+	// nil means unconstrained on that side. The invariant
+	// "VersionMax == nil || VersionMin == nil || *VersionMin <= *VersionMax"
+	// holds when the spec is built via the fluent Builder; direct field
+	// assignment can violate it, in which case Validate() returns
+	// ErrInvertedVersionRange.
+	VersionMin *Version
+	VersionMax *Version
 
 	// Companions that must be present when this library is used.
 	Companions    []CompanionSpec
 	CompanionOnly bool
+}
+
+// ErrInvertedVersionRange is returned by Validate when VersionMin > VersionMax.
+var ErrInvertedVersionRange = errors.New("policydsl: version range is inverted (min > max)")
+
+// Validate checks the structural invariants of the spec. It does NOT enforce
+// domain rules (a policy with no Reason, no detection patterns, etc. is still
+// valid here — that is the consumer's job). The single invariant checked is
+// the version-range ordering, which direct field assignment can violate but
+// the fluent Builder prevents.
+//
+// Returns nil when the spec is structurally sound.
+func (s PolicySpec) Validate() error {
+	if s.VersionMin != nil && s.VersionMax != nil && s.VersionMin.After(*s.VersionMax) {
+		return fmt.Errorf("%w: min %s > max %s", ErrInvertedVersionRange, s.VersionMin, s.VersionMax)
+	}
+
+	return nil
 }

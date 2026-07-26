@@ -1,5 +1,7 @@
 package policydsl
 
+import "fmt"
+
 // Builder provides a fluent API for constructing PolicySpecs. Created via
 // Ban(name) or Companion(...). Each method returns the Builder so calls chain.
 //
@@ -126,13 +128,41 @@ func (b *Builder) WithCVEs(cves ...string) *Builder {
 }
 
 // VersionRange sets inclusive version constraints for the library targeted by
-// this policy (NOT the Go toolchain version). Empty means unconstrained on
-// that side.
-func (b *Builder) VersionRange(minVer, maxVer string) *Builder {
-	b.spec.VersionMin = minVer
-	b.spec.VersionMax = maxVer
+// this policy (NOT the Go toolchain version). nil on either side means
+// unbounded. Panics if both bounds are non-nil and min > max (a nonsensical
+// inverted range) — this is a programmer error that should fail fast at
+// package-level policy initialization, not surface silently at runtime.
+func (b *Builder) VersionRange(min, max *Version) *Builder {
+	if min != nil && max != nil && min.After(*max) {
+		panic(fmt.Errorf("%w: min %s > max %s", ErrInvertedVersionRange, min, max))
+	}
+
+	b.spec.VersionMin = min
+	b.spec.VersionMax = max
 
 	return b
+}
+
+// VersionRangeStrings is the string convenience form of VersionRange: each
+// bound is parsed via ParseVersion (empty string means unbounded on that
+// side). Panics on a parse error or an inverted range. Intended for
+// package-level policy vars where the version literals are known at compile
+// time; use VersionRange with parsed Versions when the input is untrusted.
+func (b *Builder) VersionRangeStrings(minVer, maxVer string) *Builder {
+	return b.VersionRange(parseOptionalVersion(minVer), parseOptionalVersion(maxVer))
+}
+
+// parseOptionalVersion parses a version bound where empty string means
+// unbounded (nil). Panics on a non-empty malformed string, matching the
+// Must-parse convention used for package-level policy initialization.
+func parseOptionalVersion(s string) *Version {
+	if s == "" {
+		return nil
+	}
+
+	v := MustParseVersion(s)
+
+	return &v
 }
 
 // RequiresCompanion adds a required companion library spec.
