@@ -5,7 +5,7 @@
 **User request:** "I do not like Must* functions!" — applied after an initial
 erraudit triage surfaced 3 CRITICAL "Panic on error" findings
 (`MustCVE`, `MustNewVersion`, `MustParseVersion`). The previous project memory
-(AGENTS.md) had marked these as *accepted* false positives; the user overrode
+(AGENTS.md) had marked these as _accepted_ false positives; the user overrode
 that. Outcome: make the library **panic-free** — every error returned, never
 panicked.
 
@@ -17,6 +17,7 @@ No unrelated project research was performed.
 ## a) FULLY DONE
 
 ### Source removals (the core ask)
+
 - **`cve.go`** — deleted `MustCVE(id string) CVE`; updated the `CVE` type doc
   comment (no longer mentions a panic variant).
 - **`version.go`** — deleted `MustNewVersion(major, minor, patch int) Version`
@@ -28,24 +29,27 @@ No unrelated project research was performed.
   updated `WithCVEs` + `VersionRange` doc comments.
 
 ### Cascade decision (why VersionRangeStrings had to go too)
+
 `VersionRangeStrings` was a thin wrapper that parsed two strings via
 `MustParseVersion` and panicked on failure. Keeping it while removing `Must*`
 would have meant re-implementing a panic-on-error inline — directly
 contradicting the user's intent. So the string convenience was removed; callers
 now `ParseVersion` each bound (getting an error) before the chain. This is the
-honest, consistent design: anything that can fail lives *outside* the fluent
+honest, consistent design: anything that can fail lives _outside_ the fluent
 chain as a `(T, error)` free function, because a fluent `Builder` chain cannot
 propagate a returned error mid-chain.
 
 ### Split-brain fix (bonus architectural improvement)
+
 `VersionRange` used to `panic` on inversion while `PolicySpec.Validate()`
-returned `*InvertedVersionRangeError` for the *same* invariant — a split-brain
+returned `*InvertedVersionRangeError` for the _same_ invariant — a split-brain
 (two enforcement points for one rule). Removing the panic makes `Validate()`
 the **single source of truth** for the inversion invariant. Updated
 `policy.go` field doc (`VersionMin`/`VersionMax`) and `Validate()` doc comment
 to reflect that the Builder no longer enforces the invariant.
 
 ### Test rewrites
+
 - **`cve_test.go`** — removed `TestMustCVE_PanicsOnError`,
   `TestMustCVE_ReturnsValid`.
 - **`version_test.go`** — removed `TestMustNewVersion_PanicsOnNegative`,
@@ -70,6 +74,7 @@ to reflect that the Builder no longer enforces the invariant.
 - **`zero_value_test.go`** — updated the `MustNewVersion(0,0,0)` call.
 
 ### Documentation updates (all living docs touched)
+
 - **`AGENTS.md`** — reversed the project memory: new "Architecture Decision:
   Panic-Free (Errors Returned, Never Panicked)" section instructs future
   sessions NOT to re-add `Must*`; updated Quick Start `erraudit` line;
@@ -89,6 +94,7 @@ to reflect that the Builder no longer enforces the invariant.
   `MustCVE`).
 
 ### Verification (all green)
+
 - `go build ./...` — clean
 - `go vet ./...` — clean
 - `go test ./...` — **169 RUN/PASS lines, 0 FAIL**
@@ -154,12 +160,13 @@ this session is complete.
 ## e) WHAT WE SHOULD IMPROVE
 
 ### e.1 The staticcheck SA4023 finding exposed a REAL latent bug (most important)
+
 When I assigned the concrete `*InvertedVersionRangeError` returned by
 `Validate()` to an `error`-typed variable and then wrote `if err == nil`,
 staticcheck flagged `SA4023: this comparison is never true`. This is the
 classic **typed-nil interface gotcha**: a non-nil `*InvertedVersionRangeError`
 pointer assigned to an `error` interface produces a non-nil interface, so the
-check *does* work — but staticcheck's flow analysis (correctly) cannot prove
+check _does_ work — but staticcheck's flow analysis (correctly) cannot prove
 it, and the pattern is a known footgun. I fixed the test instances by using
 the concrete type directly. **But the public API still has this shape**:
 `Validate() *InvertedVersionRangeError`. Any consumer who writes
@@ -168,6 +175,7 @@ who does the reverse (concrete var, interface nil) gets bitten. This deserves
 a design decision — see Question 1.
 
 ### e.2 I wrote tests reactively instead of proactively
+
 The 25-lint-issue cascade (§d.3) is the symptom. The root cause: I wrote the
 "obvious" verbose pattern first and let the linter tell me what was wrong. A
 senior pass would have: (1) grep'd all call sites, (2) recognized the repeated
@@ -175,18 +183,21 @@ parse-fatal shape, (3) introduced the helper, (4) written clean call sites
 once. Net cost: ~1 extra round-trip of rewrites. Acceptable but not exemplary.
 
 ### e.3 `parseVersionOrFatal` lives in `builder_behavior_test.go` but is used by `policy_test.go`
+
 This works (both are `package policydsl_test`), but the helper's location is
 arbitrary — it's defined in whichever test file I happened to be editing. A
 small `testhelpers_test.go` would be the honest home. Minor, but it's the kind
 of "works by accident" placement that rots.
 
 ### e.4 The auto-git daemon caused a real edit failure
+
 Not my fuckup, but worth recording: the background auto-committer modified
 `builder.go` between my read and my edit. For a session doing many rapid edits,
 this is a live hazard. Consider either pausing the daemon during AI sessions or
 always re-reading immediately before each edit in this repo.
 
 ### e.5 No regression test asserts "the library is panic-free"
+
 `erraudit` verifies it at the tool level, but there's no in-repo test that
 fails if someone re-introduces a `panic(`. A trivial `TestNoPanicsInNonTestSource`
 that scans the package source for `panic(` would prevent regression at PR
@@ -197,6 +208,7 @@ time, independent of whether erraudit is wired into CI.
 ## f) Up to 50 things we should get done next
 
 ### High impact (do first)
+
 1. **Fix the pre-existing `CategoryMaintainability` typo** at
    `policy_test.go:562` → `CategoryMaintenance` (or add the missing constant).
    Currently a hard compile error in that test if isolated, masked by the rest
@@ -215,6 +227,7 @@ time, independent of whether erraudit is wired into CI.
    be `v0.2.0`.
 
 ### Validate() / error-model hardening
+
 6. Consider whether `Validate()` should grow beyond the single version-range
    invariant (e.g. non-empty `Reason`, at least one detection pattern). Today
    it's structural-only; domain rules are the consumer's job "by design" —
@@ -234,6 +247,7 @@ time, independent of whether erraudit is wired into CI.
     "Error handling" section listing every sentinel + when it fires).
 
 ### API surface polish
+
 11. Move `parseVersionOrFatal` into a `testhelpers_test.go`.
 12. Consider `Version.IsZero()` convenience (currently you compare against
     `Version{}`).
@@ -255,6 +269,7 @@ time, independent of whether erraudit is wired into CI.
     construction without the panic.
 
 ### Tests
+
 19. Add an integration test: full policy (version range + CVEs + companions +
     alternatives) validates clean end-to-end.
 20. `FuzzParseVersion` exists and asserts no-panic — now even more relevant;
@@ -268,6 +283,7 @@ time, independent of whether erraudit is wired into CI.
     `TestPolicySpec_Validate_InvertedRangeErrorCarriesBounds` — keep it green).
 
 ### Docs / memory
+
 24. Add a dedicated ADR for the "Panic-Free" decision (currently inline in
     AGENTS.md; an ADR gives it permanence and a date).
 25. Update `TODO_LIST.md` if it references Must*/panic (not checked this
@@ -281,6 +297,7 @@ time, independent of whether erraudit is wired into CI.
 30. Confirm godoc renders cleanly locally (`go doc -all`).
 
 ### Lint / CI / tooling
+
 31. Review whether `erraudit` is wired into CI/buildflow (it's in Quick Start,
     but is it a gate?). Now that it's 0, it should be a hard gate.
 32. Review the `golangci-lint` v2 config (`.golangci.yml`) — `funlen` 60,
@@ -296,6 +313,7 @@ time, independent of whether erraudit is wired into CI.
 36. Run the `full-code-review` skill to visit every file post-change.
 
 ### Ecosystem alignment
+
 37. Check sibling LarsArtmann libraries (`go-error-family`, `go-output`,
     `go-atomic-write`, `go-linter-sdk`, `samber-do-auditlog`) for `Must*`
     patterns that should be aligned with this panic-free stance.
@@ -305,6 +323,7 @@ time, independent of whether erraudit is wired into CI.
     `~/.config/crush/AGENTS.md` (currently it's project-local).
 
 ### Cleanup
+
 40. Remove `CategoryMaintainability` reference OR add the constant (see #1).
 41. Confirm `LICENSE` is present and MIT (referenced in AGENTS, not verified
     this session).
@@ -318,6 +337,7 @@ time, independent of whether erraudit is wired into CI.
     raw commands; ensure that's documented (it is, in AGENTS Quick Start).
 
 ### Forward-looking
+
 46. Roadmap to `v1.0.0`: now that the API is panic-free (a major stability
     improvement), review remaining v1.0.0 blockers in `ROADMAP.md`.
 47. Consider whether `PolicySpec` should be immutable after construction
@@ -344,7 +364,7 @@ API design tradeoff — I can't decide your values for you.
 
 **Q2.** Should I add a non-panicking fail-fast constructor
 `NewVersionRange(min, max *Version) (*VersionRange, error)` that validates
-inversion at construction and returns an error — giving callers who *want*
+inversion at construction and returns an error — giving callers who _want_
 fail-fast-on-inversion a way to get it without panicking? Or is
 `PolicySpec.Validate()` after `Spec()` sufficient as the single validation
 path? This decides whether a `VersionRange` value type exists at all.
