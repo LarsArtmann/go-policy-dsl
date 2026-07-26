@@ -130,12 +130,13 @@ removed; it will not become real unless a concrete consumer demand appears.
 
 ## Direction: release & visibility
 
-### First tagged release
+### First tagged release — `v0.1.0` SHIPPED
 
-The module has never been tagged. The first tag will be `v0.2.0` (the
-`GoVersionRange` → `VersionRange` rename is breaking; `v0.1.0` was only ever
-scaffolding, never published). Track in `TODO_LIST.md` once the v1.0.0
-criteria above are closer.
+`v0.1.0` is tagged (2026-07-26, signed) — an early scaffolding snapshot. The
+next release is `v0.2.0`, carrying the panic-free + typed-domain breaking
+refactor (`GoVersionRange` → `VersionRange`, typed
+`Mode`/`Version`/`CVE`/`[]Replacement`). Track remaining work in `TODO_LIST.md`
+once the v1.0.0 criteria above are closer.
 
 ### Go module proxy / GOPROXY visibility
 

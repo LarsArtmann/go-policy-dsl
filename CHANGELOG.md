@@ -7,12 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Versioning policy (pre-1.0):** the public API is not yet stable. Breaking
 > changes are allowed in any `0.x` bump and are always listed under the
-> **Changed** section with a `**BREAKING**` marker. The first tagged release
-> will be `v0.2.0` (the module has never been tagged `v0.1.0` — the entry below
-> is the original scaffolding baseline, not a published release). See
+> **Changed** section with a `**BREAKING**` marker. `v0.1.0` was the first
+> tagged release (2026-07-26, signed — an early scaffolding snapshot). `v0.2.0`
+> is the second, carrying the panic-free + typed-domain breaking refactor. See
 > `ROADMAP.md` for the path to `v1.0.0`.
 
 ## [Unreleased]
+
+_Nothing yet._
+
+## [0.2.0] - 2026-07-26
 
 ### Changed
 
@@ -160,7 +164,7 @@ ErrInvertedVersionRange)` still works via the type's `Is` method. Callers
 - Removed a phantom `Require` builder referenced in the package + type docs
   that never existed in code.
 
-## [0.1.0] - 2026-01-01
+## [0.1.0] - 2026-07-26
 
 ### Added
 
