@@ -191,6 +191,7 @@ linters:
       - path: _test\.go
         linters:
           - goconst
+          - depguard
           - dupl
           - errcheck
           - exhaustruct
