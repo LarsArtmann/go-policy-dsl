@@ -59,7 +59,8 @@ func TestBuilder_FullFluentChain(t *testing.T) {
 		t.Errorf("unexpected import patterns: %v", spec.Detection.ImportPatterns)
 	}
 
-	if len(spec.Alternatives) != 1 || spec.Alternatives[0] != "sqlc" {
+	if len(spec.Alternatives) != 1 || spec.Alternatives[0].Library != "sqlc" ||
+		spec.Alternatives[0].Reason != "type-safe SQL" {
 		t.Errorf("unexpected alternatives: %v", spec.Alternatives)
 	}
 
@@ -151,7 +152,7 @@ func TestBuilder_Suggest_SetsDescription(t *testing.T) {
 		Suggest(policydsl.NewReplacement("sqlc", "type-safe SQL")).
 		Spec()
 
-	if len(spec.Alternatives) != 1 || spec.Alternatives[0] != "sqlc" {
+	if len(spec.Alternatives) != 1 || spec.Alternatives[0].Library != "sqlc" {
 		t.Fatalf("unexpected alternatives: %v", spec.Alternatives)
 	}
 
@@ -185,12 +186,60 @@ func TestBuilder_Suggest_MultipleAppendsAlternatives(t *testing.T) {
 		Suggest(policydsl.NewReplacement("b", "rb")).
 		Spec()
 
-	if !equalStrings(spec.Alternatives, []string{"a", "b"}) {
-		t.Errorf("expected [a b], got %v", spec.Alternatives)
+	if !equalReplacements(spec.Alternatives, []policydsl.Replacement{
+		{Library: "a", Reason: "ra"},
+		{Library: "b", Reason: "rb"},
+	}) {
+		t.Errorf("expected [a/ra b/rb], got %v", spec.Alternatives)
 	}
 
 	if want := "Replace with a: ra"; spec.Description != want {
 		t.Errorf("expected first suggestion's derived description %q, got %q", want, spec.Description)
+	}
+}
+
+// TestBuilder_SuggestExplicit_NoDescriptionDerivation confirms the no-magic
+// counterpart: SuggestExplicit appends the replacement but never derives
+// Description, even when Description is empty. This is the escape hatch for
+// callers who find the Suggest side-effect surprising.
+func TestBuilder_SuggestExplicit_NoDescriptionDerivation(t *testing.T) {
+	t.Parallel()
+
+	spec := policydsl.Ban("gorm").
+		SuggestExplicit(policydsl.NewReplacement("sqlc", "type-safe SQL")).
+		Spec()
+
+	if !equalReplacements(spec.Alternatives, []policydsl.Replacement{
+		{Library: "sqlc", Reason: "type-safe SQL"},
+	}) {
+		t.Errorf("SuggestExplicit should append the replacement: %v", spec.Alternatives)
+	}
+
+	if spec.Description != "" {
+		t.Errorf("SuggestExplicit must NOT derive Description, got %q", spec.Description)
+	}
+}
+
+// SuggestExplicit and Suggest can be mixed; only Suggest derives Description.
+func TestBuilder_SuggestExplicit_MixedWithSuggest(t *testing.T) {
+	t.Parallel()
+
+	spec := policydsl.Ban("x").
+		SuggestExplicit(policydsl.NewReplacement("a", "ra")).
+		Suggest(policydsl.NewReplacement("b", "rb")).
+		Spec()
+
+	if !equalReplacements(spec.Alternatives, []policydsl.Replacement{
+		{Library: "a", Reason: "ra"},
+		{Library: "b", Reason: "rb"},
+	}) {
+		t.Errorf("expected [a/ra b/rb], got %v", spec.Alternatives)
+	}
+
+	// The first call was SuggestExplicit (no derivation); the second Suggest
+	// sees an empty Description and derives from "b".
+	if want := "Replace with b: rb"; spec.Description != want {
+		t.Errorf("expected Suggest to derive Description from b, got %q", spec.Description)
 	}
 }
 
@@ -201,10 +250,16 @@ func TestBuilder_WithAlternatives_Replaces(t *testing.T) {
 
 	spec := policydsl.Ban("x").
 		Suggest(policydsl.NewReplacement("a", "ra")).
-		WithAlternatives("p", "q").
+		WithAlternatives(
+			policydsl.NewReplacement("p", "rp"),
+			policydsl.NewReplacement("q", "rq"),
+		).
 		Spec()
 
-	if !equalStrings(spec.Alternatives, []string{"p", "q"}) {
+	if !equalReplacements(spec.Alternatives, []policydsl.Replacement{
+		{Library: "p", Reason: "rp"},
+		{Library: "q", Reason: "rq"},
+	}) {
 		t.Errorf("WithAlternatives should replace, got %v", spec.Alternatives)
 	}
 }
@@ -491,6 +546,24 @@ func equalStrings(got, want []string) bool {
 
 	for i := range want {
 		if got[i] != want[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
+// equalReplacements is the []Replacement counterpart to equalStrings. Since
+// Alternatives is now []Replacement (not []string), this verifies both Library
+// and Reason survive — the whole point of consolidating alternatives onto the
+// richer type so no information is silently discarded.
+func equalReplacements(got, want []policydsl.Replacement) bool {
+	if len(got) != len(want) {
+		return false
+	}
+
+	for i := range want {
+		if got[i].Library != want[i].Library || got[i].Reason != want[i].Reason {
 			return false
 		}
 	}

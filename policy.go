@@ -139,7 +139,7 @@ type PolicySpec struct {
 
 	// Metadata for reporting
 	Description  string
-	Alternatives []string
+	Alternatives []Replacement
 	CVEs         []string
 
 	// VersionMin and VersionMax constrain the version of the library this

@@ -23,7 +23,7 @@ func ExampleBan() {
 		Spec()
 
 	fmt.Println(spec.Name, spec.Severity, spec.Category)
-	fmt.Println(spec.Alternatives[0])
+	fmt.Println(spec.Alternatives[0].Library)
 	// Output:
 	// gorm critical performance
 	// github.com/yourorg/sqlc-queries

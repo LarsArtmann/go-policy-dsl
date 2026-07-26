@@ -38,7 +38,7 @@ func TestBehavior_BuildingABan(t *testing.T) {
 		assertSpecField(t, "severity", string(spec.Severity), string(policydsl.SeverityCritical))
 		assertSpecField(t, "category", string(spec.Category), string(policydsl.CategoryPerformance))
 		assertSpecField(t, "import pattern", spec.Detection.ImportPatterns[0], "gorm.io/gorm")
-		assertSpecField(t, "alternative", spec.Alternatives[0], "github.com/yourorg/sqlc-queries")
+		assertSpecField(t, "alternative", spec.Alternatives[0].Library, "github.com/yourorg/sqlc-queries")
 	})
 
 	t.Run("it defaults to critical security when no overrides are given", func(t *testing.T) {
@@ -87,8 +87,8 @@ func TestBehavior_SuggestingAReplacement(t *testing.T) {
 			t.Fatalf("expected 2 alternatives, got %d: %v", len(spec.Alternatives), spec.Alternatives)
 		}
 
-		assertSpecField(t, "alternative[0]", spec.Alternatives[0], "sqlc")
-		assertSpecField(t, "alternative[1]", spec.Alternatives[1], "ent")
+		assertSpecField(t, "alternative[0]", spec.Alternatives[0].Library, "sqlc")
+		assertSpecField(t, "alternative[1]", spec.Alternatives[1].Library, "ent")
 	})
 }
 

@@ -103,9 +103,13 @@ func (b *Builder) WithDescription(desc string) *Builder {
 	return b
 }
 
-// Suggest sets the recommended replacement.
+// Suggest appends a recommended replacement to Alternatives (preserving the
+// full Replacement — both Library and Reason). As a convenience side-effect,
+// when Description is empty it is derived from the replacement as
+// "Replace with <library>: <reason>". An explicit Description is never
+// overwritten; use SuggestExplicit to opt out of the derivation entirely.
 func (b *Builder) Suggest(r Replacement) *Builder {
-	b.spec.Alternatives = append(b.spec.Alternatives, r.Library)
+	b.spec.Alternatives = append(b.spec.Alternatives, r)
 
 	if b.spec.Description == "" && r.Reason != "" {
 		b.spec.Description = "Replace with " + r.Library + ": " + r.Reason
@@ -114,8 +118,19 @@ func (b *Builder) Suggest(r Replacement) *Builder {
 	return b
 }
 
-// WithAlternatives sets the recommended replacement libraries directly.
-func (b *Builder) WithAlternatives(alts ...string) *Builder {
+// SuggestExplicit appends a recommended replacement to Alternatives WITHOUT
+// deriving Description. It is the no-magic counterpart to Suggest for callers
+// who want full control over Description (or none at). The replacement's
+// Library and Reason are still stored.
+func (b *Builder) SuggestExplicit(r Replacement) *Builder {
+	b.spec.Alternatives = append(b.spec.Alternatives, r)
+
+	return b
+}
+
+// WithAlternatives sets the recommended replacement libraries directly (set /
+// replace semantics, unlike the append-style Suggest / SuggestExplicit).
+func (b *Builder) WithAlternatives(alts ...Replacement) *Builder {
 	b.spec.Alternatives = alts
 
 	return b
