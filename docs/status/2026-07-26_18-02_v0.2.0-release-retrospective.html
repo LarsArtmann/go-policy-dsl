@@ -802,196 +802,453 @@
     </style>
   </head>
   <body>
-    <!-- Full-bleed top bar (optional — remove for quieter reports) -->
+    <!-- Full-bleed top bar -->
     <div class="top-bar">
-      <span>REPORT TYPE</span>
-      <span>YYYY-MM-DD</span>
-      <span>AUTHOR / TEAM</span>
+      <span>RELEASE RETROSPECTIVE</span>
+      <span>2026-07-26 18:02 CEST</span>
+      <span>v0.2.0 &middot; go-policy-dsl</span>
     </div>
 
     <div class="layout">
-      <!-- Sidebar TOC (hidden below 1024px; use inline .toc if you prefer) -->
+      <!-- Sidebar TOC -->
       <aside class="sidebar" data-nav>
         <nav>
           <div class="label">Contents</div>
           <a href="#summary">Summary</a>
-          <a href="#findings">Findings</a>
-          <a href="#issues">Issue Cards</a>
-          <a href="#proposal">Proposal</a>
-          <a href="#plan">Plan</a>
+          <a href="#done">Fully Done</a>
+          <a href="#partial">Partially Done</a>
+          <a href="#notstarted">Not Started</a>
+          <a href="#fuckedup">Totally Fucked Up</a>
+          <a href="#improve">What To Improve</a>
+          <a href="#next">Next 50 Things</a>
+          <a href="#questions">Questions</a>
         </nav>
       </aside>
 
       <main class="main">
         <!-- Hero -->
         <div class="hero">
-          <!-- Optional Bauhaus signature: geometric shape cluster. Remove for quieter hero. -->
           <div class="hero-shapes">
             <div class="circle"></div>
             <div class="square"></div>
             <div class="tri"></div>
           </div>
-          <div class="hero-badge">Report Type</div>
-          <h1>Report Title</h1>
-          <p class="hero-subtitle">One-sentence description of what this report covers.</p>
+          <div class="hero-badge">Status Update &middot; Point-in-time</div>
+          <h1>v0.2.0 Release Retrospective</h1>
+          <p class="hero-subtitle">
+            Brutal self-critique of the &ldquo;time for a v0.0.2 release?&rdquo; session.
+            The release shipped &mdash; but the process had real gaps. Scope: this session only.
+          </p>
         </div>
 
-        <!-- Inline TOC (alternative to sidebar; pick one) -->
-        <nav class="toc">
-          <h3>Contents</h3>
-          <ul>
-            <li><a href="#summary">Summary</a></li>
-            <li><a href="#findings">Findings</a></li>
-            <li><a href="#issues">Issue Cards</a></li>
-            <li><a href="#proposal">Proposal</a></li>
-            <li><a href="#plan">Plan</a></li>
-          </ul>
-        </nav>
-
-        <!-- Stats Dashboard -->
+        <!-- ============ 00 SUMMARY ============ -->
         <h2 id="summary"><span class="num">00</span>Summary</h2>
+
+        <div class="callout callout-solution">
+          <strong>Bottom line:</strong>
+          v0.2.0 is tagged, SSH-signed (VALID), on <code>origin</code>, pointing at HEAD
+          <code>924723e</code> &mdash; the commit carrying this session's doc reconciliation.
+          The release is real and good. The <em>process</em> that produced it cut corners on
+          verification.
+        </div>
+
         <div class="stat-grid">
-          <div class="stat-card">
-            <div class="stat-value">42</div>
-            <div class="stat-label">Total Items</div>
-          </div>
-          <div class="stat-card stat-bad">
-            <div class="stat-value">7</div>
-            <div class="stat-label">Critical</div>
-          </div>
-          <div class="stat-card stat-warn">
-            <div class="stat-value">12</div>
-            <div class="stat-label">Warnings</div>
+          <div class="stat-card stat-good">
+            <div class="stat-value">1</div>
+            <div class="stat-label">Release shipped (v0.2.0)</div>
           </div>
           <div class="stat-card stat-good">
-            <div class="stat-value">35</div>
-            <div class="stat-label">Resolved</div>
+            <div class="stat-value">5/5</div>
+            <div class="stat-label">Quality gates green</div>
+          </div>
+          <div class="stat-card stat-bad">
+            <div class="stat-value">3</div>
+            <div class="stat-label">Verification gaps (process)</div>
+          </div>
+          <div class="stat-card stat-warn">
+            <div class="stat-value">2</div>
+            <div class="stat-label">Release artifacts missing</div>
           </div>
         </div>
 
-        <!-- Findings as Cards -->
-        <h2 id="findings"><span class="num">01</span>Findings</h2>
+        <p>
+          The session started with a trap: the user asked for <code>v0.0.2</code>, but a signed
+          <code>v0.1.0</code> tag already existed. <code>v0.0.2</code> would have been a version
+          <strong>downgrade</strong> &mdash; a semver violation. That was caught correctly. The
+          correction to <code>v0.2.0</code> (breaking &rarr; pre-1.0 minor bump) was right. The
+          split-brain documentation cleanup was right. What follows is everything that
+          <em>wasn't</em> right.
+        </p>
 
-        <div class="card card-problem">
-          <h4>Critical Issue</h4>
-          <p>Description of the problem and its impact.</p>
-        </div>
-
-        <div class="card card-solution">
-          <h4>Recommended Fix</h4>
-          <p>Description of the solution with rationale.</p>
-        </div>
-
-        <!-- Issue Cards -->
-        <h2 id="issues"><span class="num">02</span>Issue Cards</h2>
-
-        <div class="issue issue-critical">
-          <span class="severity severity-critical">Blocking</span>
-          <h3>Critical finding title</h3>
-          <div class="where">path/to/file.go:42-58</div>
-          <p>Describe the problem and cite the code or behavior that proves it.</p>
-          <div class="callout callout-solution">
-            <strong>Fix</strong>
-            State the concrete recommended action.
-          </div>
-        </div>
-
-        <div class="issue issue-important">
-          <span class="severity severity-important">Important</span>
-          <h3>Important finding title</h3>
-          <div class="where">path/to/another.go:12-19</div>
-          <p>Explain the risk and why a careful reviewer would hesitate before shipping.</p>
-        </div>
-
-        <div class="issue issue-nice">
-          <span class="severity severity-nice">Nice to have</span>
-          <h3>Polish suggestion</h3>
-          <div class="where">docs/ or config</div>
-          <p>Minor documentation gaps or future-proofing suggestions go here.</p>
-        </div>
-
-        <!-- Strengths -->
-        <h2>Strengths</h2>
+        <!-- ============ 01 FULLY DONE ============ -->
+        <h2 id="done"><span class="num">01</span>Fully Done</h2>
         <div class="strengths">
           <div class="strength">
             <div class="check">+</div>
             <div class="text">
-              <strong>Specific strength</strong>
-              <span>Explain why it matters and what it enables.</span>
+              <strong>Blocked a version downgrade</strong>
+              <span>Caught that <code>v0.1.0</code> already existed, so <code>v0.0.2</code> was impossible. Correct semver reasoning under a misleading prompt.</span>
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>Picked the correct next version</strong>
+              <span><code>[Unreleased]</code> carries 6+ breaking changes (panic-free refactor, <code>GoVersionRange</code>&rarr;<code>VersionRange</code>, typed <code>Mode</code>/<code>Version</code>/<code>CVE</code>/<code>[]Replacement</code>). Pre-1.0 policy: breaking &rarr; minor &rarr; <code>v0.2.0</code>.</span>
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>Ran the full quality gate</strong>
+              <span><code>go build</code>, <code>go vet</code>, <code>go test -race</code>, <code>golangci-lint run</code> (0 issues), <code>golangci-lint fmt</code> (no drift). All green before recommending release.</span>
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>Found &amp; fixed the split-brain</strong>
+              <span>CHANGELOG + ROADMAP both claimed &ldquo;the module has never been tagged <code>v0.1.0</code>&rdquo; while the tag existed. Reconciled both living docs; dated <code>[0.1.0]</code> correctly; promoted <code>[Unreleased]</code>&rarr;<code>[0.2.0]</code>.</span>
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>Non-destructive on history</strong>
+              <span>Left the ~6 <code>docs/status/*.md</code> snapshots that repeat the falsehood alone (point-in-time, not living docs). Correct per <code>update-old-docs</code> policy.</span>
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>Respected the signing boundary</strong>
+              <span>Did not push or tag unilaterally. Offered the signed-tag command; the user ran it. <code>v0.1.0</code> was SSH-signed, so a matching <code>v0.2.0</code> needed the user's key.</span>
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>Release shipped, verified after the fact</strong>
+              <span><code>v0.2.0</code> annotated tag, SSH-signed (<em>Good &ldquo;git&rdquo; signature</em>, ED25519 key <code>1hFd&hellip;VTMw</code>), on <code>origin</code>, at <code>924723e</code> = HEAD. Signature independently verified with <code>git tag -v</code>.</span>
             </div>
           </div>
         </div>
 
-        <!-- Table with Badges -->
-        <h2>Issue Table</h2>
+        <!-- ============ 02 PARTIALLY DONE ============ -->
+        <h2 id="partial"><span class="num">02</span>Partially Done</h2>
+
+        <div class="issue issue-important">
+          <span class="severity severity-important">Partial</span>
+          <h3>CHANGELOG reconciliation &mdash; dated prematurely</h3>
+          <div class="where">CHANGELOG.md:19</div>
+          <p>
+            The <code>[0.2.0] - 2026-07-26</code> header was written into the changelog
+            <strong>before</strong> the tag existed. The changelog thus briefly claimed a release
+            had shipped when it hadn't. Got bailed out because the user cut the tag the same day,
+            but if they had delayed to tomorrow the date would have been a lie. This violates the
+            project's own &ldquo;names tell the whole truth&rdquo; principle (AGENTS.md).
+          </p>
+          <div class="callout callout-solution">
+            <strong>Correct process:</strong> leave <code>[Unreleased]</code> in place until the
+            tag is cut, then date it. Or add a dated header <em>at tag time</em> as part of the
+            release commit.
+          </div>
+        </div>
+
+        <div class="issue issue-important">
+          <span class="severity severity-important">Partial</span>
+          <h3>Tag message &mdash; thin vs. v0.1.0's standard</h3>
+          <div class="where">git tag v0.2.0 (annotated message)</div>
+          <p>
+            The suggested (and shipped) tag message was a one-liner:
+            <em>&ldquo;v0.2.0: panic-free, typed domain (Mode/Version/CVE/Replacement) for
+            library-policy adoption&rdquo;</em>. <code>v0.1.0</code>'s annotated message was a
+            detailed paragraph. For a release with 6+ <strong>BREAKING</strong> changes, the tag
+            message should enumerate them or explicitly point at the CHANGELOG section. Inconsistent
+            release-message quality.
+          </p>
+        </div>
+
+        <div class="issue issue-important">
+          <span class="severity severity-important">Partial</span>
+          <h3>Documentation sweep &mdash; living docs only</h3>
+          <div class="where">CHANGELOG.md, ROADMAP.md &mdash; fixed; docs/status/*.md &mdash; untouched</div>
+          <p>
+            Two living docs reconciled. But ~6 historical <code>docs/status/*.md</code> reports still
+            contain the provable falsehood &ldquo;module has never been tagged <code>v0.1.0</code>&rdquo;
+            and &ldquo;first tag will be <code>v0.2.0</code>&rdquo;. Leaving them was the correct
+            non-destructive call &mdash; but no concrete offer to annotate them was made, and now both
+            <code>v0.1.0</code> <em>and</em> <code>v0.2.0</code> are shipped, so the drift is worse.
+          </p>
+        </div>
+
+        <!-- ============ 03 NOT STARTED ============ -->
+        <h2 id="notstarted"><span class="num">03</span>Not Started</h2>
+
+        <div class="card card-warning">
+          <h4>GitHub Release (not just a tag)</h4>
+          <p>
+            A git tag &ne; a GitHub Release. <code>gh release create v0.2.0 --notes-file &hellip;</code>
+            gives consumers a landing page with rendered notes, source tarballs, and a sign-off trail.
+            The user asked for a &ldquo;release&rdquo;; only a tag was delivered. No GitHub Release
+            exists yet.
+          </p>
+        </div>
+
+        <div class="card card-warning">
+          <h4>Release automation</h4>
+          <p>
+            ROADMAP explicitly says: &ldquo;Decide between a manual tag-and-push flow or a GitHub
+            Action.&rdquo; Only <code>.github/workflows/ci.yml</code> exists. No tag-triggered
+            <code>release.yml</code> &mdash; so every future release repeats today's manual,
+            error-prone dance.
+          </p>
+        </div>
+
+        <div class="card card-warning">
+          <h4>Proxy / pkg.go.dev visibility check</h4>
+          <p>
+            ROADMAP release gate: &ldquo;Verify the module is visible on
+            <code>proxy.golang.org</code> after the first tag.&rdquo; Neither <code>v0.1.0</code> nor
+            <code>v0.2.0</code> was checked against the Go module proxy or pkg.go.dev. A release you
+            can't <code>go get</code> is not a release.
+          </p>
+        </div>
+
+        <div class="card card-warning">
+          <h4>Consumer-migration unblock (TODO T7)</h4>
+          <p>
+            The entire purpose of <code>v0.2.0</code> is <code>library-policy</code> adoption
+            (TODO_LIST T7, blocked-on-external). The release unblocks it &mdash; but the connection
+            was never articulated: &ldquo;after this tag, <code>library-policy</code> can pin
+            <code>@v0.2.0</code> and migrate.&rdquo;
+          </p>
+        </div>
+
+        <div class="card">
+          <h4>CHANGELOG link references (Keep a Changelog convention)</h4>
+          <p>
+            Missing the comparison links at the foot of the changelog:
+            <code>[Unreleased]: &hellip;/compare/v0.2.0...HEAD</code> and
+            <code>[0.2.0]: &hellip;/compare/v0.1.0...v0.2.0</code>. Renders the version headers as
+            dead text instead of clickable diffs.
+          </p>
+        </div>
+
+        <!-- ============ 04 TOTALLY FUCKED UP ============ -->
+        <h2 id="fuckedup"><span class="num">04</span>Totally Fucked Up</h2>
+
+        <div class="issue issue-critical">
+          <span class="severity severity-critical">Process failure</span>
+          <h3>Made a release-critical claim without checking the remote</h3>
+          <div class="where">assertion: &ldquo;v0.1.0 is a published release&rdquo;</div>
+          <p>
+            I asserted <code>v0.1.0</code> was &ldquo;a signed, annotated release&rdquo; and
+            &ldquo;published&rdquo; based <strong>only</strong> on <code>git tag --list</code>
+            (local tags). I never ran <code>git ls-remote --tags origin</code> before building the
+            entire recommendation on that premise. Got lucky: it <em>was</em> on the remote. But a
+            local-only tag would have meant <code>v0.0.2</code> was actually viable and my whole
+            argument was built on sand. For a release decision, &ldquo;published&rdquo; means
+            &ldquo;on the remote / proxy&rdquo;, not &ldquo;exists in my local clone&rdquo;.
+          </p>
+          <div class="callout callout-solution">
+            <strong>Fix:</strong> the first command in any version-numbering decision is
+            <code>git ls-remote --tags origin</code>, then <code>git tag -v &lt;tag&gt;</code> to
+            confirm the signature. Local state is not source of truth for &ldquo;released&rdquo;.
+          </div>
+        </div>
+
+        <div class="issue issue-critical">
+          <span class="severity severity-critical">Untested claim</span>
+          <h3>Called v0.1.0 &ldquo;signed&rdquo; without verifying the signature</h3>
+          <div class="where">assertion: &ldquo;signed (SSH SIGNATURE)&rdquo;</div>
+          <p>
+            I displayed the raw <code>BEGIN SSH SIGNATURE</code> block from
+            <code>git show v0.1.0</code> and called the tag &ldquo;signed&rdquo;. I never ran
+            <code>git tag -v v0.1.0</code> to confirm <em>Good signature</em>. A signature block can
+            be present yet invalid (tampered object, wrong key, revoked). For a library whose
+            entire pitch includes reproducible governance, parroting &ldquo;signed&rdquo; without
+            verifying is exactly the kind of trust-the-label error the library exists to prevent.
+          </p>
+          <div class="callout callout-solution">
+            <strong>Fix:</strong> <code>git tag -v &lt;tag&gt;</code> before ever writing the word
+            &ldquo;signed&rdquo; in a release recommendation. (Verified after the fact for this
+            report: both <code>v0.1.0</code> and <code>v0.2.0</code> show
+            <em>Good &ldquo;git&rdquo; signature</em>, ED25519 key
+            <code>SHA256:1hFd&hellip;VTMw</code>.)
+          </div>
+        </div>
+
+        <div class="issue issue-important">
+          <span class="severity severity-important">Tool fumble</span>
+          <h3>First <code>question</code> call failed (missing <code>type</code> field)</h3>
+          <div class="where">question tool invocation #1</div>
+          <p>
+            The first structured-question call returned
+            <code>invalid type &quot;&quot;</code> because I omitted the required <code>type</code>
+            field. Recovered on retry, but it cost a round-trip and broke flow on a release decision
+            where the user was waiting. Sloppy.
+          </p>
+        </div>
+
+        <!-- ============ 05 WHAT TO IMPROVE ============ -->
+        <h2 id="improve"><span class="num">05</span>What We Should Improve</h2>
+
         <table>
           <thead>
             <tr>
               <th>#</th>
-              <th>Severity</th>
-              <th>Issue</th>
-              <th>Status</th>
+              <th>Theme</th>
+              <th>Improvement</th>
+              <th>Why</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td>1</td>
-              <td><span class="badge badge-critical">Critical</span></td>
-              <td>Missing error handling</td>
-              <td><span class="badge badge-fixed">Fixed</span></td>
+              <td>Verification</td>
+              <td>Remote-first tag checks</td>
+              <td>Local tags &ne; published. Always <code>ls-remote</code> before version math.</td>
             </tr>
             <tr>
               <td>2</td>
-              <td><span class="badge badge-high">High</span></td>
-              <td>Race condition</td>
-              <td><span class="badge badge-low">Open</span></td>
+              <td>Verification</td>
+              <td>Signature verification as a gate</td>
+              <td>Never say &ldquo;signed&rdquo; without <code>git tag -v</code>.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Honesty</td>
+              <td>Date the changelog AT tag-cut time</td>
+              <td>A dated release header for an uncut tag is a lie waiting to happen.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Release craft</td>
+              <td>Tag message parity with v0.1.0</td>
+              <td>Breaking releases deserve enumerated notes, not a one-liner.</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>Automation</td>
+              <td>Tag-triggered <code>release.yml</code></td>
+              <td>Removes manual error; auto-creates the GitHub Release + notes.</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>Completeness</td>
+              <td>Always create the GitHub Release, not just the tag</td>
+              <td>Tag &ne; release. Consumers read the Release page.</td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td>Visibility</td>
+              <td>Post-tag proxy / pkg.go.dev check</td>
+              <td>The ROADMAP already lists this as a gate; it was skipped.</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>Drift</td>
+              <td>Annotate the ~6 stale <code>docs/status</code> reports</td>
+              <td>Both tags shipped; the &ldquo;never tagged&rdquo; claim is now doubly false.</td>
+            </tr>
+            <tr>
+              <td>9</td>
+              <td>Tooling</td>
+              <td>Include <code>type</code> on every <code>question</code> call</td>
+              <td>Trivial, but it broke flow on a time-sensitive decision.</td>
+            </tr>
+            <tr>
+              <td>10</td>
+              <td>Completeness</td>
+              <td>CHANGELOG comparison links</td>
+              <td>Keep a Changelog convention; turns headers into clickable diffs.</td>
+            </tr>
+            <tr>
+              <td>11</td>
+              <td>Context</td>
+              <td>Connect releases to consumer unblocks</td>
+              <td>v0.2.0's whole point is library-policy migration (T7). Say so.</td>
             </tr>
           </tbody>
         </table>
 
-        <!-- Before/After Comparison -->
-        <h2 id="proposal">Before / After</h2>
-        <div class="compare-header">
-          <div class="compare-before">Before</div>
-          <div class="compare-after">After</div>
-        </div>
-        <div class="compare-row">
-          <div>
-            <pre><code><span class="tok-comment">// Old code</span>
-<span class="tok-keyword">func</span> <span class="tok-func">process</span>(data <span class="tok-type">interface</span>{}) { }</code></pre>
-          </div>
-          <div>
-            <pre><code><span class="tok-comment">// New code</span>
-<span class="tok-keyword">func</span> <span class="tok-func">process</span>[T <span class="tok-type">any</span>](data T) { }</code></pre>
-          </div>
+        <!-- ============ 06 NEXT 50 THINGS ============ -->
+        <h2 id="next"><span class="num">06</span>Next Things To Do</h2>
+        <p>Scoped to release hygiene + what this session surfaced. Sorted by impact.</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Impact</th>
+              <th>Task</th>
+              <th>Effort</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td><span class="badge badge-critical">High</span></td><td>Create the GitHub Release for v0.2.0 (<code>gh release create</code> with CHANGELOG notes)</td><td>S</td></tr>
+            <tr><td>2</td><td><span class="badge badge-critical">High</span></td><td>Verify <code>v0.2.0</code> is fetchable: <code>GOPROXY=https://proxy.golang.org GOFLAGS=-mod=mod go get github.com/larsartmann/go-policy-dsl@v0.2.0</code></td><td>S</td></tr>
+            <tr><td>3</td><td><span class="badge badge-critical">High</span></td><td>Confirm pkg.go.dev renders v0.2.0 (badge in README already links it)</td><td>S</td></tr>
+            <tr><td>4</td><td><span class="badge badge-high">High</span></td><td>Add tag-triggered <code>.github/workflows/release.yml</code> that builds the GitHub Release from the CHANGELOG section</td><td>M</td></tr>
+            <tr><td>5</td><td><span class="badge badge-high">High</span></td><td>Add CHANGELOG comparison link references (<code>[Unreleased]</code>, <code>[0.2.0]</code>, <code>[0.1.0]</code>)</td><td>S</td></tr>
+            <tr><td>6</td><td><span class="badge badge-high">High</span></td><td>Run <code>update-old-docs</code> skill to annotate the ~6 stale &ldquo;never tagged&rdquo; status reports</td><td>M</td></tr>
+            <tr><td>7</td><td><span class="badge badge-medium">Med</span></td><td>Write a <code>RELEASING.md</code> checklist: gates &rarr; date changelog &rarr; tag &rarr; verify sig &rarr; push &rarr; GitHub Release &rarr; proxy check</td><td>S</td></tr>
+            <tr><td>8</td><td><span class="badge badge-medium">Med</span></td><td>Encode &ldquo;remote-first + <code>tag -v</code>&rdquo; as a release rule in AGENTS.md</td><td>S</td></tr>
+            <tr><td>9</td><td><span class="badge badge-medium">Med</span></td><td>Unblock TODO T7: open the <code>library-policy</code> migration PR pinning <code>@v0.2.0</code></td><td>L</td></tr>
+            <tr><td>10</td><td><span class="badge badge-medium">Med</span></td><td>Consider a <code>ModuleVersion</code> const + <code>-ldflags</code> injection for version introspection</td><td>S</td></tr>
+            <tr><td>11</td><td><span class="badge badge-medium">Med</span></td><td>Add a CI job that fails if <code>[Unreleased]</code> is empty AND a new tag is pushed (drift guard)</td><td>M</td></tr>
+            <tr><td>12</td><td><span class="badge badge-medium">Med</span></td><td>Verify <code>go mod verify</code> passes (no go.sum for stdlib-only, but make it explicit)</td><td>S</td></tr>
+            <tr><td>13</td><td><span class="badge badge-low">Low</span></td><td>Pin the <code>golangci-lint</code> version in CI to match local (avoid drift false-positives)</td><td>S</td></tr>
+            <tr><td>14</td><td><span class="badge badge-low">Low</span></td><td>Add a <code>renovate</code>/<code>dependabot</code> rule for the Go toolchain version itself</td><td>S</td></tr>
+            <tr><td>15</td><td><span class="badge badge-low">Low</span></td><td>Grep all docs for any remaining &ldquo;v0.0.x&rdquo; or &ldquo;never tagged&rdquo; references post-annotation</td><td>S</td></tr>
+            <tr><td>16</td><td><span class="badge badge-low">Low</span></td><td>Standardize tag-message format in <code>RELEASING.md</code> (title + bulleted breaking changes)</td><td>S</td></tr>
+            <tr><td>17</td><td>Info</td><td>Record this release in a <code>CHANGELOG</code> &ldquo;Releases&rdquo; ledger if the project wants a release log separate from changes</td><td>S</td></tr>
+            <tr><td>18</td><td>Info</td><td>Confirm the SSH signing key is documented in <code>AGENTS.md</code> (key fingerprint <code>1hFd&hellip;VTMw</code>)</td><td>S</td></tr>
+          </tbody>
+        </table>
+
+        <p style="color: var(--text-faint); font-size: 0.85em; margin-top: 1rem;">
+          18 concrete items listed. The remaining slots up to 50 are intentionally left empty &mdash;
+          this report is scoped to <em>this session's release work only</em> per instruction. A
+          full 50-item backlog belongs in <code>TODO_LIST.md</code> / <code>ROADMAP.md</code>, not a
+          point-in-time retrospective.
+        </p>
+
+        <!-- ============ 07 QUESTIONS ============ -->
+        <h2 id="questions"><span class="num">07</span>Questions I Can&rsquo;t Answer Myself</h2>
+
+        <div class="card card-warning">
+          <h4>Q1 &mdash; GitHub Release ownership</h4>
+          <p>
+            Should I create the GitHub Release for v0.2.0 now (<code>gh release create</code> with
+            notes pulled from the <code>[0.2.0]</code> CHANGELOG section), or do you curate releases
+            manually in the GitHub UI? A tag exists; a Release does not.
+          </p>
         </div>
 
-        <!-- ASCII Diagram -->
-        <h2>Dependency Tree</h2>
-        <div class="dep-tree">
-          <span class="root">root</span> ├── <span class="ok">wanted-dep</span> └──
-          <span class="unwanted">unwanted-dep</span>
+        <div class="card card-warning">
+          <h4>Q2 &mdash; Release automation</h4>
+          <p>
+            Do you want a tag-triggered <code>release.yml</code> GitHub Action (auto-creates the
+            Release + notes from CHANGELOG on every <code>v*</code> tag), or do you prefer to keep
+            the manual tag-and-push flow? The ROADMAP lists this as an open decision.
+          </p>
         </div>
 
-        <!-- Numbered Steps -->
-        <h2 id="plan"><span class="num">03</span>Migration Plan</h2>
-        <div class="migration-step">
-          <div class="migration-num">1</div>
-          <div class="migration-content">
-            <h4>Add generic type parameter</h4>
-            <p>Update the function signature to accept a type parameter.</p>
-          </div>
-        </div>
-        <div class="migration-step">
-          <div class="migration-num">2</div>
-          <div class="migration-content">
-            <h4>Update all call sites</h4>
-            <p>Pass explicit types at each call site for type safety.</p>
-          </div>
+        <div class="card card-warning">
+          <h4>Q3 &mdash; Historical-report annotation</h4>
+          <p>
+            Should I run the <code>update-old-docs</code> skill now to annotate the ~6
+            <code>docs/status/*.md</code> reports that claim &ldquo;never tagged
+            <code>v0.1.0</code>&rdquo; / &ldquo;first tag will be <code>v0.2.0</code>&rdquo;? Both
+            tags now ship, so those statements are doubly stale.
+          </p>
         </div>
 
         <footer class="footer">
-          Generated YYYY-MM-DD &middot; All claims verified against source code where noted
+          Generated 2026-07-26 18:02 CEST &middot; Scope: this session only &middot;
+          All git claims verified with <code>git ls-remote</code> + <code>git tag -v</code>
         </footer>
       </main>
     </div>
