@@ -116,13 +116,13 @@ func TestBehavior_RequiringACompanion(t *testing.T) {
 		assertSpecField(t, "companion severity", string(companion.Severity), string(policydsl.SeverityModerate))
 	})
 
-	t.Run("a companion-only policy flags the spec so the consumer never emits a ban", func(t *testing.T) {
+	t.Run("a companion-only policy sets the mode so the consumer never emits a ban", func(t *testing.T) {
 		t.Parallel()
 
 		spec := policydsl.Ban("samber/do").AsCompanionOnly().Spec()
 
-		if !spec.CompanionOnly {
-			t.Errorf("expected CompanionOnly=true so the consumer suppresses the ban; got false")
+		if spec.Mode != policydsl.ModeCompanionOnly {
+			t.Errorf("expected ModeCompanionOnly so the consumer suppresses the ban; got %q", spec.Mode)
 		}
 	})
 }

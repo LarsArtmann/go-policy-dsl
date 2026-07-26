@@ -104,6 +104,28 @@ type CompanionSpec struct {
 	Severity         Severity
 }
 
+// Mode declares what enforcement a policy performs. It replaces the former
+// dishonest `CompanionOnly bool` field: that name lied — it suppressed the
+// ban, not the companion. A typed enum is honest, reads as a question at call
+// sites (`spec.Mode == ModeCompanionOnly`), and is extensible.
+//
+// The zero value is the empty Mode, which consumers MUST treat as ban-active
+// (the default). `Ban(...)` sets `ModeBan` explicitly so a built spec always
+// carries a readable mode; `AsCompanionOnly()` sets `ModeCompanionOnly`.
+type Mode string
+
+const (
+	// ModeBan is the default: the policy emits a ban finding for its target
+	// library and enforces any declared companions.
+	ModeBan Mode = "ban"
+
+	// ModeCompanionOnly suppresses the ban finding; the policy enforces only
+	// that declared companions are present alongside the (allowed) target
+	// library. Use this for "this library is fine, but if you use it you must
+	// also use X".
+	ModeCompanionOnly Mode = "companion-only"
+)
+
 // PolicySpec is the declarative Go representation of a library governance
 // policy. Construct via the fluent Builder (Ban/Companion) so every
 // field has a sensible default and the call sites read like prose.
@@ -131,8 +153,13 @@ type PolicySpec struct {
 	VersionMax *Version
 
 	// Companions that must be present when this library is used.
-	Companions    []CompanionSpec
-	CompanionOnly bool
+	Companions []CompanionSpec
+
+	// Mode declares what the policy enforces. ModeBan (the default) emits a
+	// ban finding and enforces any declared companions; ModeCompanionOnly
+	// suppresses the ban so only companion presence is enforced. The zero
+	// value (empty Mode) is treated as ban-active. Set via AsCompanionOnly().
+	Mode Mode
 }
 
 // ErrInvertedVersionRange is returned by Validate when VersionMin > VersionMax.

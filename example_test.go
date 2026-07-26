@@ -61,7 +61,7 @@ func ExampleCompanion() {
 		AsCompanionOnly().
 		Spec()
 
-	fmt.Println("companion-only:", spec.CompanionOnly)
+	fmt.Println("companion-only:", spec.Mode == policydsl.ModeCompanionOnly)
 	fmt.Println("companion:", spec.Companions[0].Library)
 	// Output:
 	// companion-only: true

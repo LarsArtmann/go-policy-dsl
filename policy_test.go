@@ -346,8 +346,8 @@ func TestBuilder_RequiresCompanionAndAsCompanionOnly(t *testing.T) {
 		AsCompanionOnly().
 		Spec()
 
-	if !spec.CompanionOnly {
-		t.Error("expected companion-only")
+	if spec.Mode != policydsl.ModeCompanionOnly {
+		t.Errorf("expected ModeCompanionOnly, got %q", spec.Mode)
 	}
 
 	if len(spec.Companions) != 1 {

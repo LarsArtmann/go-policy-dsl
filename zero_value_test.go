@@ -44,8 +44,8 @@ func TestPolicySpec_ZeroValue(t *testing.T) {
 		t.Errorf("zero-value Companions should be empty, got %v", spec.Companions)
 	}
 
-	if spec.CompanionOnly {
-		t.Errorf("zero-value CompanionOnly should be false")
+	if spec.Mode != "" {
+		t.Errorf("zero-value Mode should be empty (treated as ban-active), got %q", spec.Mode)
 	}
 
 	// The zero-value spec has no inverted range, so it MUST validate clean.

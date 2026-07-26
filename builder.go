@@ -31,6 +31,7 @@ func Ban(name string) *Builder {
 			Name:     name,
 			Severity: SeverityCritical,
 			Category: CategorySecurity,
+			Mode:     ModeBan,
 		},
 	}
 }
@@ -172,10 +173,10 @@ func (b *Builder) RequiresCompanion(c CompanionSpec) *Builder {
 	return b
 }
 
-// AsCompanionOnly marks this entry as companion-only: never emit a ban finding,
-// only enforce that required companion libraries are present.
+// AsCompanionOnly sets the policy mode to ModeCompanionOnly: never emit a ban
+// finding, only enforce that required companion libraries are present.
 func (b *Builder) AsCompanionOnly() *Builder {
-	b.spec.CompanionOnly = true
+	b.spec.Mode = ModeCompanionOnly
 
 	return b
 }
