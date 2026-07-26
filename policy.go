@@ -158,11 +158,10 @@ type PolicySpec struct {
 
 	// VersionMin and VersionMax constrain the version of the library this
 	// policy targets (NOT the Go toolchain version). Inclusive on both ends;
-	// nil means unconstrained on that side. The invariant
-	// "VersionMax == nil || VersionMin == nil || *VersionMin <= *VersionMax"
-	// holds when the spec is built via the fluent Builder; direct field
-	// assignment can violate it, in which case Validate() returns
-	// ErrInvertedVersionRange.
+	// nil means unconstrained on that side. An inverted range (VersionMin >
+	// VersionMax) is detectable via Validate(), which returns
+	// *InvertedVersionRangeError. The Builder never panics on inversion;
+	// callers that care about soundness MUST call Validate().
 	VersionMin *Version
 	VersionMax *Version
 
@@ -208,8 +207,9 @@ func (e *InvertedVersionRangeError) Is(target error) bool {
 // Validate checks the structural invariants of the spec. It does NOT enforce
 // domain rules (a policy with no Reason, no detection patterns, etc. is still
 // valid here — that is the consumer's job). The single invariant checked is
-// the version-range ordering, which direct field assignment can violate but
-// the fluent Builder prevents.
+// the version-range ordering, which both direct field assignment and the
+// fluent Builder can violate (the Builder is panic-free by design, so it never
+// rejects an inverted range at construction time).
 //
 // Returns nil when the spec is structurally sound; returns
 // *InvertedVersionRangeError (with Min/Max populated) when the range is

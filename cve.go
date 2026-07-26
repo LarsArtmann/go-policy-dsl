@@ -10,7 +10,7 @@ import (
 // "CVE-YYYY-NNNN..." (e.g. "CVE-2021-44228"). It is a branded string type so
 // the DSL stays dependency-free and JSON-serializable while making an
 // unvalidated free-form string unrepresentable on a PolicySpec. Construct via
-// NewCVE (validated) or MustCVE (panics) so an invalid ID cannot reach a spec.
+// NewCVE (validated) so an invalid ID cannot reach a spec.
 type CVE string
 
 // ErrInvalidCVE is returned when a string is not a canonical CVE identifier.
@@ -29,17 +29,6 @@ func NewCVE(id string) (CVE, error) {
 	}
 
 	return CVE(id), nil
-}
-
-// MustCVE is the convenience form of NewCVE for package-level policy
-// initialization; it panics on an invalid CVE identifier.
-func MustCVE(id string) CVE {
-	c, err := NewCVE(id)
-	if err != nil {
-		panic(err)
-	}
-
-	return c
 }
 
 // String renders the CVE in its canonical form.

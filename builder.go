@@ -1,7 +1,5 @@
 package policydsl
 
-import "fmt"
-
 // Builder provides a fluent API for constructing PolicySpecs. Created via
 // Ban(name) or Companion(...). Each method returns the Builder so calls chain.
 //
@@ -154,8 +152,8 @@ func (b *Builder) WithAlternativeStrings(libraries ...string) *Builder {
 }
 
 // WithCVEs tags the policy with related, validated CVE identifiers for
-// security reporting. Each CVE is constructed via NewCVE / MustCVE so an
-// invalid identifier cannot reach the spec.
+// security reporting. Each CVE is constructed via NewCVE so an invalid
+// identifier cannot reach the spec.
 func (b *Builder) WithCVEs(cves ...CVE) *Builder {
 	b.spec.CVEs = cves
 
@@ -164,40 +162,15 @@ func (b *Builder) WithCVEs(cves ...CVE) *Builder {
 
 // VersionRange sets inclusive version constraints for the library targeted by
 // this policy (NOT the Go toolchain version). nil on either side means
-// unbounded. Panics if both bounds are non-nil and min > max (a nonsensical
-// inverted range) — this is a programmer error that should fail fast at
-// package-level policy initialization, not surface silently at runtime.
+// unbounded. An inverted range (min > max) is NOT rejected here; call
+// PolicySpec.Validate() to detect it. Keeping construction panic-free means the
+// fluent chain never aborts mid-build — structural validation is the caller's
+// responsibility.
 func (b *Builder) VersionRange(minVer, maxVer *Version) *Builder {
-	if minVer != nil && maxVer != nil && minVer.After(*maxVer) {
-		panic(fmt.Errorf("%w: min %s > max %s", ErrInvertedVersionRange, minVer, maxVer))
-	}
-
 	b.spec.VersionMin = minVer
 	b.spec.VersionMax = maxVer
 
 	return b
-}
-
-// VersionRangeStrings is the string convenience form of VersionRange: each
-// bound is parsed via ParseVersion (empty string means unbounded on that
-// side). Panics on a parse error or an inverted range. Intended for
-// package-level policy vars where the version literals are known at compile
-// time; use VersionRange with parsed Versions when the input is untrusted.
-func (b *Builder) VersionRangeStrings(minVer, maxVer string) *Builder {
-	return b.VersionRange(parseOptionalVersion(minVer), parseOptionalVersion(maxVer))
-}
-
-// parseOptionalVersion parses a version bound where empty string means
-// unbounded (nil). Panics on a non-empty malformed string, matching the
-// Must-parse convention used for package-level policy initialization.
-func parseOptionalVersion(s string) *Version {
-	if s == "" {
-		return nil
-	}
-
-	v := MustParseVersion(s)
-
-	return &v
 }
 
 // RequiresCompanion adds a required companion library spec.

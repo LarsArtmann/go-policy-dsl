@@ -36,17 +36,6 @@ func NewVersion(major, minor, patch int) (Version, error) {
 	return Version{Major: major, Minor: minor, Patch: patch}, nil
 }
 
-// MustNewVersion is the convenience form of NewVersion for package-level
-// policy initialization; it panics on a negative component.
-func MustNewVersion(major, minor, patch int) Version {
-	v, err := NewVersion(major, minor, patch)
-	if err != nil {
-		panic(err)
-	}
-
-	return v
-}
-
 // versionComponentCount is the number of dot-separated components in a full
 // "major.minor.patch" version string.
 const versionComponentCount = 3
@@ -99,17 +88,6 @@ func parseVersionComponent(raw, name, original string) (int, error) {
 	}
 
 	return n, nil
-}
-
-// MustParseVersion is the convenience form of ParseVersion for package-level
-// policy initialization; it panics on a parse error.
-func MustParseVersion(s string) Version {
-	v, err := ParseVersion(s)
-	if err != nil {
-		panic(err)
-	}
-
-	return v
 }
 
 // String renders the version as "major.minor.patch".
