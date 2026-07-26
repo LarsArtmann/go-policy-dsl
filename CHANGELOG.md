@@ -70,6 +70,8 @@ ErrInvertedVersionRange)` still works via the type's `Is` method. Callers
   edge case of subtracting two ints.
 - Moved shared test helper `parseVersionOrFatal` from `builder_behavior_test.go`
   to a dedicated `testhelpers_test.go` (its honest home).
+- Removed dead `errMustCommit bool` field from the `TestNewVersion` struct
+  (declared but never read — a latent lie in the test fixtures).
 - Bumped the `golangci-lint` `go` directive `1.26.4` → `1.26.5` to match
   `go.mod`.
 
