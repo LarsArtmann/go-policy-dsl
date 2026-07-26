@@ -47,3 +47,24 @@ jobs:
             git diff -- .
             exit 1
           fi
+
+  fuzz:
+    name: Fuzz targets (30s each)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      # Each Go fuzz target runs independently (-fuzz accepts one target).
+      # -run=^$ skips regular tests so only the fuzzer executes.
+      # The corpus grows locally via seed corpus; CI extends coverage with
+      # short bursts so regressions are caught before merge.
+      - name: FuzzParseVersion (30s)
+        run: go test -run=^$ -fuzz=FuzzParseVersion -fuzztime=30s .
+
+      - name: FuzzBuilder_PatternsOpaque (30s)
+        run: go test -run=^$ -fuzz=FuzzBuilder_PatternsOpaque -fuzztime=30s .

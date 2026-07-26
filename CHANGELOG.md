@@ -65,11 +65,33 @@ ErrInvertedVersionRange)` still works via the type's `Is` method. Callers
 - Rewrote the test suite as an external `policydsl_test` package with
   `t.Parallel()` on every test, so the suite exercises only the exported API
   (the same surface real consumers use) and is race-clean.
+- Replaced hand-rolled `cmpSign` with stdlib `cmp.Compare` in `Version.Compare`,
+  dropping ~10 lines of sign logic and eliminating the theoretical overflow
+  edge case of subtracting two ints.
+- Moved shared test helper `parseVersionOrFatal` from `builder_behavior_test.go`
+  to a dedicated `testhelpers_test.go` (its honest home).
 - Bumped the `golangci-lint` `go` directive `1.26.4` → `1.26.5` to match
   `go.mod`.
 
 ### Added
 
+- `TestNoPanicsInNonTestSource` — in-repo regression guard for the panic-free
+  contract. Parses every non-test `.go` file via `go/parser` and fails if any
+  contains a `panic(` call expression. Catches regressions at PR time
+  independent of whether `erraudit` is wired into CI.
+- `TestBan_SetsModeBan` — pins that `Ban(...)` explicitly sets `Mode = ModeBan`
+  (not the zero-value empty string).
+- `TestMode_DenyByDefaultContract` — pins the deny-by-default Mode contract:
+  the ONLY value that suppresses the ban finding is `ModeCompanionOnly`; every
+  other value (empty string, `ModeBan`, unknown strings) is ban-active.
+- Documented the **Mode deny-by-default contract** in AGENTS.md: a garbage Mode
+  never silently disables enforcement.
+- Documented the **no-struct-tags policy** in AGENTS.md: `PolicySpec`, `Mode`,
+  `CVE`, `Replacement`, and `Version` deliberately have no `json`/`yaml` struct
+  tags — the DSL declares values, not config. Consumers bridge at the boundary.
+- GitHub Actions CI fuzz job running both fuzz targets (`FuzzParseVersion`,
+  `FuzzBuilder_PatternsOpaque`) for 30s each on every push and PR.
+- `.github/dependabot.yml` for automatic GitHub Actions version bumps.
 - `docs/DOMAIN_LANGUAGE.md` — ubiquitous-language glossary (Ban, Companion,
   Detection, Replacement, Severity, Category, PolicySpec, Version, Mode, CVE).
 - `FEATURES.md` — honest feature inventory by status.
