@@ -221,13 +221,13 @@ and returns exactly what was built.
 
 ## Builder method convention
 
-| Prefix / form                 | Semantics                                 | Examples                                                                                                                       |
-| ----------------------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `With<X>(...)`                | **Set / replace** the field wholesale     | `WithSeverity`, `WithCategory`, `WithDescription`, `WithAlternatives(...Replacement)`, `WithCVEs(...CVE)`                     |
+| Prefix / form                 | Semantics                                 | Examples                                                                                                                             |
+| ----------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `With<X>(...)`                | **Set / replace** the field wholesale     | `WithSeverity`, `WithCategory`, `WithDescription`, `WithAlternatives(...Replacement)`, `WithCVEs(...CVE)`                            |
 | Bare verb / noun (`<X>(...)`) | **Append** to a slice field               | `ImportPatterns`, `GoModPatterns`, `ExcludeIfContains`, `ExcludeIfTransitiveFrom`, `RequiresCompanion`, `Suggest`, `SuggestExplicit` |
-| `DetectVia(d)`                | **Replace** the whole `Detection` struct  | —                                                                                                                             |
-| `As<X>()`                     | **Set the `Mode`**                        | `AsCompanionOnly` (sets `ModeCompanionOnly`)                                                                                  |
-| `Spec()`                      | **Terminate** the chain, return the value | —                                                                                                                             |
+| `DetectVia(d)`                | **Replace** the whole `Detection` struct  | —                                                                                                                                    |
+| `As<X>()`                     | **Set the `Mode`**                        | `AsCompanionOnly` (sets `ModeCompanionOnly`)                                                                                         |
+| `Spec()`                      | **Terminate** the chain, return the value | —                                                                                                                                    |
 
 This convention is enforced only by tests and doc comments, not by the type
 system. Contributors adding a new method should pick the form that matches its

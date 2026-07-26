@@ -49,7 +49,7 @@ A third CRITICAL panic (`cve.go:39`) appeared mid-session due to concurrent refa
 ### Documentation sync — incomplete
 
 - **`docs/DOMAIN_LANGUAGE.md:206`** — Still says `PolicySpec.Validate() error`. Should say `*InvertedVersionRangeError`. **Stale.**
-- **`policy.go` struct doc comment (line ~150)** — Says "Validate() returns ErrInvertedVersionRange". Now imprecise: it returns `*InvertedVersionRangeError` which *matches* the sentinel via `Is()`. Technically not wrong but misleading.
+- **`policy.go` struct doc comment (line ~150)** — Says "Validate() returns ErrInvertedVersionRange". Now imprecise: it returns `*InvertedVersionRangeError` which _matches_ the sentinel via `Is()`. Technically not wrong but misleading.
 - **`CHANGELOG.md`** — No entry for the typed error addition under `[Unreleased]`.
 - **`example_test.go`** — Still only shows `errors.Is` usage. Could now demonstrate typed `err.Min`/`err.Max` access (the whole point of the refactor).
 
@@ -219,14 +219,14 @@ You said "no suppression" for the source code. But for CI gating, `erraudit ./..
 
 ## Session Metrics
 
-| Metric                          | Before | After |
-| ------------------------------- | ------ | ----- |
-| erraudit CRITICAL (panic)       | 2      | 3\*   |
-| erraudit WARNING (generic_return) | 1    | **0** |
-| erraudit total violations       | 3      | 3\*   |
-| golangci-lint issues            | 0      | 0     |
-| go test                         | PASS   | PASS  |
-| go vet                          | 0      | 0     |
+| Metric                            | Before | After |
+| --------------------------------- | ------ | ----- |
+| erraudit CRITICAL (panic)         | 2      | 3\*   |
+| erraudit WARNING (generic_return) | 1      | **0** |
+| erraudit total violations         | 3      | 3\*   |
+| golangci-lint issues              | 0      | 0     |
+| go test                           | PASS   | PASS  |
+| go vet                            | 0      | 0     |
 
 \* The third CRITICAL (`cve.go:39`) appeared mid-session from concurrent refactoring. All 3 are accepted Must-pattern false positives.
 
@@ -234,10 +234,10 @@ You said "no suppression" for the source code. But for CI gating, `erraudit ./..
 
 ## Files Changed This Session
 
-| File              | Change                                                             |
-| ----------------- | ------------------------------------------------------------------ |
-| `policy.go`       | Added `InvertedVersionRangeError` type; changed `Validate()` return type |
-| `policy_test.go`  | Added `TestPolicySpec_Validate_InvertedRangeErrorCarriesBounds`    |
-| `AGENTS.md`       | Updated Quick Start, Validate description, Must-panic documentation |
+| File             | Change                                                                   |
+| ---------------- | ------------------------------------------------------------------------ |
+| `policy.go`      | Added `InvertedVersionRangeError` type; changed `Validate()` return type |
+| `policy_test.go` | Added `TestPolicySpec_Validate_InvertedRangeErrorCarriesBounds`          |
+| `AGENTS.md`      | Updated Quick Start, Validate description, Must-panic documentation      |
 
 All changes were auto-committed by the git daemon (commits `4af24d3`, `6220ac3`).

@@ -32,42 +32,42 @@ decision. The code is better; the discipline was leaky again.
 
 ## a) FULLY DONE ✅
 
-| #  | Item                                                                                              | Evidence                                                                                  |
-| -- | ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| 1  | T2: replaced lying `CompanionOnly bool` with typed `Mode` (`ModeBan`/`ModeCompanionOnly`)         | `policy.go:107-162`; `Ban()` sets `ModeBan`, `AsCompanionOnly()` sets `ModeCompanionOnly` |
-| 2  | T4: `Alternatives []string` → `[]Replacement` (full Replacement stored, no `Reason` loss)         | `policy.go:142`; `Suggest`/`WithAlternatives` retyped; `equalReplacements` helper added  |
-| 3  | T3: branded `CVE` type + `NewCVE`/`MustCVE` validating `CVE-YYYY-NNNN`, `ErrInvalidCVE` sentinel  | `cve.go`, `cve_test.go` (12 invalid cases, 4 valid, sentinel-wrap, panic, Example)       |
-| 4  | T5: `SuggestExplicit(r)` — no-magic append (no `Description` derivation) + 2 contract tests       | `builder.go`; `TestBuilder_SuggestExplicit_NoDescriptionDerivation`, `..._MixedWithSuggest` |
-| 5  | T1: `FuzzBuilder_PatternsOpaque` pinning "patterns are opaque strings" contract (3.1M execs PASS) | `builder_fuzz_test.go` (7 seeds; every pattern entry point round-trips any string)       |
-| 6  | T6: `Require` decided **NO** (YAGNI, no consumer need) and documented                              | `ROADMAP.md` "Decided against" section                                                    |
-| 7  | T7: verified blocked-on-external directly (`go.mod` + `rg --include=*.go` = zero imports)         | `TODO_LIST.md` annotated with ADR 0006 + the cutover status reports as evidence           |
-| 8  | Six docs synced: CHANGELOG, FEATURES, DOMAIN_LANGUAGE, AGENTS, README, ROADMAP, TODO_LIST         | all BREAKING entries + Added entries; stale `Validate() error` corrected to typed return  |
-| 9  | Full gate green at the end: build / vet / `test -race` / `golangci-lint run` / `golangci-lint fmt`| 0 issues; `fmt` no drift                                                                  |
+| #   | Item                                                                                               | Evidence                                                                                    |
+| --- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| 1   | T2: replaced lying `CompanionOnly bool` with typed `Mode` (`ModeBan`/`ModeCompanionOnly`)          | `policy.go:107-162`; `Ban()` sets `ModeBan`, `AsCompanionOnly()` sets `ModeCompanionOnly`   |
+| 2   | T4: `Alternatives []string` → `[]Replacement` (full Replacement stored, no `Reason` loss)          | `policy.go:142`; `Suggest`/`WithAlternatives` retyped; `equalReplacements` helper added     |
+| 3   | T3: branded `CVE` type + `NewCVE`/`MustCVE` validating `CVE-YYYY-NNNN`, `ErrInvalidCVE` sentinel   | `cve.go`, `cve_test.go` (12 invalid cases, 4 valid, sentinel-wrap, panic, Example)          |
+| 4   | T5: `SuggestExplicit(r)` — no-magic append (no `Description` derivation) + 2 contract tests        | `builder.go`; `TestBuilder_SuggestExplicit_NoDescriptionDerivation`, `..._MixedWithSuggest` |
+| 5   | T1: `FuzzBuilder_PatternsOpaque` pinning "patterns are opaque strings" contract (3.1M execs PASS)  | `builder_fuzz_test.go` (7 seeds; every pattern entry point round-trips any string)          |
+| 6   | T6: `Require` decided **NO** (YAGNI, no consumer need) and documented                              | `ROADMAP.md` "Decided against" section                                                      |
+| 7   | T7: verified blocked-on-external directly (`go.mod` + `rg --include=*.go` = zero imports)          | `TODO_LIST.md` annotated with ADR 0006 + the cutover status reports as evidence             |
+| 8   | Six docs synced: CHANGELOG, FEATURES, DOMAIN_LANGUAGE, AGENTS, README, ROADMAP, TODO_LIST          | all BREAKING entries + Added entries; stale `Validate() error` corrected to typed return    |
+| 9   | Full gate green at the end: build / vet / `test -race` / `golangci-lint run` / `golangci-lint fmt` | 0 issues; `fmt` no drift                                                                    |
 
 ---
 
 ## b) PARTIALLY DONE ⚠️
 
-| #  | Item                                  | What's done                                                                                                     | What's missing                                                                                                                                                                                          |
-| -- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1  | `Mode` semantics pinning             | Zero-value `Mode == ""` is asserted ban-active (`TestPolicySpec_ZeroValue`); `AsCompanionOnly()` is tested      | **No test asserts `Ban()` sets `Mode == ModeBan`** (`TestBan_DefaultsToCriticalSecurity` checks Severity/Category but not Mode). **No test for an arbitrary/unknown `Mode` value** (`Mode("garbage")`). |
-| 2  | `Mode` validation                    | Documented "zero = ban-active; consumers treat unknown as ban-active"                                           | `Validate()` does NOT reject an unknown `Mode`. The typed enum is a naming improvement, not a make-impossible-states-unrepresentable guarantee at the validate layer.                                   |
-| 3  | CHANGELOG completeness               | Added BREAKING entries for Mode/CVE/Alternatives + Added for SuggestExplicit/Mode/CVE/fuzz; fixed the stale `Validate() error` line | I documented the concurrent session's `InvertedVersionRangeError` work (right thing) but did not author or review that change — it landed under my session without me reading those test files fully.    |
-| 4  | Doc consistency sweep                | Six living docs updated                                                                                          | CONTRIBUTING.md and older `docs/status/*` reports were NOT re-scanned for `CompanionOnly bool` / `Alternatives []string` / `CVEs []string` references that my retypes invalidated.                     |
+| #   | Item                     | What's done                                                                                                                         | What's missing                                                                                                                                                                                          |
+| --- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `Mode` semantics pinning | Zero-value `Mode == ""` is asserted ban-active (`TestPolicySpec_ZeroValue`); `AsCompanionOnly()` is tested                          | **No test asserts `Ban()` sets `Mode == ModeBan`** (`TestBan_DefaultsToCriticalSecurity` checks Severity/Category but not Mode). **No test for an arbitrary/unknown `Mode` value** (`Mode("garbage")`). |
+| 2   | `Mode` validation        | Documented "zero = ban-active; consumers treat unknown as ban-active"                                                               | `Validate()` does NOT reject an unknown `Mode`. The typed enum is a naming improvement, not a make-impossible-states-unrepresentable guarantee at the validate layer.                                   |
+| 3   | CHANGELOG completeness   | Added BREAKING entries for Mode/CVE/Alternatives + Added for SuggestExplicit/Mode/CVE/fuzz; fixed the stale `Validate() error` line | I documented the concurrent session's `InvertedVersionRangeError` work (right thing) but did not author or review that change — it landed under my session without me reading those test files fully.   |
+| 4   | Doc consistency sweep    | Six living docs updated                                                                                                             | CONTRIBUTING.md and older `docs/status/*` reports were NOT re-scanned for `CompanionOnly bool` / `Alternatives []string` / `CVEs []string` references that my retypes invalidated.                      |
 
 ---
 
 ## c) NOT STARTED ❌
 
-| #  | Item                                                                                      | Why it matters                                                                                                                                                              |
-| -- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1  | `lsp_restart` to clear the 6 stale diagnostics                                           | See d.1. Never ran it.                                                                                                                                                      |
-| 2  | `Mode` validation in `Validate()` (reject `Mode("garbage")`)                              | The typed enum claims type safety it doesn't fully deliver at the construction-by-field-assignment boundary.                                                                |
-| 3  | Struct tags (`json:"..."` / `yaml:"..."`) on `PolicySpec`/`Mode`/`CVE`/`Replacement`      | `library-policy` emits YAML; without tags the consumer hand-maps every field. Adding tags now (before the cutover) is cheaper than after.                                   |
-| 4  | CI fuzz wiring (`-fuzztime` in `.github/workflows/ci.yml`)                                | Two fuzz targets exist and pass seeds, but CI doesn't fuzz them — the corpus only grows locally.                                                                            |
-| 5  | Re-read the concurrent session's `InvertedVersionRangeError` test files                   | I trusted `go test` passing as proof the typed-error work is sound; I did not read those tests to confirm they actually assert what the CHANGELOG now claims.               |
-| 6  | CONTRIBUTING.md / old status reports annotation sweep                                     | My retypes may have left stale references in files I didn't touch this session.                                                                                            |
-| 7  | A `Mode` zero-value-vs-`ModeBan` distinction decision                                     | `Ban()` sets `ModeBan` explicitly, but the zero value (`""`) is also "ban-active". Are they semantically identical at the consumer boundary, or should `""` be "undeclared"? Undecided. |
+| #   | Item                                                                                 | Why it matters                                                                                                                                                                          |
+| --- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `lsp_restart` to clear the 6 stale diagnostics                                       | See d.1. Never ran it.                                                                                                                                                                  |
+| 2   | `Mode` validation in `Validate()` (reject `Mode("garbage")`)                         | The typed enum claims type safety it doesn't fully deliver at the construction-by-field-assignment boundary.                                                                            |
+| 3   | Struct tags (`json:"..."` / `yaml:"..."`) on `PolicySpec`/`Mode`/`CVE`/`Replacement` | `library-policy` emits YAML; without tags the consumer hand-maps every field. Adding tags now (before the cutover) is cheaper than after.                                               |
+| 4   | CI fuzz wiring (`-fuzztime` in `.github/workflows/ci.yml`)                           | Two fuzz targets exist and pass seeds, but CI doesn't fuzz them — the corpus only grows locally.                                                                                        |
+| 5   | Re-read the concurrent session's `InvertedVersionRangeError` test files              | I trusted `go test` passing as proof the typed-error work is sound; I did not read those tests to confirm they actually assert what the CHANGELOG now claims.                           |
+| 6   | CONTRIBUTING.md / old status reports annotation sweep                                | My retypes may have left stale references in files I didn't touch this session.                                                                                                         |
+| 7   | A `Mode` zero-value-vs-`ModeBan` distinction decision                                | `Ban()` sets `ModeBan` explicitly, but the zero value (`""`) is also "ban-active". Are they semantically identical at the consumer boundary, or should `""` be "undeclared"? Undecided. |
 
 ---
 
@@ -137,7 +137,7 @@ decision. The code is better; the discipline was leaky again.
 - **Re-read any file that another session might have touched before each
   structural edit.** In a repo with an auto-git daemon and possibly concurrent
   agents, a file read at minute 5 is stale by minute 35. Add a `git log -1
-  --format=%ct <file>` sanity check, or just re-View.
+--format=%ct <file>` sanity check, or just re-View.
 - **When a typed enum replaces a bool, extend the tests of the replaced bool's
   default.** The `TestBan_DefaultsToCriticalSecurity` test was the natural
   home for a `spec.Mode == ModeBan` assertion and I missed it because I was

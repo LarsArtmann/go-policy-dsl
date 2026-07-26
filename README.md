@@ -86,38 +86,38 @@ at construction — the footgun the old string API allowed.
 
 ### Constructors
 
-| Function                                               | Returns         | Purpose                                                                             |
-| ------------------------------------------------------ | --------------- | ----------------------------------------------------------------------------------- |
+| Function                                               | Returns         | Purpose                                                                                         |
+| ------------------------------------------------------ | --------------- | ----------------------------------------------------------------------------------------------- |
 | `Ban(name string) *Builder`                            | `*Builder`      | Start a banned-library policy (defaults to `SeverityCritical` + `CategorySecurity` + `ModeBan`) |
-| `Companion(lib, pattern, reason string) CompanionSpec` | `CompanionSpec` | Build a required-companion spec (defaults to `SeverityModerate`)                    |
-| `CompanionWithSeverity(...)`                           | `CompanionSpec` | Companion with custom severity                                                      |
-| `ImportPattern(pattern string) Detection`              | `Detection`     | Convenience for source-import detection                                             |
-| `GoModPattern(pattern string) Detection`               | `Detection`     | Convenience for go.mod-path detection                                               |
-| `NewReplacement(library, reason string) Replacement`   | `Replacement`   | Build a swap-in alternative value                                                   |
-| `NewCVE(id string) (CVE, error)`                       | `CVE`           | Validated CVE identifier (`CVE-YYYY-NNNN`)                                          |
-| `MustCVE(id string) CVE`                               | `CVE`           | CVE that panics on an invalid id (for package-level init)                           |
+| `Companion(lib, pattern, reason string) CompanionSpec` | `CompanionSpec` | Build a required-companion spec (defaults to `SeverityModerate`)                                |
+| `CompanionWithSeverity(...)`                           | `CompanionSpec` | Companion with custom severity                                                                  |
+| `ImportPattern(pattern string) Detection`              | `Detection`     | Convenience for source-import detection                                                         |
+| `GoModPattern(pattern string) Detection`               | `Detection`     | Convenience for go.mod-path detection                                                           |
+| `NewReplacement(library, reason string) Replacement`   | `Replacement`   | Build a swap-in alternative value                                                               |
+| `NewCVE(id string) (CVE, error)`                       | `CVE`           | Validated CVE identifier (`CVE-YYYY-NNNN`)                                                      |
+| `MustCVE(id string) CVE`                               | `CVE`           | CVE that panics on an invalid id (for package-level init)                                       |
 
 ### Builder methods
 
-| Method                             | Effect                                                   |
-| ---------------------------------- | -------------------------------------------------------- |
-| `Because(reason)`                  | Sets the human-readable reason (required)                |
-| `WithSeverity(s)`                  | Overrides the default severity                           |
-| `WithCategory(c)`                  | Overrides the default category                           |
-| `DetectVia(d)`                     | Sets the full `Detection` (import + go.mod + exclusions) |
-| `ImportPatterns(p...)`             | Adds source-import patterns                              |
-| `GoModPatterns(p...)`              | Adds go.mod-path patterns                                |
-| `ExcludeIfContains(p...)`          | Suppressions: if string appears, no violation            |
-| `ExcludeIfTransitiveFrom(libs...)` | Parent libs that justify transitive presence             |
-| `WithDescription(desc)`            | Detailed description for reporting                       |
-| `Suggest(r)`                       | Adds a recommended replacement (full `Replacement`)      |
-| `SuggestExplicit(r)`               | Adds a replacement WITHOUT deriving `Description`        |
-| `WithAlternatives(alts...)`        | Sets `[]Replacement` alternatives directly (set)         |
-| `WithCVEs(cves...)`                | Tags with validated `CVE` values                         |
-| `VersionRange(min, max)`           | Inclusive library version constraints (not Go version)   |
-| `RequiresCompanion(c)`             | Adds a required companion spec                           |
+| Method                             | Effect                                                          |
+| ---------------------------------- | --------------------------------------------------------------- |
+| `Because(reason)`                  | Sets the human-readable reason (required)                       |
+| `WithSeverity(s)`                  | Overrides the default severity                                  |
+| `WithCategory(c)`                  | Overrides the default category                                  |
+| `DetectVia(d)`                     | Sets the full `Detection` (import + go.mod + exclusions)        |
+| `ImportPatterns(p...)`             | Adds source-import patterns                                     |
+| `GoModPatterns(p...)`              | Adds go.mod-path patterns                                       |
+| `ExcludeIfContains(p...)`          | Suppressions: if string appears, no violation                   |
+| `ExcludeIfTransitiveFrom(libs...)` | Parent libs that justify transitive presence                    |
+| `WithDescription(desc)`            | Detailed description for reporting                              |
+| `Suggest(r)`                       | Adds a recommended replacement (full `Replacement`)             |
+| `SuggestExplicit(r)`               | Adds a replacement WITHOUT deriving `Description`               |
+| `WithAlternatives(alts...)`        | Sets `[]Replacement` alternatives directly (set)                |
+| `WithCVEs(cves...)`                | Tags with validated `CVE` values                                |
+| `VersionRange(min, max)`           | Inclusive library version constraints (not Go version)          |
+| `RequiresCompanion(c)`             | Adds a required companion spec                                  |
 | `AsCompanionOnly()`                | Sets `Mode = ModeCompanionOnly` (never ban; enforce companions) |
-| `Spec()`                           | Returns the finished `PolicySpec`                        |
+| `Spec()`                           | Returns the finished `PolicySpec`                               |
 
 ### Types
 
