@@ -79,12 +79,12 @@ func ParseVersion(s string) (Version, error) {
 // parsed int is guaranteed non-negative without a uint->int conversion.
 func parseVersionComponent(raw, name, original string) (int, error) {
 	if raw == "" || raw[0] == '+' || raw[0] == '-' {
-		return 0, fmt.Errorf("%w: component %s of %q", ErrInvalidVersion, name, original)
+		return 0, fmt.Errorf("%w: component %s %q of %q", ErrInvalidVersion, name, raw, original)
 	}
 
 	n, err := strconv.Atoi(raw)
 	if err != nil || n < 0 {
-		return 0, fmt.Errorf("%w: component %s of %q", ErrInvalidVersion, name, original)
+		return 0, fmt.Errorf("%w: component %s %q of %q", ErrInvalidVersion, name, raw, original)
 	}
 
 	return n, nil
