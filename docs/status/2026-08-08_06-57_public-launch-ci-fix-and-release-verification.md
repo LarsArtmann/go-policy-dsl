@@ -12,11 +12,11 @@ Continuation session. Task: go through everything with a critical eye, fix the o
 
 Prior session had already corrected all three releases. Verified each by pulling the full body via `gh release view` and confirming accuracy against actual `git diff <prev_tag>..<tag>` output. No changes needed.
 
-| Release | Title | Body | Status |
-|---------|-------|------|--------|
-| v0.1.0 | initial release: fluent policy DSL with typed domain | 3,100 chars, pure "Added" | Correct |
-| v0.2.0 | panic-free API | 2,480 chars, only panic-free refactor | Correct |
-| v0.3.0 | RequireIfContains content gate | 1,499 chars, additive only | Latest |
+| Release | Title                                                | Body                                  | Status  |
+| ------- | ---------------------------------------------------- | ------------------------------------- | ------- |
+| v0.1.0  | initial release: fluent policy DSL with typed domain | 3,100 chars, pure "Added"             | Correct |
+| v0.2.0  | panic-free API                                       | 2,480 chars, only panic-free refactor | Correct |
+| v0.3.0  | RequireIfContains content gate                       | 1,499 chars, additive only            | Latest  |
 
 ### 2. Pre-public security sweep
 
@@ -37,6 +37,7 @@ Searched README, ROADMAP, AGENTS, TODO_LIST, CONTRIBUTING, DOMAIN_LANGUAGE, FEAT
 ### 6. Go module proxy verified
 
 All three versions confirmed indexed on `proxy.golang.org`:
+
 - v0.1.0 — `acf5126` tag hash
 - v0.2.0 — `924723e` tag hash
 - v0.3.0 — `f2d4caf` tag hash
@@ -116,6 +117,7 @@ The auto-git daemon committed CHANGELOG changes with a completely empty message.
 ## f) Up to 50 things to get done next
 
 ### Immediate (should have done this session)
+
 1. Set GitHub repo topics (`go`, `golang`, `policy`, `linting`, `dsl`, `library-governance`)
 2. Add a `Topics` section to README mentioning the key terms for SEO
 3. Wait for pkg.go.dev to index, verify the badge resolves
@@ -123,12 +125,14 @@ The auto-git daemon committed CHANGELOG changes with a completely empty message.
 5. Set up branch protection rules on master (require CI to pass before merge)
 
 ### CI improvements
+
 6. Cache golangci-lint binary in CI to avoid compiling from source every run (~1m overhead)
 7. Add a `GOWORK=off` note to the README contributing section (currently says `go test ./...` without the prefix, which fails locally due to parent go.work)
 8. Consider adding `GOTOOLCHAIN: local` or `GOWORK=off` to the CI env explicitly (currently relies on setup-go behavior)
 9. Consider adding a release GitHub Action (tag → create release from CHANGELOG)
 
 ### Repo polish for public presence
+
 10. Write a proper repo `description` (currently set but verify it's good)
 11. Consider enabling GitHub Discussions for community Q&A
 12. Add a `CONTRIBUTING.md` review — verify it doesn't reference private repos
@@ -137,6 +141,7 @@ The auto-git daemon committed CHANGELOG changes with a completely empty message.
 15. Add `go get` badge or install instructions verification (verify `go get` works from a clean module)
 
 ### Documentation consistency
+
 16. Do a strict CHANGELOG ↔ release body consistency pass
 17. Verify FEATURES.md doesn't claim anything contradicted by the corrected CHANGELOG
 18. Check if TODO_LIST.md harvest log `[Unreleased]` references should be `[0.3.0]`
@@ -144,18 +149,21 @@ The auto-git daemon committed CHANGELOG changes with a completely empty message.
 20. Consider whether `docs/status/` historical reports should be visible on a public repo (they contain internal session context)
 
 ### Code quality
+
 21. Run `erraudit ./...` to confirm 0 violations (mentioned in AGENTS.md, not run this session)
 22. Consider whether the `Severity` enum values `recommended`, `deprecated`, `obsolete` belong in the public API or are over-engineered
 23. Consider adding more godoc examples for edge cases
 24. Run `golangci-lint fmt ./...` to check for formatting drift after the version bump
 
 ### Release process
+
 25. Write a release checklist doc (verify CI green, verify CHANGELOG, verify tag diff, create release, set Latest flag)
 26. Consider automating release creation from CHANGELOG sections
 27. Consider adding `goreleaser` or similar for release automation
 28. Consider whether v0.3.0 release notes should mention the CI fix (they don't — the fix is post-release)
 
 ### Public SDK presence
+
 29. Verify the module resolves correctly via `go get github.com/larsartmann/go-policy-dsl@v0.3.0` from a clean environment
 30. Consider whether a docs website (Astro + Starlight) is worth setting up now that the repo is public
 31. Consider adding the repo to awesome-go lists or similar community curated lists
@@ -163,18 +171,21 @@ The auto-git daemon committed CHANGELOG changes with a completely empty message.
 33. Consider whether `library-policy` migration should now be prioritized (the first consumer gate for v1.0.0)
 
 ### Discoverability
+
 34. Add the repo to the LarsArtmann org profile README (if one exists)
 35. Cross-link from sibling repos (go-error-family, go-output, etc.)
 36. Consider adding a "used by" section once consumers adopt
 37. Consider adding a logo or visual identity
 
 ### Hardening
+
 38. Add branch protection (require PR review, require CI green)
 39. Consider adding `CODEOWNERS` review requirements
 40. Consider adding security policy (`SECURITY.md`)
 41. Consider whether the `.github/dependabot.yml` covers the right ecosystems
 
 ### Cleanup
+
 42. Consider whether `docs/reviews/` and `docs/status/` historical reports should be in a separate branch or kept on master for a public repo
 43. Check if any historical reports reference credentials, internal URLs, or private information
 44. Consider whether `CONTRIBUTING.md` needs a section about the `GOWORK=off` workaround
@@ -199,14 +210,14 @@ The auto-git daemon committed CHANGELOG changes with a completely empty message.
 
 ## Summary
 
-| Area | State |
-|------|-------|
-| GitHub releases (all 3) | Fully done — verified accurate |
-| Repo visibility | PUBLIC |
-| CI | GREEN — fixed pre-existing golangci-lint failure |
-| Go module proxy | All 3 versions indexed |
-| Go Report Card badge | Removed (service sunset) |
-| pkg.go.dev | Not yet indexed (pending, expected delay) |
-| Quality gate | Passes (test, lint, build) |
-| Repo topics | Empty (not set) |
-| Branch protection | Not configured |
+| Area                    | State                                            |
+| ----------------------- | ------------------------------------------------ |
+| GitHub releases (all 3) | Fully done — verified accurate                   |
+| Repo visibility         | PUBLIC                                           |
+| CI                      | GREEN — fixed pre-existing golangci-lint failure |
+| Go module proxy         | All 3 versions indexed                           |
+| Go Report Card badge    | Removed (service sunset)                         |
+| pkg.go.dev              | Not yet indexed (pending, expected delay)        |
+| Quality gate            | Passes (test, lint, build)                       |
+| Repo topics             | Empty (not set)                                  |
+| Branch protection       | Not configured                                   |

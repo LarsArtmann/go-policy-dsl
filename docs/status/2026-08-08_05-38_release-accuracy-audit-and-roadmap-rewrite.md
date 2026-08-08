@@ -97,6 +97,7 @@ Both releases were backfilled in a prior session by diffing from the initial com
 ## f) Up to 50 things to get done next
 
 ### Release & visibility
+
 1. Make the repo public (`gh repo edit --visibility public`)
 2. Verify `proxy.golang.org` picks up the module after going public
 3. Verify the pkg.go.dev badge resolves after going public
@@ -104,55 +105,66 @@ Both releases were backfilled in a prior session by diffing from the initial com
 5. Verify the CI badge resolves after going public
 
 ### CHANGELOG ↔ release consistency
+
 6. Do a strict consistency pass between CHANGELOG sections and GitHub release bodies — unify wording where they should match
 7. Add `MustNewVersion` and `MustParseVersion` removal notes to the CHANGELOG v0.1.0 section (the release notes mention them but the CHANGELOG only notes `MustCVE` and `VersionRangeStrings`)
 8. Verify the CHANGELOG v0.1.0 "Added" list is a complete inventory of what existed at the tag (run `git ls-tree -r v0.1.0 --name-only` and cross-check)
 
 ### ROADMAP
+
 9. Consider removing `library-policy` and `go-linter-sdk` references from ROADMAP if the repo goes public (ROADMAP is internal, but if it's public, these references point to private repos)
 10. Consider whether the "Direction: documentation presence" section is still relevant or can be trimmed
 11. Consider whether the "golangci-lint plugin template" idea is still relevant or YAGNI
 
 ### FEATURES.md
+
 12. Verify FEATURES.md is consistent with the corrected CHANGELOG (e.g., no claims that contradict the v0.2.0 scope)
 13. Check if FEATURES.md "Domain validation in `Validate()`" PLANNED item is still accurate
 
 ### TODO_LIST.md
+
 14. Verify TODO_LIST.md harvest log is accurate — it references `[Unreleased]` which is now `[0.3.0]`
 15. Check if TODO_LIST.md needs any new items based on this session's findings
 
 ### AGENTS.md
+
 16. Verify AGENTS.md "Consumers" section is still accurate
 17. Verify AGENTS.md "Surprising Behaviors" section doesn't reference removed APIs
 18. Consider whether AGENTS.md should mention `GOWORK=off` requirement more prominently
 
 ### Testing
+
 19. Consider adding a test that verifies the CHANGELOG sections match the GitHub release bodies (meta-test)
 20. Consider adding a CI check that runs `git diff <prev_tag>..<tag> --stat` and warns if CHANGELOG items don't match
 
 ### Docs hygiene
+
 21. Check if `docs/DOMAIN_LANGUAGE.md` needs updates after the ROADMAP rewrite
 22. Check if any `docs/status/` reports reference the old v0.2.0 release title or contents
 23. Check if `CONTRIBUTING.md` references are still accurate
 24. Check if `.editorconfig` and `.gitattributes` are still needed
 
 ### Release process
+
 25. Write a release checklist (verify CHANGELOG against tag diff, verify release notes against CHANGELOG, verify Latest flag)
 26. Consider release automation (GitHub Action for tag → release → pkg.go.dev)
 27. Consider whether future releases should generate release notes from the CHANGELOG automatically
 
 ### Code quality
+
 28. Run `erraudit ./...` to confirm 0 violations (mentioned in AGENTS.md but not run this session)
 29. Run `golangci-lint fmt ./...` to check for formatting drift
 30. Consider whether the `Severity` enum has too many values (`recommended`, `deprecated`, `obsolete` are listed in v0.1.0 but not in the README API table)
 
 ### Public presence
+
 31. Rewrite README to remove `library-policy`/`go-linter-sdk` references — **WAIT, this was already done in a prior session** (commit `cb1e2b9`). Verify it's still clean.
 32. Check if the README "Contributing" section mentions `GOWORK=off` (it doesn't — it says `go test ./...` without the prefix)
 33. Add `GOWORK=off` to the README contributing commands
 34. Consider adding a CONTRIBUTING.md mention of the `GOWORK=off` requirement
 
 ### Consistency
+
 35. Verify that no doc references the old v0.2.0 title "panic-free, typed domain"
 36. Verify that no doc references `[Unreleased]` when it should reference `[0.3.0]`
 37. Verify that the ROADMAP v1.0.0 criteria don't contradict the CHANGELOG or FEATURES.md
@@ -172,13 +184,13 @@ Both releases were backfilled in a prior session by diffing from the initial com
 
 ## Summary
 
-| Area | State |
-|------|-------|
-| ROADMAP.md | Fully done — forward-looking only, committed |
-| CHANGELOG.md | Fully done — v0.1.0 and v0.2.0 corrected, committed |
-| v0.1.0 GitHub release | Fully done — pure "Added", 3,100 chars |
-| v0.2.0 GitHub release | Fully done — panic-free refactor only, 2,480 chars, title fixed |
-| v0.3.0 GitHub release | Fully done — footer fixed, 1,499 chars |
-| Quality gate | Passes (test, lint, build) |
-| Repo visibility | Not started — user's discretion |
-| CHANGELOG ↔ release consistency | Partially done — close but not identical |
+| Area                            | State                                                           |
+| ------------------------------- | --------------------------------------------------------------- |
+| ROADMAP.md                      | Fully done — forward-looking only, committed                    |
+| CHANGELOG.md                    | Fully done — v0.1.0 and v0.2.0 corrected, committed             |
+| v0.1.0 GitHub release           | Fully done — pure "Added", 3,100 chars                          |
+| v0.2.0 GitHub release           | Fully done — panic-free refactor only, 2,480 chars, title fixed |
+| v0.3.0 GitHub release           | Fully done — footer fixed, 1,499 chars                          |
+| Quality gate                    | Passes (test, lint, build)                                      |
+| Repo visibility                 | Not started — user's discretion                                 |
+| CHANGELOG ↔ release consistency | Partially done — close but not identical                        |
