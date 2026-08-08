@@ -21,6 +21,7 @@ Added 7 topics: `go`, `golang`, `policy`, `linting`, `dsl`, `library-governance`
 ### 3. CONTRIBUTING.md fixes
 
 Two changes:
+
 - **Fixed a documentation lie:** Line 70 said `VersionRange(min, max *Version) panics on an inverted range (min > max)` — this was removed in v0.2.0 (panic-free design). Replaced with the correct behavior: does NOT panic, detect via `PolicySpec.Validate()`.
 - **Added GOWORK=off note:** Contributors with a parent `go.work` need `GOWORK=off` for all Go commands.
 
@@ -41,6 +42,7 @@ Replaced `go install golangci-lint` (compiles from source, ~1m overhead) with `g
 **Quality gate job: 37s (down from 1m41s)** — 2.7x faster.
 
 Also added:
+
 - `concurrency: { group: ci-${{ github.ref }}, cancel-in-progress: true }` — cancels stale runs when new pushes land.
 - `timeout-minutes: 10` (quality gate) / `timeout-minutes: 15` (fuzz) — prevents hung jobs.
 
@@ -49,6 +51,7 @@ Committed as `09a8ff3`. CI verified green — both jobs pass.
 ### 7. pkg.go.dev verified — fully indexed
 
 pkg.go.dev now resolves with the full module page:
+
 - Version: v0.3.0
 - License: MIT
 - Full API documentation rendered (all types, methods, examples)
@@ -105,12 +108,14 @@ Line 70 said `VersionRange(min, max *Version) panics on an inverted range (min >
 ## f) Up to 50 things to get done next
 
 ### Immediate (noticed this session, not yet done)
+
 1. Trigger pkg.go.dev re-index to serve the current README (not the v0.3.0 tagged version)
 2. Set up branch protection on master (require CI green before merge) — needs user decision re: auto-git daemon
 3. Run `erraudit ./...` to confirm 0 violations (mentioned in AGENTS.md, not run this session)
 4. Check if `WithAlternativeStrings` should be documented in the README API table (it exists in the code but is missing from the README constructor table)
 
 ### CI / infrastructure
+
 5. Monitor for `golangci-lint-action` Node.js 20 → 24 fix (upstream)
 6. Consider adding `govulncheck` job to CI (stdlib-only, but deps-of-deps matter downstream)
 7. Consider adding test-coverage reporting (`go test -cover` + threshold gate)
@@ -120,6 +125,7 @@ Line 70 said `VersionRange(min, max *Version) panics on an inverted range (min >
 11. Consider adding a release GitHub Action (tag → create release from CHANGELOG)
 
 ### Documentation consistency
+
 12. Verify `docs/DOMAIN_LANGUAGE.md` doesn't contain stale API references (e.g., `GoVersionRange`, `Must*` functions, `CompanionOnly bool`)
 13. Verify no other doc claims `VersionRange` panics (grep found CONTRIBUTING.md this session — check the rest)
 14. Do a strict CHANGELOG ↔ release body consistency pass
@@ -128,6 +134,7 @@ Line 70 said `VersionRange(min, max *Version) panics on an inverted range (min >
 17. Consider adding `WithAlternativeStrings` to the README API table or documenting why it's excluded
 
 ### Public presence
+
 18. Verify `go get github.com/larsartmann/go-policy-dsl@v0.3.0` works from a clean environment
 19. Consider adding the repo to awesome-go or similar curated lists
 20. Consider writing a blog post or announcement for the public launch
@@ -137,18 +144,21 @@ Line 70 said `VersionRange(min, max *Version) panics on an inverted range (min >
 24. Consider adding a code of conduct (`CODE_OF_CONDUCT.md`)
 
 ### Code quality
+
 25. Consider whether the `Severity` enum values `recommended`, `deprecated`, `obsolete` are used or over-engineered
 26. Consider adding more godoc examples for edge cases (`SuggestExplicit`, `Validate`)
 27. Run `golangci-lint fmt ./...` to check for formatting drift after CI version bump
 28. Consider whether the fuzz targets need seed corpus expansion
 
 ### Release process
+
 29. Write a release checklist doc (verify CI green, CHANGELOG, tag diff, Latest flag)
 30. Consider automating release creation from CHANGELOG sections
 31. Consider whether v0.3.0 release notes should mention the CI fix (post-release fix)
 32. Consider whether a v0.3.1 patch release is warranted for the CONTRIBUTING.md fix and CI fix
 
 ### Cleanup
+
 33. Verify all badge links resolve on the public README (Go Reference, CI, License)
 34. Consider whether `docs/status/` historical reports should be visible on a public repo
 35. Check if any historical reports reference now-fixed issues in a misleading way
@@ -159,6 +169,7 @@ Line 70 said `VersionRange(min, max *Version) panics on an inverted range (min >
 40. Consider whether the issue/PR templates are adequate for public consumers
 
 ### Consumer readiness
+
 41. Verify `library-policy` can actually `go get` this module now that it's public
 42. Prepare a migration plan for `library-policy` to adopt this SDK
 43. Consider whether `go-linter-sdk` adoption should be revisited
@@ -166,6 +177,7 @@ Line 70 said `VersionRange(min, max *Version) panics on an inverted range (min >
 45. Consider whether a "used by" section should be added once consumers adopt
 
 ### Hardening
+
 46. Add `SECURITY.md` to `.github/` directory (GitHub convention) instead of repo root
 47. Consider adding `govulncheck` as a periodic scheduled job
 48. Consider adding dependency-review-action for PRs
@@ -186,14 +198,14 @@ Line 70 said `VersionRange(min, max *Version) panics on an inverted range (min >
 
 ## Summary
 
-| Area | State |
-|------|-------|
-| Historical docs audit | Clean — no secrets, private repo refs acceptable |
-| GitHub topics | Set (7 topics) |
-| CONTRIBUTING.md | Fixed (GOWORK=off + panic-free correction) |
-| README | GOWORK=off note added |
-| SECURITY.md | Created |
-| CI | Green, optimized (37s quality gate via golangci-lint-action) |
-| pkg.go.dev | Fully indexed — but serving old README |
-| Branch protection | Not configured (blocked on auto-git daemon decision) |
-| Quality gate | Passes (test, lint, build) |
+| Area                  | State                                                        |
+| --------------------- | ------------------------------------------------------------ |
+| Historical docs audit | Clean — no secrets, private repo refs acceptable             |
+| GitHub topics         | Set (7 topics)                                               |
+| CONTRIBUTING.md       | Fixed (GOWORK=off + panic-free correction)                   |
+| README                | GOWORK=off note added                                        |
+| SECURITY.md           | Created                                                      |
+| CI                    | Green, optimized (37s quality gate via golangci-lint-action) |
+| pkg.go.dev            | Fully indexed — but serving old README                       |
+| Branch protection     | Not configured (blocked on auto-git daemon decision)         |
+| Quality gate          | Passes (test, lint, build)                                   |
