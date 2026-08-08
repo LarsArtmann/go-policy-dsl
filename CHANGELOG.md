@@ -41,68 +41,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `VersionRange(min, max *Version)` no longer panics on inverted ranges.
     Detect `min > max` via `PolicySpec.Validate()`, which returns
     `*InvertedVersionRangeError`.
-- **Renamed** `GoVersionRange` → `VersionRange`, `GoVersionMin` → `VersionMin`,
-  `GoVersionMax` → `VersionMax`. The old names lied — they constrain the
-  _library_ version, not the Go toolchain.
-- **Retyped** `PolicySpec.VersionMin` / `VersionMax` from `string` to `*Version`,
-  and `Builder.VersionRange` from `(string, string)` to `(*Version, *Version)`.
-  `nil` on either side means unbounded (was the empty string). Migrate by
-  parsing each bound with `ParseVersion` before the chain.
-- **Replaced** `PolicySpec.CompanionOnly bool` with a typed `Mode` enum
-  (`ModeBan` / `ModeCompanionOnly`). `AsCompanionOnly()` sets
-  `ModeCompanionOnly`; consumers read `spec.Mode != ModeCompanionOnly` for
-  ban-active. The zero-value `Mode` (`""`) is treated as ban-active.
-- **Retyped** `PolicySpec.Alternatives` from `[]string` to `[]Replacement`, and
-  `WithAlternatives(...string)` to `WithAlternatives(...Replacement)`. `Suggest`
-  appends the **full** `Replacement` (both `Library` and `Reason`) instead of
-  discarding the reason. Access `alt.Library` where you read a bare name before.
-- **Retyped** `PolicySpec.CVEs` from `[]string` to `[]CVE`, and
-  `WithCVEs(...string)` to `WithCVEs(...CVE)`. Build CVEs via `NewCVE(id)`
-  (validates `CVE-YYYY-NNNN`); invalid identifiers can no longer reach a spec.
-- `Validate()` now returns a concrete `*InvertedVersionRangeError` (with
-  `Min`/`Max` fields) instead of a generic wrapped `error`.
-  `errors.Is(err, ErrInvertedVersionRange)` still works via the type's `Is`
-  method.
 
 ### Added
 
-- **`Version` type** — stdlib-only parsed semver-lite (`{Major, Minor, Patch}`)
-  with `NewVersion`, `ParseVersion`, and `String` / `Compare` / `Before` /
-  `After` / `Equal`. Enables compile-time-checked version bounds with no semver
-  dependency.
-- **`PolicySpec.Validate()`** — structural validation returning
-  `*InvertedVersionRangeError`. Checks the version-range invariant; domain rules
-  remain the consumer's job. `Spec()` stays validation-free.
-- **`Mode` typed enum** (`ModeBan` / `ModeCompanionOnly`) — deny-by-default:
-  the only value that suppresses the ban finding is `ModeCompanionOnly`; every
-  other value (empty string, `ModeBan`, unknown strings) is ban-active.
-- **`CVE` branded type** with `NewCVE(id)` validating `CVE-YYYY-NNNN`.
-- **`SuggestExplicit(r Replacement)`** — the no-magic counterpart to `Suggest`:
-  appends a replacement without deriving `Description`.
-- **`Version.Compare`** uses stdlib `cmp.Compare` (replaces hand-rolled sign
-  logic, eliminates integer overflow edge case).
-
-### Fixed
-
-- Package doc example now compiles: `policydsl.Replacement(...)` (a type, not
-  callable) → `policydsl.NewReplacement(library, reason)`.
-- LICENSE corrected from proprietary to **MIT**, matching the README and all
-  sibling LarsArtmann SDK libraries.
-- Removed a phantom `Require` builder referenced in docs that never existed in
-  code.
+- **`Version.Compare`** uses stdlib `cmp.Compare` (replaces hand-rolled
+  `cmpSign` sign logic, eliminates integer overflow edge case).
 
 ### Internal
 
-- Rewrote the test suite as an external `policydsl_test` package with
-  `t.Parallel()` on every test (exercises only the exported API, race-clean).
-- `erraudit ./...` reports 0 violations — panic-free contract verified.
 - In-repo regression guard `TestNoPanicsInNonTestSource` parses every non-test
-  `.go` file and fails if any contains a `panic(` call expression.
-- GitHub Actions CI: build, vet, test -race, `golangci-lint run`,
-  `golangci-lint fmt` drift check, fuzz targets (`FuzzParseVersion`,
-  `FuzzBuilder_PatternsOpaque`).
-- `docs/DOMAIN_LANGUAGE.md`, `FEATURES.md`, `TODO_LIST.md`, `ROADMAP.md`,
-  `CODEOWNERS`, issue/PR templates, `.github/dependabot.yml`.
+  `.go` file via `go/parser` and fails if any contains a `panic(` call
+  expression.
+- `erraudit ./...` reports 0 violations — panic-free contract verified.
+- `testhelpers_test.go` for shared test utilities.
+- `TestBan_SetsModeBan` and `TestMode_DenyByDefaultContract` pin the
+  deny-by-default Mode contract; `TestBuilder_VersionRange_UnboundedMin` and
+  `TestBuilder_VersionRange_InvertedDeferToValidate` pin the panic-free
+  `VersionRange` behaviour.
+- Documented the panic-free contract, no-struct-tags policy, and Mode
+  deny-by-default contract in `AGENTS.md`.
+- GitHub Actions CI fuzz job running both fuzz targets for 30s each on every
+  push and PR.
+- `.github/dependabot.yml` for automatic GitHub Actions version bumps.
+- Removed dead `errMustCommit bool` field from the `TestNewVersion` struct.
 
 ## [0.1.0] - 2026-07-26
 
@@ -146,6 +107,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `t.Parallel()`.
 - `docs/DOMAIN_LANGUAGE.md`, `FEATURES.md`, `TODO_LIST.md`, `ROADMAP.md`,
   `CONTRIBUTING.md`.
-- GitHub Actions CI workflow, `.github/dependabot.yml`, `CODEOWNERS`, issue/PR
-  templates.
+- GitHub Actions CI workflow, `CODEOWNERS`, issue/PR templates.
 - MIT `LICENSE`.
