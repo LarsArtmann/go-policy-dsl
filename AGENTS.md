@@ -11,7 +11,7 @@ go test ./...                 # all tests
 golangci-lint run ./...       # lint (uses .golangci.yml, v2 format)
 golangci-lint fmt ./...       # apply formatters (gci, goimports, gofumpt)
 go build ./...                # build check
-erraudit ./...                # hierarchical error analysis (0 violations — the library is panic-free)
+erraudit ./...                # hierarchical error analysis (0 panics on errors, 0 silent swallows — panic-free)
 ```
 
 No `flake.nix` — this is a tiny stdlib-only library; buildflow handles CI. Module: `github.com/larsartmann/go-policy-dsl`, Go 1.26.5.

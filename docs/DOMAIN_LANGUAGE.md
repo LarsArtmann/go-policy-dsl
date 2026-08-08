@@ -418,7 +418,8 @@ constructors (no `MustCVE`, `MustNewVersion`, `MustParseVersion`) and no
 cannot propagate a returned error mid-chain, so any method that can fail lives
 _outside_ the chain as a free function returning `(T, error)`. Pinned by
 `TestNoPanicsInNonTestSource` (parses every non-test `.go` file via `go/parser`
-and fails if any contains a `panic(` call) and `erraudit ./...` (0 violations).
+and fails if any contains a `panic(` call) and `erraudit ./...` (0 panics on
+errors, 0 silent swallows).
 
 ### Deny-by-Default
 

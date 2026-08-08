@@ -57,7 +57,7 @@ bare methods (`ImportPatterns`, `GoModPatterns`, `ExcludeIfContains`,
 `ExcludeIfTransitiveFrom`, `RequireIfContains`) append. `RequireIfContains` is a
 content gate — when non-empty, the policy only activates if at least one declared
 string appears in the matched file content (the inverse of `ExcludeIfContains`).
-Evidence: `policy.go:67`, `builder.go:44-80`, `builder.go:146-154`, tested by
+Evidence: `policy.go:84`, `builder.go:59-106`, tested by
 `TestBuilder_DetectVia_Replaces`, `TestBuilder_AppendDetectionHelpers`,
 `TestImportPattern`, `TestGoModPattern`.
 
@@ -91,11 +91,12 @@ but a reader of go.mod cannot see that exemption). Evidence:
 
 ### Severity and Category enums
 
-`Severity` (`critical` / `high` / `moderate` / `low` / `info`) and
-`Category` (`security` / `performance` / `maintainability` / `correctness` /
-`licensing` / `compatibility` / `configuration`) are `string` aliases so the
-DSL stays dependency-free. Consumers bridge to their own severity/category
-types at the boundary. Evidence: `policy.go:26-63`.
+`Severity` (`critical` / `high` / `moderate` / `low` / `info` / `recommended` /
+`deprecated` / `obsolete`) and `Category` (`security` / `performance` /
+`maintenance` / `deprecation` / `architecture` / `correctness` / `licensing` /
+`compatibility` / `configuration`) are `string` aliases so the DSL stays
+dependency-free. Consumers bridge to their own severity/category types at the
+boundary. Evidence: `policy.go:29-82`.
 
 ### CVE tagging (validated)
 
@@ -124,10 +125,11 @@ Evidence: `policy.go`, tested by `TestBuilder_RequiresCompanionAndAsCompanionOnl
 ### Panic-free contract
 
 The library **never panics**. Every error condition is returned, never
-panicked. No `Must*` constructors exist. This is verified at two levels:
-`erraudit ./...` (0 violations) and an in-repo regression test
-(`TestNoPanicsInNonTestSource`) that parses every non-test `.go` file via
-`go/parser` and fails if any contains a `panic(` call expression. Evidence:
+panicked. No `Must*` constructors exist. This is verified at two
+levels: `erraudit ./...` (0 panics on errors, 0 silent swallows) and an in-repo
+regression test (`TestNoPanicsInNonTestSource`) that parses every non-test
+`.go` file via `go/parser` and fails if any contains a `panic(` call
+expression. Evidence:
 `AGENTS.md` "Panic-Free" section, `panic_free_test.go`.
 
 ### Opaque-pattern contract (fuzz-pinned)
