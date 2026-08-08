@@ -183,7 +183,9 @@ func TestBuilder_AppendDetectionHelpers(t *testing.T) {
 		},
 		{
 			name: "RequireIfContains",
-			call: func(b *policydsl.Builder) *policydsl.Builder { return b.RequireIfContains("http.ServeMux", "http.ResponseWriter") },
+			call: func(b *policydsl.Builder) *policydsl.Builder {
+				return b.RequireIfContains("http.ServeMux", "http.ResponseWriter")
+			},
 			got:  func(d policydsl.Detection) []string { return d.RequireIfContains },
 			want: []string{"http.ServeMux", "http.ResponseWriter"},
 		},
