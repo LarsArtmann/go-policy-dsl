@@ -102,26 +102,26 @@ panics; it returns errors.
 
 ### Builder methods
 
-| Method                             | Effect                                                          |
-| ---------------------------------- | --------------------------------------------------------------- |
-| `Because(reason)`                  | Sets the human-readable reason (required)                       |
-| `WithSeverity(s)`                  | Overrides the default severity                                  |
-| `WithCategory(c)`                  | Overrides the default category                                  |
-| `DetectVia(d)`                     | Sets the full `Detection` (import + go.mod + exclusions)        |
-| `ImportPatterns(p...)`             | Adds source-import patterns                                     |
-| `GoModPatterns(p...)`              | Adds go.mod-path patterns                                       |
-| `ExcludeIfContains(p...)`          | Suppressions: if string appears, no violation                   |
+| Method                             | Effect                                                           |
+| ---------------------------------- | ---------------------------------------------------------------- |
+| `Because(reason)`                  | Sets the human-readable reason (required)                        |
+| `WithSeverity(s)`                  | Overrides the default severity                                   |
+| `WithCategory(c)`                  | Overrides the default category                                   |
+| `DetectVia(d)`                     | Sets the full `Detection` (import + go.mod + exclusions)         |
+| `ImportPatterns(p...)`             | Adds source-import patterns                                      |
+| `GoModPatterns(p...)`              | Adds go.mod-path patterns                                        |
+| `ExcludeIfContains(p...)`          | Suppressions: if string appears, no violation                    |
 | `RequireIfContains(p...)`          | Content gate: policy only fires when at least one string appears |
-| `ExcludeIfTransitiveFrom(libs...)` | Parent libs that justify transitive presence                    |
-| `WithDescription(desc)`            | Detailed description for reporting                              |
-| `Suggest(r)`                       | Adds a recommended replacement (full `Replacement`)             |
-| `SuggestExplicit(r)`               | Adds a replacement WITHOUT deriving `Description`               |
-| `WithAlternatives(alts...)`        | Sets `[]Replacement` alternatives directly (set)                |
-| `WithCVEs(cves...)`                | Tags with validated `CVE` values                                |
-| `VersionRange(min, max)`           | Inclusive library version constraints (not Go version)          |
-| `RequiresCompanion(c)`             | Adds a required companion spec                                  |
-| `AsCompanionOnly()`                | Sets `Mode = ModeCompanionOnly` (never ban; enforce companions) |
-| `Spec()`                           | Returns the finished `PolicySpec`                               |
+| `ExcludeIfTransitiveFrom(libs...)` | Parent libs that justify transitive presence                     |
+| `WithDescription(desc)`            | Detailed description for reporting                               |
+| `Suggest(r)`                       | Adds a recommended replacement (full `Replacement`)              |
+| `SuggestExplicit(r)`               | Adds a replacement WITHOUT deriving `Description`                |
+| `WithAlternatives(alts...)`        | Sets `[]Replacement` alternatives directly (set)                 |
+| `WithCVEs(cves...)`                | Tags with validated `CVE` values                                 |
+| `VersionRange(min, max)`           | Inclusive library version constraints (not Go version)           |
+| `RequiresCompanion(c)`             | Adds a required companion spec                                   |
+| `AsCompanionOnly()`                | Sets `Mode = ModeCompanionOnly` (never ban; enforce companions)  |
+| `Spec()`                           | Returns the finished `PolicySpec`                                |
 
 ### Types
 
@@ -130,7 +130,7 @@ panics; it returns errors.
 | `Severity`      | `SeverityCritical` / `SeverityHigh` / `SeverityModerate` / `SeverityLow` / `SeverityInfo`                                                                                |
 | `Category`      | `CategorySecurity` / `CategoryPerformance` / `CategoryMaintainability` / `CategoryCorrectness` / `CategoryLicensing` / `CategoryCompatibility` / `CategoryConfiguration` |
 | `Mode`          | `ModeBan` (default: emit ban + enforce companions) / `ModeCompanionOnly` (suppress ban, enforce only companions)                                                         |
-| `Detection`     | How a violation is found: `ImportPatterns`, `GoModPatterns`, `ExcludeIfContains`, `ExcludeIfTransitiveFrom`, `RequireIfContains`                              |
+| `Detection`     | How a violation is found: `ImportPatterns`, `GoModPatterns`, `ExcludeIfContains`, `ExcludeIfTransitiveFrom`, `RequireIfContains`                                         |
 | `Replacement`   | Recommended swap-in: `Library`, `Reason`                                                                                                                                 |
 | `CompanionSpec` | Required companion library                                                                                                                                               |
 | `CVE`           | Validated `CVE-YYYY-NNNN` identifier (branded `string`)                                                                                                                  |
