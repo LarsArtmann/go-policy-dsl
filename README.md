@@ -217,6 +217,9 @@ golangci-lint run ./...  # lint (0 issues)
 golangci-lint fmt ./...  # format check / apply
 ```
 
+> If you have a parent `go.work` that doesn't include this module, prefix
+> commands with `GOWORK=off` (e.g. `GOWORK=off go test ./...`).
+
 ## License
 
 [MIT](LICENSE)

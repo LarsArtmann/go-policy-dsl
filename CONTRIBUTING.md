@@ -16,7 +16,7 @@ The project is a **stdlib-only, zero-dependency** public SDK library. There is
 no `flake.nix` (intentional — buildflow handles CI for this tiny module); all
 you need is Go 1.26+ and `golangci-lint`.
 
-## The Quality Gate (run all four before pushing)
+## The Quality Gate (run all before pushing)
 
 ```bash
 go build ./...                 # build check
@@ -25,6 +25,9 @@ go vet ./...                   # vet
 golangci-lint run ./...        # lint (uses .golangci.yml, v2 format)
 golangci-lint fmt ./...        # apply formatters (gci, goimports, gofumpt, golines@120)
 ```
+
+> If you have a parent `go.work` that doesn't include this module, prefix
+> commands with `GOWORK=off` (e.g. `GOWORK=off go test ./...`).
 
 `golangci-lint fmt` is the **last** command before declaring done — formatter
 drift must never land. If it changes anything, re-review and re-run.
@@ -67,7 +70,9 @@ These are intentional and pinned by tests; see `AGENTS.md` for full detail:
 
 - `Suggest(r Replacement)` derives `Description` from the replacement when
   `Description` is empty (and never overwrites an explicit one).
-- `VersionRange(min, max *Version)` panics on an inverted range (`min > max`).
+- `VersionRange(min, max *Version)` does NOT panic on an inverted range
+  — the library is panic-free by design. Detect `min > max` via
+  `PolicySpec.Validate()`, which returns `*InvertedVersionRangeError`.
 - `Spec()` performs no validation; structural validation lives in the separate
   `PolicySpec.Validate()` method.
 
