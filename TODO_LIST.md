@@ -5,12 +5,12 @@ evidence (code path or source report). When an item ships, it is **removed**
 from this file and recorded in `CHANGELOG.md` — completed work never lives
 here. Vague or unbounded ideas belong in `ROADMAP.md`, not here.
 
-> **Harvest log:** items T1–T6 shipped in prior sessions (see `CHANGELOG.md`
-> `[Unreleased]`). T7 shipped — `library-policy` migrated to the SDK (see
-> `CHANGELOG.md` `[0.2.0]` and the `[Unreleased]` section for the
-> `RequireIfContains` addition). T8–T16 shipped in the 2026-07-26 session (see
-> `CHANGELOG.md` `[Unreleased]` for details).
-
 ---
 
 _No open items._
+
+The library is stable at v0.3.0 (tests pass, lint clean, panic-free). The
+forward-looking work — `library-policy` migration, domain validation
+expansion, matcher subpackage, LSP server, docs website — lives in
+`ROADMAP.md`. When any of those graduates into a bounded, estimable task, it
+moves here.

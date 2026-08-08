@@ -102,22 +102,33 @@ and companion, and adding it would be speculative API surface (YAGNI). A
 phantom `Require` once appeared in package docs by mistake and was removed.
 It will not become real unless a concrete consumer demand appears.
 
+### Open question: are all `Severity` values earning their keep?
+
+The enum ships eight values (`critical` through `obsolete`). The first five
+are battle-tested via consumer mappings; the last three (`recommended`,
+`deprecated`, `obsolete`) have no known consumer yet. They may be
+over-engineered, or they may prove useful once `library-policy` and
+`go-linter-sdk` adopt the DSL. No action until a consumer either uses or
+confirms they don't need them.
+
 ---
 
 ## Direction: release & visibility
 
 ### Go module proxy / GOPROXY visibility
 
-Verify the module is visible on `proxy.golang.org` after the first tag. The
-pkg.go.dev badge in README links to the module; confirm it resolves
-post-publish. The repo is currently private — the proxy check is only
-relevant if visibility flips to public.
+The repo is **public** and all three versions (v0.1.0–v0.3.0) are confirmed
+indexed on `proxy.golang.org`. pkg.go.dev renders the full module page (API
+docs, examples, README). No action needed unless a future tag fails to
+propagate — re-index is triggered by a new tag or a manual
+`go get @latest` + pkg.go.dev request.
 
 ### Release automation
 
-Tag → pkg.go.dev update. Decide between a manual tag-and-push flow or a
-GitHub Action. Low urgency until the first consumer is ready to pin a
-version.
+Tag → pkg.go.dev update currently uses a manual tag-and-push flow. A GitHub
+Action that creates a GitHub release from `CHANGELOG.md` sections (and
+optionally generates an SBOM) would reduce manual steps. Low urgency until the
+first consumer is ready to pin a version.
 
 ---
 
@@ -134,3 +145,22 @@ widens; pkg.go.dev + README cover the current audience.
 A runnable bridge sample makes the dependency-free `Severity` design
 concrete for consumer authors (the README has one; a godoc `Example*` would
 round out the surface). Low urgency until the first consumer cutover.
+
+---
+
+## Direction: CI & infrastructure
+
+### Branch protection
+
+Master has no required status checks — the auto-git daemon commits directly.
+A public repo should enforce at minimum "CI green before merge," but this
+conflicts with the daemon's direct-push workflow. Resolving this needs a user
+decision (daemon bypass, daemon-via-PR, or CI-only gate without review).
+
+### CI hardening ideas
+
+Raw ideas, not committed: add `govulncheck` (periodic or per-PR), test
+coverage reporting with a threshold gate, a Go versions matrix, and
+`actionlint` to catch malformed workflow YAML. The current CI is fast (37s
+quality gate via `golangci-lint-action`) and green; these are polish, not
+gaps.

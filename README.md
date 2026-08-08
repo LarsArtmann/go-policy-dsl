@@ -130,6 +130,7 @@ var NetHTTPServerOnly = policydsl.Ban("net/http").
 | `Suggest(r)`                       | Adds a recommended replacement (full `Replacement`)              |
 | `SuggestExplicit(r)`               | Adds a replacement WITHOUT deriving `Description`                |
 | `WithAlternatives(alts...)`        | Sets `[]Replacement` alternatives directly (set)                 |
+| `WithAlternativeStrings(libs...)`  | Sets alternatives from raw module paths (empty `Reason`)         |
 | `WithCVEs(cves...)`                | Tags with validated `CVE` values                                 |
 | `VersionRange(min, max)`           | Inclusive library version constraints (not Go version)           |
 | `RequiresCompanion(c)`             | Adds a required companion spec                                   |
@@ -142,8 +143,8 @@ Method-naming convention: `With<X>` = set/replace the field wholesale; bare `<X>
 
 | Type            | Purpose                                                                                                                                                              |
 | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Severity`      | `SeverityCritical` / `SeverityHigh` / `SeverityModerate` / `SeverityLow` / `SeverityInfo`                                                                            |
-| `Category`      | `CategorySecurity` / `CategoryPerformance` / `CategoryMaintenance` / `CategoryCorrectness` / `CategoryLicensing` / `CategoryCompatibility` / `CategoryConfiguration` |
+| `Severity`      | `SeverityCritical` / `SeverityHigh` / `SeverityModerate` / `SeverityLow` / `SeverityInfo` / `SeverityRecommended` / `SeverityDeprecated` / `SeverityObsolete`       |
+| `Category`      | `CategorySecurity` / `CategoryPerformance` / `CategoryMaintenance` / `CategoryDeprecation` / `CategoryArchitecture` / `CategoryCorrectness` / `CategoryLicensing` / `CategoryCompatibility` / `CategoryConfiguration` |
 | `Mode`          | `ModeBan` (default: emit ban + enforce companions) / `ModeCompanionOnly` (suppress ban, enforce only companions)                                                     |
 | `Detection`     | How a violation is found: `ImportPatterns`, `GoModPatterns`, `ExcludeIfContains`, `ExcludeIfTransitiveFrom`, `RequireIfContains`                                     |
 | `Replacement`   | Recommended swap-in: `Library`, `Reason`                                                                                                                             |
