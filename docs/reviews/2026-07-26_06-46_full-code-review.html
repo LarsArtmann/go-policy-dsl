@@ -3,7 +3,9 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Full Code Review &middot; go-policy-dsl &middot; 2026-07-26</title>
+		<title>
+			Full Code Review &middot; go-policy-dsl &middot; 2026-07-26
+		</title>
 		<style>
 			/* =========================================================================
          BAUHAUS DARK — Dashboard template
@@ -49,15 +51,39 @@
 				--ink-secondary: var(--text-muted);
 				--ink-muted: var(--text-faint);
 				--rose: var(--problem);
-				--rose-glow: color-mix(in srgb, var(--problem) 15%, transparent);
+				--rose-glow: color-mix(
+					in srgb,
+					var(--problem) 15%,
+					transparent
+				);
 				--emerald: var(--solution);
-				--emerald-glow: color-mix(in srgb, var(--solution) 15%, transparent);
-				--amber-glow: color-mix(in srgb, var(--warning) 15%, transparent);
+				--emerald-glow: color-mix(
+					in srgb,
+					var(--solution) 15%,
+					transparent
+				);
+				--amber-glow: color-mix(
+					in srgb,
+					var(--warning) 15%,
+					transparent
+				);
 				--coral: var(--problem);
-				--coral-light: color-mix(in srgb, var(--problem) 15%, transparent);
+				--coral-light: color-mix(
+					in srgb,
+					var(--problem) 15%,
+					transparent
+				);
 				--teal: var(--solution);
-				--teal-light: color-mix(in srgb, var(--solution) 15%, transparent);
-				--amber-light: color-mix(in srgb, var(--warning) 20%, transparent);
+				--teal-light: color-mix(
+					in srgb,
+					var(--solution) 15%,
+					transparent
+				);
+				--amber-light: color-mix(
+					in srgb,
+					var(--warning) 20%,
+					transparent
+				);
 
 				/* --- Shape --- */
 				--radius: 0px; /* Bauhaus default: sharp corners */
@@ -65,14 +91,14 @@
 
 				/* --- Type stacks (system only — zero external fonts) --- */
 				--font-heading:
-					ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-					Helvetica, Arial, sans-serif;
+					ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+					"Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 				--font-body:
-					ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-					Helvetica, Arial, sans-serif;
+					ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+					"Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 				--font-mono:
-					ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
-					monospace;
+					ui-monospace, "Cascadia Code", "Source Code Pro",
+					"JetBrains Mono", Menlo, Consolas, monospace;
 			}
 
 			* {
@@ -289,15 +315,27 @@
 			}
 			.card-problem {
 				border-left-color: var(--problem);
-				background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+				background: color-mix(
+					in srgb,
+					var(--problem) 8%,
+					var(--surface-raised)
+				);
 			}
 			.card-solution {
 				border-left-color: var(--solution);
-				background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+				background: color-mix(
+					in srgb,
+					var(--solution) 8%,
+					var(--surface-raised)
+				);
 			}
 			.card-warning {
 				border-left-color: var(--warning);
-				background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+				background: color-mix(
+					in srgb,
+					var(--warning) 8%,
+					var(--surface-raised)
+				);
 			}
 
 			/* --- Issue cards --- */
@@ -310,15 +348,27 @@
 			}
 			.issue-critical {
 				border-left-color: var(--problem);
-				background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+				background: color-mix(
+					in srgb,
+					var(--problem) 8%,
+					var(--surface-raised)
+				);
 			}
 			.issue-important {
 				border-left-color: var(--warning);
-				background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+				background: color-mix(
+					in srgb,
+					var(--warning) 8%,
+					var(--surface-raised)
+				);
 			}
 			.issue-nice {
 				border-left-color: var(--solution);
-				background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+				background: color-mix(
+					in srgb,
+					var(--solution) 8%,
+					var(--surface-raised)
+				);
 			}
 			.issue h3 {
 				margin-bottom: 0.3rem;
@@ -401,7 +451,11 @@
 			}
 			.callout-solution {
 				border-left-color: var(--solution);
-				background: color-mix(in srgb, var(--solution) 10%, transparent);
+				background: color-mix(
+					in srgb,
+					var(--solution) 10%,
+					transparent
+				);
 			}
 			.callout-warning {
 				border-left-color: var(--warning);
@@ -832,12 +886,15 @@
 						<div class="square"></div>
 						<div class="tri"></div>
 					</div>
-					<div class="hero-badge">Full Code Review &middot; go-policy-dsl</div>
+					<div class="hero-badge">
+						Full Code Review &middot; go-policy-dsl
+					</div>
 					<h1>policydsl — SDK Quality Audit</h1>
 					<p class="hero-subtitle">
-						Deep review of every source/test file in a stdlib-only Go policy DSL. 7 findings: 3
-						critical naming/correctness fixes applied on the spot, 100% statement coverage restored,
-						lint back to 0 issues.
+						Deep review of every source/test file in a stdlib-only
+						Go policy DSL. 7 findings: 3 critical naming/correctness
+						fixes applied on the spot, 100% statement coverage
+						restored, lint back to 0 issues.
 					</p>
 				</div>
 
@@ -864,17 +921,26 @@
 						>Update &middot; 2026-07-26</strong
 					>
 					<p style="margin-top: 0.5rem; color: var(--text)">
-						This audit captured the API at a single point in time. The rename it proposes &mdash;
-						<code>GoVersionRange</code> &rarr; <code>VersionRange</code> (and
-						<code>GoVersionMin/Max</code> &rarr; <code>VersionMin/Max</code>) &mdash;
-						<strong>shipped</strong>, then was superseded twice more: the bounds were retyped
-						<code>string</code> &rarr; <code>*Version</code>, and the library went
-						<strong>panic-free</strong> (the <code>Must*</code> constructors and
-						<code>VersionRangeStrings</code> were removed). Wherever this report shows
-						<code>GoVersionRange(min, max string)</code>, the current API is
-						<code>VersionRange(min, max *Version)</code> with inversion detected by
-						<code>PolicySpec.Validate()</code>, not at construction. See
-						<code>CHANGELOG.md</code> &rarr; <code>[Unreleased]</code> for the full breaking-change
+						This audit captured the API at a single point in time.
+						The rename it proposes &mdash;
+						<code>GoVersionRange</code> &rarr;
+						<code>VersionRange</code> (and
+						<code>GoVersionMin/Max</code> &rarr;
+						<code>VersionMin/Max</code>) &mdash;
+						<strong>shipped</strong>, then was superseded twice
+						more: the bounds were retyped <code>string</code> &rarr;
+						<code>*Version</code>, and the library went
+						<strong>panic-free</strong> (the
+						<code>Must*</code> constructors and
+						<code>VersionRangeStrings</code> were removed). Wherever
+						this report shows
+						<code>GoVersionRange(min, max string)</code>, the
+						current API is
+						<code>VersionRange(min, max *Version)</code> with
+						inversion detected by
+						<code>PolicySpec.Validate()</code>, not at construction.
+						See <code>CHANGELOG.md</code> &rarr;
+						<code>[Unreleased]</code> for the full breaking-change
 						history.
 					</p>
 				</div>
@@ -913,62 +979,85 @@
 					</div>
 				</div>
 				<p style="color: var(--text-muted); max-width: 70ch">
-					The library is small (395 LOC across <code>policy.go</code>, <code>builder.go</code>,
-					<code>policy_test.go</code>) and architecturally sound: a fluent, dependency-free DSL with
-					sensible defaults. The review surfaced three real defects — a
-					<strong>naming lie on the public API</strong>, a
+					The library is small (395 LOC across <code>policy.go</code>,
+					<code>builder.go</code>, <code>policy_test.go</code>) and
+					architecturally sound: a fluent, dependency-free DSL with
+					sensible defaults. The review surfaced three real defects —
+					a <strong>naming lie on the public API</strong>, a
 					<strong>phantom feature advertised in docs</strong>, and
 					<strong>7 stale lint failures</strong>
-					that contradicted AGENTS.md&rsquo;s &ldquo;0 issues&rdquo; claim. All three were fixed on
-					the spot because the project has zero shipped consumers (pre-1.0), making now the cheapest
-					moment to correct them.
+					that contradicted AGENTS.md&rsquo;s &ldquo;0 issues&rdquo;
+					claim. All three were fixed on the spot because the project
+					has zero shipped consumers (pre-1.0), making now the
+					cheapest moment to correct them.
 				</p>
 
 				<!-- Findings as Cards -->
 				<h2 id="findings"><span class="num">01</span>Findings</h2>
 
 				<div class="card card-problem">
-					<h4>Naming lie: GoVersionRange constrains the library, not Go</h4>
+					<h4>
+						Naming lie: GoVersionRange constrains the library, not
+						Go
+					</h4>
 					<p>
-						<code>GoVersionRange(min, max)</code> / <code>GoVersionMin</code> /
-						<code>GoVersionMax</code> claimed to constrain the Go toolchain. Both AGENTS.md and the
-						README example admitted the opposite: &ldquo;applies to the
-						<em>library&rsquo;s</em> version constraint, not Go itself.&rdquo; A name the docs must
-						apologise for is a name that lies. On a public API this is structural debt that
-						compounds — impossible to cheaply rename once a consumer exists. Zero consumers +
-						pre-1.0 = the window to fix it is now.
+						<code>GoVersionRange(min, max)</code> /
+						<code>GoVersionMin</code> /
+						<code>GoVersionMax</code> claimed to constrain the Go
+						toolchain. Both AGENTS.md and the README example
+						admitted the opposite: &ldquo;applies to the
+						<em>library&rsquo;s</em> version constraint, not Go
+						itself.&rdquo; A name the docs must apologise for is a
+						name that lies. On a public API this is structural debt
+						that compounds — impossible to cheaply rename once a
+						consumer exists. Zero consumers + pre-1.0 = the window
+						to fix it is now.
 					</p>
 				</div>
 
 				<div class="card card-problem">
-					<h4>Phantom &ldquo;Require&rdquo; builder advertised but unimplemented</h4>
+					<h4>
+						Phantom &ldquo;Require&rdquo; builder advertised but
+						unimplemented
+					</h4>
 					<p>
-						The package doc and the <code>PolicySpec</code> doc both referenced a
-						<code>Require</code> builder (<code>&ldquo;bans, requirements, companions&rdquo;</code>
-						/ <code>&ldquo;Ban/Require/Companion&rdquo;</code>), but only <code>Ban</code> and
-						<code>Companion</code> exist. A consumer reading the doc would search for a function
+						The package doc and the <code>PolicySpec</code> doc both
+						referenced a <code>Require</code> builder (<code
+							>&ldquo;bans, requirements, companions&rdquo;</code
+						>
+						/ <code>&ldquo;Ban/Require/Companion&rdquo;</code>), but
+						only <code>Ban</code> and <code>Companion</code> exist.
+						A consumer reading the doc would search for a function
 						that is not there. This is a documentation lie.
 					</p>
 				</div>
 
 				<div class="card card-warning">
-					<h4>AGENTS.md &ldquo;0 lint issues&rdquo; claim was stale</h4>
+					<h4>
+						AGENTS.md &ldquo;0 lint issues&rdquo; claim was stale
+					</h4>
 					<p>
 						The linter config was tightened on 2026-07-25 (enabling
-						<code>paralleltest</code> + <code>testpackage</code>) but the test file was never
-						updated. Actual run: 7 issues. The status report&rsquo;s &ldquo;0 issues&rdquo; was true
-						on 2026-07-19 but had silently rotted. Fixed by rewriting the test file (external
-						package, <code>t.Parallel()</code>), restoring the claim to truth.
+						<code>paralleltest</code> + <code>testpackage</code>)
+						but the test file was never updated. Actual run: 7
+						issues. The status report&rsquo;s &ldquo;0 issues&rdquo;
+						was true on 2026-07-19 but had silently rotted. Fixed by
+						rewriting the test file (external package,
+						<code>t.Parallel()</code>), restoring the claim to
+						truth.
 					</p>
 				</div>
 
 				<div class="card card-solution">
 					<h4>Suggest side-effect was undocumented in tests</h4>
 					<p>
-						<code>Suggest(r)</code> mutates <code>Description</code> when empty — a genuinely
-						surprising behaviour. It was documented in AGENTS.md but had
-						<strong>no test pinning it</strong>, so a silent regression could pass CI. Added three
-						dedicated tests (derives, preserves-explicit, multiple-appends) that lock the contract.
+						<code>Suggest(r)</code> mutates
+						<code>Description</code> when empty — a genuinely
+						surprising behaviour. It was documented in AGENTS.md but
+						had <strong>no test pinning it</strong>, so a silent
+						regression could pass CI. Added three dedicated tests
+						(derives, preserves-explicit, multiple-appends) that
+						lock the contract.
 					</p>
 				</div>
 
@@ -978,72 +1067,98 @@
 				<div class="issue issue-critical">
 					<span class="severity severity-critical">Critical</span>
 					<h3>Naming lie on a public API symbol</h3>
-					<div class="where">builder.go:114-120 &middot; policy.go:118-122</div>
+					<div class="where">
+						builder.go:114-120 &middot; policy.go:118-122
+					</div>
 					<p>
-						<code>GoVersionRange</code> / <code>GoVersionMin</code> / <code>GoVersionMax</code>
-						advertised themselves as Go-toolchain constraints. The implementation constrained the
-						<em>library</em> version, and AGENTS.md itself admitted it: &ldquo;applies to the
-						library&rsquo;s version constraint, not Go itself.&rdquo; A name the docs must
-						contradict is a structural defect. Zero shipped consumers + pre-1.0 made this the
-						cheapest moment to fix it.
+						<code>GoVersionRange</code> /
+						<code>GoVersionMin</code> / <code>GoVersionMax</code>
+						advertised themselves as Go-toolchain constraints. The
+						implementation constrained the
+						<em>library</em> version, and AGENTS.md itself admitted
+						it: &ldquo;applies to the library&rsquo;s version
+						constraint, not Go itself.&rdquo; A name the docs must
+						contradict is a structural defect. Zero shipped
+						consumers + pre-1.0 made this the cheapest moment to fix
+						it.
 					</p>
 					<div class="callout callout-solution">
 						<strong>Fixed</strong>
-						Renamed to <code>VersionRange</code> / <code>VersionMin</code> /
-						<code>VersionMax</code>; updated README, AGENTS.md, and the test suite to match.
+						Renamed to <code>VersionRange</code> /
+						<code>VersionMin</code> / <code>VersionMax</code>;
+						updated README, AGENTS.md, and the test suite to match.
 					</div>
 				</div>
 
 				<div class="issue issue-critical">
 					<span class="severity severity-critical">Critical</span>
-					<h3>Phantom &ldquo;Require&rdquo; builder in package docs</h3>
+					<h3>
+						Phantom &ldquo;Require&rdquo; builder in package docs
+					</h3>
 					<div class="where">policy.go:1-8, 103</div>
 					<p>
-						The package doc and the <code>PolicySpec</code> doc both name a
-						<code>Require</code> builder (&ldquo;bans, requirements, companions&rdquo; /
-						&ldquo;Ban/Require/Companion&rdquo;) that does not exist. Only <code>Ban</code> and
-						<code>Companion</code> ship. A consumer reading the doc would hunt for a missing
-						function &mdash; a documentation lie.
+						The package doc and the <code>PolicySpec</code> doc both
+						name a <code>Require</code> builder (&ldquo;bans,
+						requirements, companions&rdquo; /
+						&ldquo;Ban/Require/Companion&rdquo;) that does not
+						exist. Only <code>Ban</code> and
+						<code>Companion</code> ship. A consumer reading the doc
+						would hunt for a missing function &mdash; a
+						documentation lie.
 					</p>
 					<div class="callout callout-solution">
 						<strong>Fixed</strong>
-						Doc strings now say &ldquo;bans and companions&rdquo; / &ldquo;Ban/Companion&rdquo;,
-						matching the real API.
+						Doc strings now say &ldquo;bans and companions&rdquo; /
+						&ldquo;Ban/Companion&rdquo;, matching the real API.
 					</div>
 				</div>
 
 				<div class="issue issue-important">
 					<span class="severity severity-important">High</span>
-					<h3>&ldquo;0 lint issues&rdquo; claim had silently rotted</h3>
-					<div class="where">policy_test.go &middot; .golangci.yml</div>
+					<h3>
+						&ldquo;0 lint issues&rdquo; claim had silently rotted
+					</h3>
+					<div class="where">
+						policy_test.go &middot; .golangci.yml
+					</div>
 					<p>
 						The linter config was tightened 2025-07-25 (enabling
-						<code>paralleltest</code> + <code>testpackage</code>), but the test file was never
-						updated. <code>golangci-lint run</code> returned <strong>7 issues</strong>,
-						contradicting AGENTS.md and the status report. The &ldquo;0 issues&rdquo; claim was once
-						true but had drifted to a lie.
+						<code>paralleltest</code> + <code>testpackage</code>),
+						but the test file was never updated.
+						<code>golangci-lint run</code> returned
+						<strong>7 issues</strong>, contradicting AGENTS.md and
+						the status report. The &ldquo;0 issues&rdquo; claim was
+						once true but had drifted to a lie.
 					</p>
 					<div class="callout callout-solution">
 						<strong>Fixed</strong>
-						Rewrote <code>policy_test.go</code> as external <code>policydsl_test</code> package with
-						<code>t.Parallel()</code> on every test; added <code>depguard</code> to the test
-						exclusions. Restored to <strong>0 issues</strong>.
+						Rewrote <code>policy_test.go</code> as external
+						<code>policydsl_test</code> package with
+						<code>t.Parallel()</code> on every test; added
+						<code>depguard</code> to the test exclusions. Restored
+						to <strong>0 issues</strong>.
 					</div>
 				</div>
 
 				<div class="issue issue-important">
 					<span class="severity severity-important">High</span>
-					<h3>Surprising <code>Suggest</code> side-effect had no test</h3>
+					<h3>
+						Surprising <code>Suggest</code> side-effect had no test
+					</h3>
 					<div class="where">builder.go:90-98</div>
 					<p>
-						<code>Suggest(r)</code> appends to <code>Alternatives</code> <em>and</em> overwrites an
-						empty <code>Description</code>. This is a genuinely surprising behaviour &mdash;
-						documented in AGENTS.md but never pinned by a test, so a silent regression could ship.
+						<code>Suggest(r)</code> appends to
+						<code>Alternatives</code> <em>and</em> overwrites an
+						empty <code>Description</code>. This is a genuinely
+						surprising behaviour &mdash; documented in AGENTS.md but
+						never pinned by a test, so a silent regression could
+						ship.
 					</p>
 					<div class="callout callout-solution">
 						<strong>Fixed</strong>
-						Added three tests: derives-description, preserves-explicit-description, and
-						multiple-appends. The contract is now locked.
+						Added three tests: derives-description,
+						preserves-explicit-description, and multiple-appends.
+						The contract is now locked.
 					</div>
 				</div>
 
@@ -1052,9 +1167,11 @@
 					<h3>CHANGELOG.md is still boilerplate</h3>
 					<div class="where">CHANGELOG.md</div>
 					<p>
-						The &ldquo;[Unreleased]&rdquo; section says only &ldquo;Initial project
-						structure&rdquo;; the real LICENSE fix, doc fix, and this review&rsquo;s rename are
-						unrecorded. Deferred to a follow-up docs-health pass to keep this review scoped.
+						The &ldquo;[Unreleased]&rdquo; section says only
+						&ldquo;Initial project structure&rdquo;; the real
+						LICENSE fix, doc fix, and this review&rsquo;s rename are
+						unrecorded. Deferred to a follow-up docs-health pass to
+						keep this review scoped.
 					</p>
 				</div>
 
@@ -1063,10 +1180,12 @@
 					<h3>Stringly-typed version constraints</h3>
 					<div class="where">policy.go:118-122</div>
 					<p>
-						<code>VersionMin/Max</code> are bare <code>string</code> with empty = unconstrained. A
-						typed <code>Version</code> domain could make invalid ranges unrepresentable &mdash; but
-						that would add parsing/semver logic and break the stdlib-only contract. Accepted
-						tradeoff for now.
+						<code>VersionMin/Max</code> are bare
+						<code>string</code> with empty = unconstrained. A typed
+						<code>Version</code> domain could make invalid ranges
+						unrepresentable &mdash; but that would add
+						parsing/semver logic and break the stdlib-only contract.
+						Accepted tradeoff for now.
 					</p>
 				</div>
 
@@ -1076,10 +1195,14 @@
 					<div class="strength">
 						<div class="check">+</div>
 						<div class="text">
-							<strong>Zero dependencies &mdash; stdlib only</strong>
+							<strong
+								>Zero dependencies &mdash; stdlib only</strong
+							>
 							<span
-								>An SDK any tool (CLI, LSP, golangci plugin, CI check) can adopt without pulling a
-								framework. This is the project&rsquo;s core value proposition and it holds.</span
+								>An SDK any tool (CLI, LSP, golangci plugin, CI
+								check) can adopt without pulling a framework.
+								This is the project&rsquo;s core value
+								proposition and it holds.</span
 							>
 						</div>
 					</div>
@@ -1088,20 +1211,25 @@
 						<div class="text">
 							<strong>Consistent builder convention</strong>
 							<span
-								><code>With-</code> methods replace/set; bare methods (<code>ImportPatterns</code>,
-								<code>Suggest</code>) append. The distinction is uniform across the whole API
-								surface.</span
+								><code>With-</code> methods replace/set; bare
+								methods (<code>ImportPatterns</code>,
+								<code>Suggest</code>) append. The distinction is
+								uniform across the whole API surface.</span
 							>
 						</div>
 					</div>
 					<div class="strength">
 						<div class="check">+</div>
 						<div class="text">
-							<strong>Exemplary architectural-decision docs</strong>
+							<strong
+								>Exemplary architectural-decision docs</strong
+							>
 							<span
-								>AGENTS.md explains the <em>why</em>: root-package placement, string-typed
-								severities, accepted go-structure-linter false-positives. This is exactly what
-								session context docs should contain.</span
+								>AGENTS.md explains the <em>why</em>:
+								root-package placement, string-typed severities,
+								accepted go-structure-linter false-positives.
+								This is exactly what session context docs should
+								contain.</span
 							>
 						</div>
 					</div>
@@ -1110,19 +1238,24 @@
 						<div class="text">
 							<strong>Sensible, safe defaults</strong>
 							<span
-								><code>Ban</code> defaults to Critical/Security (fail-safe);
-								<code>Companion</code> to Moderate. A bare
-								<code>Ban(&quot;x&quot;).Spec()</code> compiles into a coherent policy.</span
+								><code>Ban</code> defaults to Critical/Security
+								(fail-safe); <code>Companion</code> to Moderate.
+								A bare
+								<code>Ban(&quot;x&quot;).Spec()</code> compiles
+								into a coherent policy.</span
 							>
 						</div>
 					</div>
 					<div class="strength">
 						<div class="check">+</div>
 						<div class="text">
-							<strong>Small, focused files under 350 lines</strong>
+							<strong
+								>Small, focused files under 350 lines</strong
+							>
 							<span
-								>policy.go (types) and builder.go (behaviour) are cleanly split. No god-files, no
-								premature decomposition.</span
+								>policy.go (types) and builder.go (behaviour)
+								are cleanly split. No god-files, no premature
+								decomposition.</span
 							>
 						</div>
 					</div>
@@ -1143,7 +1276,9 @@
 						<tr>
 							<td>1</td>
 							<td>
-								<span class="badge badge-critical">Critical</span>
+								<span class="badge badge-critical"
+									>Critical</span
+								>
 							</td>
 							<td>GoVersionRange naming lie on public API</td>
 							<td>
@@ -1153,9 +1288,13 @@
 						<tr>
 							<td>2</td>
 							<td>
-								<span class="badge badge-critical">Critical</span>
+								<span class="badge badge-critical"
+									>Critical</span
+								>
 							</td>
-							<td>Phantom &ldquo;Require&rdquo; builder in docs</td>
+							<td>
+								Phantom &ldquo;Require&rdquo; builder in docs
+							</td>
 							<td>
 								<span class="badge badge-fixed">Fixed</span>
 							</td>
@@ -1163,7 +1302,10 @@
 						<tr>
 							<td>3</td>
 							<td><span class="badge badge-high">High</span></td>
-							<td>7 stale lint failures vs &ldquo;0 issues&rdquo; claim</td>
+							<td>
+								7 stale lint failures vs &ldquo;0 issues&rdquo;
+								claim
+							</td>
 							<td>
 								<span class="badge badge-fixed">Fixed</span>
 							</td>
@@ -1221,8 +1363,9 @@
 				</div>
 
 				<footer class="footer">
-					Generated 2026-07-26 &middot; Every claim verified against source: build OK, vet OK, 15
-					tests pass (race-clean), 100% statement coverage, golangci-lint 0 issues.
+					Generated 2026-07-26 &middot; Every claim verified against
+					source: build OK, vet OK, 15 tests pass (race-clean), 100%
+					statement coverage, golangci-lint 0 issues.
 				</footer>
 			</main>
 		</div>
@@ -1250,7 +1393,8 @@
 								links.forEach(function (link) {
 									link.classList.toggle(
 										"active",
-										link.getAttribute("href") === "#" + entry.target.id,
+										link.getAttribute("href") ===
+											"#" + entry.target.id,
 									);
 								});
 							}
