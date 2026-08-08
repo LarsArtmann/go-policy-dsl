@@ -141,17 +141,17 @@ Method-naming convention: `With<X>` = set/replace the field wholesale; bare `<X>
 
 ### Types
 
-| Type            | Purpose                                                                                                                                                              |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Severity`      | `SeverityCritical` / `SeverityHigh` / `SeverityModerate` / `SeverityLow` / `SeverityInfo` / `SeverityRecommended` / `SeverityDeprecated` / `SeverityObsolete`       |
+| Type            | Purpose                                                                                                                                                                                                               |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Severity`      | `SeverityCritical` / `SeverityHigh` / `SeverityModerate` / `SeverityLow` / `SeverityInfo` / `SeverityRecommended` / `SeverityDeprecated` / `SeverityObsolete`                                                         |
 | `Category`      | `CategorySecurity` / `CategoryPerformance` / `CategoryMaintenance` / `CategoryDeprecation` / `CategoryArchitecture` / `CategoryCorrectness` / `CategoryLicensing` / `CategoryCompatibility` / `CategoryConfiguration` |
-| `Mode`          | `ModeBan` (default: emit ban + enforce companions) / `ModeCompanionOnly` (suppress ban, enforce only companions)                                                     |
-| `Detection`     | How a violation is found: `ImportPatterns`, `GoModPatterns`, `ExcludeIfContains`, `ExcludeIfTransitiveFrom`, `RequireIfContains`                                     |
-| `Replacement`   | Recommended swap-in: `Library`, `Reason`                                                                                                                             |
-| `CompanionSpec` | Required companion library                                                                                                                                           |
-| `CVE`           | Validated `CVE-YYYY-NNNN` identifier (branded `string`)                                                                                                              |
-| `Version`       | Parsed semver-lite `{Major, Minor, Patch}` for inclusive version bounds                                                                                              |
-| `PolicySpec`    | The finished declarative policy value                                                                                                                                |
+| `Mode`          | `ModeBan` (default: emit ban + enforce companions) / `ModeCompanionOnly` (suppress ban, enforce only companions)                                                                                                      |
+| `Detection`     | How a violation is found: `ImportPatterns`, `GoModPatterns`, `ExcludeIfContains`, `ExcludeIfTransitiveFrom`, `RequireIfContains`                                                                                      |
+| `Replacement`   | Recommended swap-in: `Library`, `Reason`                                                                                                                                                                              |
+| `CompanionSpec` | Required companion library                                                                                                                                                                                            |
+| `CVE`           | Validated `CVE-YYYY-NNNN` identifier (branded `string`)                                                                                                                                                               |
+| `Version`       | Parsed semver-lite `{Major, Minor, Patch}` for inclusive version bounds                                                                                                                                               |
+| `PolicySpec`    | The finished declarative policy value                                                                                                                                                                                 |
 
 ---
 

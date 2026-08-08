@@ -69,6 +69,8 @@ empty, derives `Description` from the replacement. An explicit `Description`
 is never overwritten; repeated `Suggest` calls only append. `SuggestExplicit(r)`
 is the no-magic variant that appends without deriving `Description`.
 `WithAlternatives(...Replacement)` replaces the slice wholesale (set semantics).
+`WithAlternativeStrings(...string)` is the string-convenience counterpart
+(wraps each module path in a `Replacement` with an empty `Reason`).
 `Alternatives` is typed `[]Replacement` so each entry keeps its `Reason` (no
 information loss). Evidence: `builder.go`, tested by
 `TestBuilder_Suggest_SetsDescription`,
