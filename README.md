@@ -15,12 +15,12 @@ Fluent, compile-time-checked Go DSL for declaring library governance policies �
 
 Library governance policies — "don't use gorm, use sqlc", "if you depend on samber/do you must also depend on samber-do-auditlog", "this library is banned below v2" — are typically declared in YAML and parsed at runtime. That means typos surface in CI, not in your editor; refactor support is zero; and there is no compile-time guarantee that every policy specifies the fields it needs.
 
-| YAML policies | go-policy-dsl |
-| --- | --- |
-| Typos surface at runtime (CI or worse) | Typos surface at compile time (your editor) |
-| Stringly-typed fields, no validation | Typed fields — `CVE`, `Version`, `Mode`, `Severity` are branded types |
-| Refactor support is zero (it's just text) | Full IDE rename, go-to-definition, find-references |
-| Every consumer re-implements parsing | Every consumer imports the same typed `PolicySpec` |
+| YAML policies                                                | go-policy-dsl                                                           |
+| ------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| Typos surface at runtime (CI or worse)                       | Typos surface at compile time (your editor)                             |
+| Stringly-typed fields, no validation                         | Typed fields — `CVE`, `Version`, `Mode`, `Severity` are branded types   |
+| Refactor support is zero (it's just text)                    | Full IDE rename, go-to-definition, find-references                      |
+| Every consumer re-implements parsing                         | Every consumer imports the same typed `PolicySpec`                      |
 | Inverted version range `"2.0.0" → "1.0.0"` is silently valid | `PolicySpec.Validate()` returns a concrete `*InvertedVersionRangeError` |
 
 `go-policy-dsl` makes policies plain Go values built via a fluent API. Every field is typed, every chain is checked by the compiler, and the result is a `PolicySpec` struct that any consumer — a CLI, a golangci-lint plugin, an LSP server, a CI check — can read.
@@ -102,56 +102,56 @@ var NetHTTPServerOnly = policydsl.Ban("net/http").
 
 ### Constructors
 
-| Function | Returns | Purpose |
-| --- | --- | --- |
-| `Ban(name string) *Builder` | `*Builder` | Start a banned-library policy (defaults to `SeverityCritical` + `CategorySecurity` + `ModeBan`) |
-| `Companion(lib, pattern, reason string) CompanionSpec` | `CompanionSpec` | Build a required-companion spec (defaults to `SeverityModerate`) |
-| `CompanionWithSeverity(...)` | `CompanionSpec` | Companion with custom severity |
-| `ImportPattern(pattern string) Detection` | `Detection` | Convenience for source-import detection |
-| `GoModPattern(pattern string) Detection` | `Detection` | Convenience for go.mod-path detection |
-| `NewReplacement(library, reason string) Replacement` | `Replacement` | Build a swap-in alternative value |
-| `NewCVE(id string) (CVE, error)` | `CVE` | Validated CVE identifier (`CVE-YYYY-NNNN`) |
-| `NewVersion(major, minor, patch int) Version` | `Version` | Parsed semver-lite value |
-| `ParseVersion(s string) (Version, error)` | `Version` | Parse a version string (returns error, never panics) |
+| Function                                               | Returns         | Purpose                                                                                         |
+| ------------------------------------------------------ | --------------- | ----------------------------------------------------------------------------------------------- |
+| `Ban(name string) *Builder`                            | `*Builder`      | Start a banned-library policy (defaults to `SeverityCritical` + `CategorySecurity` + `ModeBan`) |
+| `Companion(lib, pattern, reason string) CompanionSpec` | `CompanionSpec` | Build a required-companion spec (defaults to `SeverityModerate`)                                |
+| `CompanionWithSeverity(...)`                           | `CompanionSpec` | Companion with custom severity                                                                  |
+| `ImportPattern(pattern string) Detection`              | `Detection`     | Convenience for source-import detection                                                         |
+| `GoModPattern(pattern string) Detection`               | `Detection`     | Convenience for go.mod-path detection                                                           |
+| `NewReplacement(library, reason string) Replacement`   | `Replacement`   | Build a swap-in alternative value                                                               |
+| `NewCVE(id string) (CVE, error)`                       | `CVE`           | Validated CVE identifier (`CVE-YYYY-NNNN`)                                                      |
+| `NewVersion(major, minor, patch int) Version`          | `Version`       | Parsed semver-lite value                                                                        |
+| `ParseVersion(s string) (Version, error)`              | `Version`       | Parse a version string (returns error, never panics)                                            |
 
 ### Builder methods
 
-| Method | Effect |
-| --- | --- |
-| `Because(reason)` | Sets the human-readable reason (required) |
-| `WithSeverity(s)` | Overrides the default severity |
-| `WithCategory(c)` | Overrides the default category |
-| `DetectVia(d)` | Sets the full `Detection` (import + go.mod + exclusions) |
-| `ImportPatterns(p...)` | Adds source-import patterns |
-| `GoModPatterns(p...)` | Adds go.mod-path patterns |
-| `ExcludeIfContains(p...)` | Suppressions: if string appears, no violation |
-| `RequireIfContains(p...)` | Content gate: policy only fires when at least one string appears |
-| `ExcludeIfTransitiveFrom(libs...)` | Parent libs that justify transitive presence |
-| `WithDescription(desc)` | Detailed description for reporting |
-| `Suggest(r)` | Adds a recommended replacement (full `Replacement`) |
-| `SuggestExplicit(r)` | Adds a replacement WITHOUT deriving `Description` |
-| `WithAlternatives(alts...)` | Sets `[]Replacement` alternatives directly (set) |
-| `WithCVEs(cves...)` | Tags with validated `CVE` values |
-| `VersionRange(min, max)` | Inclusive library version constraints (not Go version) |
-| `RequiresCompanion(c)` | Adds a required companion spec |
-| `AsCompanionOnly()` | Sets `Mode = ModeCompanionOnly` (never ban; enforce companions) |
-| `Spec()` | Returns the finished `PolicySpec` |
+| Method                             | Effect                                                           |
+| ---------------------------------- | ---------------------------------------------------------------- |
+| `Because(reason)`                  | Sets the human-readable reason (required)                        |
+| `WithSeverity(s)`                  | Overrides the default severity                                   |
+| `WithCategory(c)`                  | Overrides the default category                                   |
+| `DetectVia(d)`                     | Sets the full `Detection` (import + go.mod + exclusions)         |
+| `ImportPatterns(p...)`             | Adds source-import patterns                                      |
+| `GoModPatterns(p...)`              | Adds go.mod-path patterns                                        |
+| `ExcludeIfContains(p...)`          | Suppressions: if string appears, no violation                    |
+| `RequireIfContains(p...)`          | Content gate: policy only fires when at least one string appears |
+| `ExcludeIfTransitiveFrom(libs...)` | Parent libs that justify transitive presence                     |
+| `WithDescription(desc)`            | Detailed description for reporting                               |
+| `Suggest(r)`                       | Adds a recommended replacement (full `Replacement`)              |
+| `SuggestExplicit(r)`               | Adds a replacement WITHOUT deriving `Description`                |
+| `WithAlternatives(alts...)`        | Sets `[]Replacement` alternatives directly (set)                 |
+| `WithCVEs(cves...)`                | Tags with validated `CVE` values                                 |
+| `VersionRange(min, max)`           | Inclusive library version constraints (not Go version)           |
+| `RequiresCompanion(c)`             | Adds a required companion spec                                   |
+| `AsCompanionOnly()`                | Sets `Mode = ModeCompanionOnly` (never ban; enforce companions)  |
+| `Spec()`                           | Returns the finished `PolicySpec`                                |
 
 Method-naming convention: `With<X>` = set/replace the field wholesale; bare `<X>` = append to a slice field; `As<X>` = set a mode flag; `Spec()` = terminate the chain.
 
 ### Types
 
-| Type | Purpose |
-| --- | --- |
-| `Severity` | `SeverityCritical` / `SeverityHigh` / `SeverityModerate` / `SeverityLow` / `SeverityInfo` |
-| `Category` | `CategorySecurity` / `CategoryPerformance` / `CategoryMaintenance` / `CategoryCorrectness` / `CategoryLicensing` / `CategoryCompatibility` / `CategoryConfiguration` |
-| `Mode` | `ModeBan` (default: emit ban + enforce companions) / `ModeCompanionOnly` (suppress ban, enforce only companions) |
-| `Detection` | How a violation is found: `ImportPatterns`, `GoModPatterns`, `ExcludeIfContains`, `ExcludeIfTransitiveFrom`, `RequireIfContains` |
-| `Replacement` | Recommended swap-in: `Library`, `Reason` |
-| `CompanionSpec` | Required companion library |
-| `CVE` | Validated `CVE-YYYY-NNNN` identifier (branded `string`) |
-| `Version` | Parsed semver-lite `{Major, Minor, Patch}` for inclusive version bounds |
-| `PolicySpec` | The finished declarative policy value |
+| Type            | Purpose                                                                                                                                                              |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Severity`      | `SeverityCritical` / `SeverityHigh` / `SeverityModerate` / `SeverityLow` / `SeverityInfo`                                                                            |
+| `Category`      | `CategorySecurity` / `CategoryPerformance` / `CategoryMaintenance` / `CategoryCorrectness` / `CategoryLicensing` / `CategoryCompatibility` / `CategoryConfiguration` |
+| `Mode`          | `ModeBan` (default: emit ban + enforce companions) / `ModeCompanionOnly` (suppress ban, enforce only companions)                                                     |
+| `Detection`     | How a violation is found: `ImportPatterns`, `GoModPatterns`, `ExcludeIfContains`, `ExcludeIfTransitiveFrom`, `RequireIfContains`                                     |
+| `Replacement`   | Recommended swap-in: `Library`, `Reason`                                                                                                                             |
+| `CompanionSpec` | Required companion library                                                                                                                                           |
+| `CVE`           | Validated `CVE-YYYY-NNNN` identifier (branded `string`)                                                                                                              |
+| `Version`       | Parsed semver-lite `{Major, Minor, Patch}` for inclusive version bounds                                                                                              |
+| `PolicySpec`    | The finished declarative policy value                                                                                                                                |
 
 ---
 
@@ -200,11 +200,11 @@ The full `Builder` method convention (`With-` = set/replace vs bare = append) is
 
 Pre-1.0. The API is **not yet stable** — breaking changes land in `0.x` bumps and are always marked `**BREAKING**` in [`CHANGELOG.md`](CHANGELOG.md). See [`ROADMAP.md`](ROADMAP.md) for the path to v1.0.0.
 
-| Version | Summary |
-| --- | --- |
-| **v0.3.0** | `RequireIfContains` content gate (additive, non-breaking) |
-| v0.2.0 | Panic-free refactor + typed domain (`Mode`, `Version`, `CVE`, `Replacement`) |
-| v0.1.0 | Initial tagged release — fluent builder, typed enums, version bounds |
+| Version    | Summary                                                                      |
+| ---------- | ---------------------------------------------------------------------------- |
+| **v0.3.0** | `RequireIfContains` content gate (additive, non-breaking)                    |
+| v0.2.0     | Panic-free refactor + typed domain (`Mode`, `Version`, `CVE`, `Replacement`) |
+| v0.1.0     | Initial tagged release — fluent builder, typed enums, version bounds         |
 
 ---
 
