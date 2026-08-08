@@ -2,7 +2,6 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/larsartmann/go-policy-dsl.svg)](https://pkg.go.dev/github.com/larsartmann/go-policy-dsl)
 [![CI](https://github.com/larsartmann/go-policy-dsl/actions/workflows/ci.yml/badge.svg)](https://github.com/larsartmann/go-policy-dsl/actions/workflows/ci.yml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/larsartmann/go-policy-dsl)](https://goreportcard.com/report/github.com/larsartmann/go-policy-dsl)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 Fluent, compile-time-checked Go DSL for declaring library governance policies — bans, requirements, companions. Pure Go values, no YAML, no codegen, no runtime parsing.
