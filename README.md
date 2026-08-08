@@ -111,6 +111,7 @@ panics; it returns errors.
 | `ImportPatterns(p...)`             | Adds source-import patterns                                     |
 | `GoModPatterns(p...)`              | Adds go.mod-path patterns                                       |
 | `ExcludeIfContains(p...)`          | Suppressions: if string appears, no violation                   |
+| `RequireIfContains(p...)`          | Content gate: policy only fires when at least one string appears |
 | `ExcludeIfTransitiveFrom(libs...)` | Parent libs that justify transitive presence                    |
 | `WithDescription(desc)`            | Detailed description for reporting                              |
 | `Suggest(r)`                       | Adds a recommended replacement (full `Replacement`)             |
@@ -129,7 +130,7 @@ panics; it returns errors.
 | `Severity`      | `SeverityCritical` / `SeverityHigh` / `SeverityModerate` / `SeverityLow` / `SeverityInfo`                                                                                |
 | `Category`      | `CategorySecurity` / `CategoryPerformance` / `CategoryMaintainability` / `CategoryCorrectness` / `CategoryLicensing` / `CategoryCompatibility` / `CategoryConfiguration` |
 | `Mode`          | `ModeBan` (default: emit ban + enforce companions) / `ModeCompanionOnly` (suppress ban, enforce only companions)                                                         |
-| `Detection`     | How a violation is found: `ImportPatterns`, `GoModPatterns`, `ExcludeIfContains`, `ExcludeIfTransitiveFrom`                                                              |
+| `Detection`     | How a violation is found: `ImportPatterns`, `GoModPatterns`, `ExcludeIfContains`, `ExcludeIfTransitiveFrom`, `RequireIfContains`                              |
 | `Replacement`   | Recommended swap-in: `Library`, `Reason`                                                                                                                                 |
 | `CompanionSpec` | Required companion library                                                                                                                                               |
 | `CVE`           | Validated `CVE-YYYY-NNNN` identifier (branded `string`)                                                                                                                  |
@@ -175,7 +176,7 @@ The full `Builder` method convention (`With-` = set/replace vs bare = append) is
 
 ## Consumers
 
-- [`library-policy`](https://github.com/LarsArtmann/library-policy) — primary consumer (governance CLI + server + golangci plugin). Its `domain/policy/spec.go` is the migration target. (It does NOT yet import this module — it has its own independent copy; migration is the first adoption target.)
+- [`library-policy`](https://github.com/LarsArtmann/library-policy) — primary consumer (governance CLI + server + golangci plugin). Imports `github.com/larsartmann/go-policy-dsl` v0.2.0; `domain/policy/spec.go` re-exports the SDK types via aliases, and `policies/policies.go` declares all bans via the fluent `Builder` API.
 
 Planned:
 
@@ -183,7 +184,7 @@ Planned:
 
 ## Status
 
-Early. The `Ban` / `Builder` / `Spec` core, the typed `Version` domain, and the companion API are implemented and tested. The API is **not yet stable** (pre-1.0; see `CHANGELOG.md` for breaking changes). Zero consumers shipped — `library-policy` migration is the first adoption target. See `ROADMAP.md` for the path to `v1.0.0`.
+Early but shipped. The `Ban` / `Builder` / `Spec` core, the typed `Version` domain, the companion API, and `RequireIfContains` content gates are implemented and tested. One consumer shipped — `library-policy` migrated to the SDK (v0.2.0). The API is **not yet stable** (pre-1.0; see `CHANGELOG.md` for breaking changes). See `ROADMAP.md` for the path to `v1.0.0`.
 
 ## License
 
