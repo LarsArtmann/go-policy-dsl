@@ -77,6 +77,10 @@ func TestDetection_ZeroValue(t *testing.T) {
 	if len(detection.ExcludeIfTransitiveFrom) != 0 {
 		t.Errorf("zero-value ExcludeIfTransitiveFrom should be empty, got %v", detection.ExcludeIfTransitiveFrom)
 	}
+
+	if len(detection.RequireIfContains) != 0 {
+		t.Errorf("zero-value RequireIfContains should be empty, got %v", detection.RequireIfContains)
+	}
 }
 
 // TestCompanionSpec_ZeroValue documents that a zero CompanionSpec has no

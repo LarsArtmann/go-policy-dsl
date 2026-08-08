@@ -94,6 +94,17 @@ func (b *Builder) ExcludeIfTransitiveFrom(libraries ...string) *Builder {
 	return b
 }
 
+// RequireIfContains adds content gates: when any are set, the policy only
+// fires if at least one string appears in the matched file content. This is
+// the inverse of ExcludeIfContains — exclude suppresses when found; require
+// activates only when found. The consumer (not the DSL) owns the matching
+// semantics.
+func (b *Builder) RequireIfContains(patterns ...string) *Builder {
+	b.spec.Detection.RequireIfContains = append(b.spec.Detection.RequireIfContains, patterns...)
+
+	return b
+}
+
 // WithDescription sets the optional detailed description for reporting.
 func (b *Builder) WithDescription(desc string) *Builder {
 	b.spec.Description = desc

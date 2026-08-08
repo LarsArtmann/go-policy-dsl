@@ -181,6 +181,12 @@ func TestBuilder_AppendDetectionHelpers(t *testing.T) {
 			got:  func(d policydsl.Detection) []string { return d.ExcludeIfTransitiveFrom },
 			want: []string{"ginkgo"},
 		},
+		{
+			name: "RequireIfContains",
+			call: func(b *policydsl.Builder) *policydsl.Builder { return b.RequireIfContains("http.ServeMux", "http.ResponseWriter") },
+			got:  func(d policydsl.Detection) []string { return d.RequireIfContains },
+			want: []string{"http.ServeMux", "http.ResponseWriter"},
+		},
 	}
 
 	for _, tt := range tests {

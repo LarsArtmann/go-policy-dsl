@@ -98,6 +98,14 @@ type Detection struct {
 	// justifies this library appearing transitively (avoids false positives
 	// on indirect dependencies).
 	ExcludeIfTransitiveFrom []string
+
+	// RequireIfContains gates WHEN a policy fires: when non-empty, the policy
+	// only activates if at least one of these strings appears in the matched
+	// file content. This is the inverse of ExcludeIfContains — exclude
+	// suppresses when a pattern IS present; require fires ONLY when a pattern
+	// IS present. Use cases: "net/http is both client and server; only
+	// recommend companions when the file actually serves HTTP."
+	RequireIfContains []string
 }
 
 // Replacement recommends a swap-in alternative for a banned library.

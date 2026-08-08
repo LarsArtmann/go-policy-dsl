@@ -14,7 +14,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_Nothing yet._
+### Added
+
+- `Detection.RequireIfContains []string` — a content gate that controls WHEN a
+  policy fires: when non-empty, the policy only activates if at least one of the
+  declared strings appears in the matched file content. This is the inverse of
+  `ExcludeIfContains` (which suppresses when found). Use case: `net/http` is both
+  a client and server package; `RequireIfContains` lets a policy declare "only
+  fire for server code" by listing server-side signals like `http.ServeMux`,
+  `http.ResponseWriter`, etc. The DSL declares the values; the consumer owns the
+  matching semantics.
+- `Builder.RequireIfContains(patterns ...string)` — fluent append helper
+  matching the convention of `ExcludeIfContains` / `ExcludeIfTransitiveFrom`.
 
 ## [0.2.0] - 2026-07-26
 
