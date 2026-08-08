@@ -1,8 +1,15 @@
 # Pareto Execution Plan — go-policy-dsl
 
 > **Snapshot:** 2026-08-08 08:24
+> **Updated:** 2026-08-08 — P1 (library-policy migration) **DONE**; P3 (branch protection) **DISAPPROVED** by user
 > **Project state:** v0.3.0 public, CI green, docs healthy (Accuracy 10/10, Fitness 10/10), TODO_LIST empty
 > **Input sources:** `ROADMAP.md`, `FEATURES.md`, recent `docs/status/*` reports (2026-08-08), code audit
+
+> **Major update (2026-08-08):** `library-policy` has shipped on
+> `go-policy-dsl` v0.3.0 — the first consumer gate for v1.0.0 is **MET**.
+> The consumer adopted the DSL as-is with no blocking API gaps. Branch
+> protection has been **disapproved** by the user (daemon workflow conflict).
+> See updated tables below for revised status.
 
 ---
 
@@ -16,7 +23,12 @@ The library is in excellent shape:
 - **CI is green and fast** (37s quality gate via golangci-lint-action)
 - **Zero open TODOs** — all prior work shipped across v0.1.0–v0.3.0
 
-The v1.0.0 gate is clear and singular: **first consumer migration** (`library-policy`). Two of three v1.0.0 criteria are already met (no stringly-typed axes, validation surface partially settled). The third — first consumer shipped — is the load-bearing gate.
+The v1.0.0 gate is now down to one question: **does the validation surface
+need to expand?** Gate 1 (first consumer shipped) is MET — `library-policy`
+is on v0.3.0. Gate 3 (no stringly-typed axes) was already met. Gate 2
+(validation surface) is the remaining open question: the consumer adopted
+the DSL as-is, so the current surface was sufficient, but whether
+`library-policy` revealed unmet validation needs is not yet confirmed.
 
 ---
 
@@ -24,32 +36,32 @@ The v1.0.0 gate is clear and singular: **first consumer migration** (`library-po
 
 ### The 1% that delivers 51%
 
-| # | Task | Why it's the 1% |
-|---|------|-----------------|
-| **P1** | **library-policy migration** | Unlocks v1.0.0. Proves the API works in a real consumer. Reveals the real validation requirements. Without this, "stable" is a claim, not a fact. |
+| # | Task | Status |
+|---|------|--------|
+| **P1** | **library-policy migration** | **DONE** — shipped on v0.3.0. API proven in a real consumer. No blocking gaps surfaced. |
 
 ### The 4% that delivers 64%
 
-| # | Task | Why it's the 4% |
-|---|------|-----------------|
-| **P1** | library-policy migration | (above) |
-| **P2** | Release checklist doc | Prevents "CI was red when tagged" from recurring (happened on ALL 3 releases). One doc, permanent guardrail. |
-| **P3** | Branch protection on master | Public repo, anyone can push. Auto-git daemon commits directly. Minimum: CI-required status checks. |
-| **P4** | pkg.go.dev re-index | Public visitors see the stale v0.3.0-tagged README (references `library-policy`). First impressions on a fresh public repo. |
+| # | Task | Status |
+|---|------|--------|
+| **P1** | library-policy migration | **DONE** |
+| **P2** | Release checklist doc | Not started — still high-value (all 3 releases had CI-red-on-tag issues) |
+| **P3** | Branch protection on master | **DISAPPROVED** by user — daemon workflow conflict. Removed from plan. |
+| **P4** | pkg.go.dev re-index | Stale README served (dead badge, old structure). Self-corrects on next tag push. |
 
 ### The 20% that delivers 80%
 
-| # | Task | Why it's in the 20% |
-|---|------|---------------------|
-| **P1** | library-policy migration | (above) |
-| **P2** | Release checklist doc | (above) |
-| **P3** | Branch protection | (above) |
-| **P4** | pkg.go.dev re-index | (above) |
-| **P5** | Release automation (GitHub Action: tag → release from CHANGELOG) | Eliminates manual release steps; prevents release body drift from CHANGELOG |
-| **P6** | `govulncheck` in CI | Stdlib-only today, but deps-of-deps matter downstream. Public repo = public trust. |
-| **P7** | Test coverage reporting + threshold gate | Quantifies test health; catches regression in coverage |
-| **P8** | Godoc `ExampleSeverityBridge` | Makes the dependency-free design concrete for consumer authors (the README has one; godoc is where developers look) |
-| **P9** | SBOM generation on release | Supply-chain best practice for a public SDK |
+| # | Task | Status |
+|---|------|--------|
+| **P1** | library-policy migration | **DONE** |
+| **P2** | Release checklist doc | Not started |
+| **P3** | Branch protection | **DISAPPROVED** |
+| **P4** | pkg.go.dev re-index | Self-corrects on next tag |
+| **P5** | Release automation (GitHub Action: tag → release from CHANGELOG) | Not started — reduces friction now that consumer pins versions |
+| **P6** | `govulncheck` in CI | Not started — stdlib-only today, deps-of-deps matter downstream |
+| **P7** | Test coverage reporting + threshold gate | Not started |
+| **P8** | Godoc `ExampleSeverityBridge` | Not started — consumer has bridged in practice; example documents the pattern |
+| **P9** | SBOM generation on release | Not started |
 
 ### The other 20% (to get to 100%)
 
@@ -127,16 +139,12 @@ Sorted by impact (desc) → effort (asc) → customer value (desc).
 | F4 | Write post-tag checklist items (GitHub release from CHANGELOG, set Latest flag, verify pkg.go.dev) | 10 | F3 |
 | F5 | Run `git status` + commit release-checklist.md | 5 | F4 |
 
-### Tier 2: The 4% → 64%
+### Tier 2: Release safety + pkg.go.dev (revised)
 
-| ID | Task | Est (min) | Depends on |
-|----|------|-----------|------------|
-| F6 | Draft branch-protection recommendation (3 options: daemon bypass, PR-based, CI-only gate) | 10 | — |
-| F7 | Present branch-protection options to user via `question` tool | 5 | F6 |
-| F8 | Apply branch protection via `gh api` once user decides | 10 | F7 |
-| F9 | Run `go get github.com/larsartmann/go-policy-dsl@latest` to trigger re-index | 5 | — |
-| F10 | Submit pkg.go.dev re-index request form | 5 | F9 |
-| F11 | Verify pkg.go.dev serves current README (not v0.3.0 tagged version) | 5 | F10 |
+| ID | Task | Est (min) | Status |
+|----|------|-----------|--------|
+| F6-F8 | ~~Branch protection~~ | — | **DISAPPROVED** by user. Removed from plan. |
+| F9-F11 | pkg.go.dev re-index | 15 | Stale README served. Self-corrects on next tag. See P4 above. |
 
 ### Tier 3: API completeness (godoc examples)
 
@@ -184,15 +192,11 @@ Sorted by impact (desc) → effort (asc) → customer value (desc).
 | F36 | Write blog post body (expand outline) | 12 | F35 |
 | F37 | Add cross-links from sibling repo READMEs | 10 | — |
 
-### Tier 7: Consumer readiness (library-policy migration)
+### Tier 7: Consumer readiness (library-policy migration) — DONE
 
-| ID | Task | Est (min) | Depends on |
-|----|------|-----------|------------|
-| F38 | Read `library-policy/domain/policy/spec.go` to understand current local copy | 12 | — |
-| F39 | Identify API gaps between local copy and DSL (field-by-field diff) | 12 | F38 |
-| F40 | Draft migration plan: add `go get` dependency, replace imports, delete local copy | 12 | F39 |
-| F41 | Identify which `library-policy` tests need updating after migration | 12 | F40 |
-| F42 | Estimate breaking-change impact on `library-policy` consumers | 10 | F41 |
+| ID | Task | Est (min) | Status |
+|----|------|-----------|--------|
+| F38-F42 | All consumer migration tasks | 58 | **DONE** — library-policy shipped on v0.3.0. API was sufficient as-is. |
 
 ### Tier 8: Architecture decisions (post-consumer)
 
@@ -329,23 +333,28 @@ graph TD
 | Pareto Tier | Tasks | Total Est | % of Effort | % of Value | Key Deliverable |
 |-------------|-------|-----------|-------------|------------|-----------------|
 | **1% → 51%** | F1–F5 | 40 min | 4% | 51% | Release checklist (permanent guardrail) |
-| **4% → 64%** | F6–F11 | 40 min | 4% | 13% | Branch protection + pkg.go.dev fix |
+| **4% → 64%** | F6–F11 | 15 min | 1% | 3% | ~~Branch protection~~ (disapproved) + pkg.go.dev (self-corrects on next tag) |
 | **20% → 80%** | F12–F30 | 194 min | 19% | 16% | Godoc examples + CI hardening + release automation |
-| **Consumer gate** | F38–F42 | 58 min | 6% | 15% | library-policy migration plan |
+| ~~Consumer gate~~ | ~~F38–F42~~ | ~~58 min~~ | — | — | **DONE** — library-policy shipped on v0.3.0 |
 | **Other 20%** | F31–F37, F43–F51 | 170 min | 17% | 5% | Public presence + fuzz + architecture spikes |
-| **Total** | F1–F51 | ~502 min | ~50% | 100% | (remaining 50% effort is execution of consumer migration) |
+| **Remaining** | F1–F5, F12–F30, F31–F37, F43–F51 | ~404 min | ~41% | 25% | Everything actionable from this repo |
 
-> **Note on effort vs value:** The consumer migration (M14, ~hours of work in the `library-policy` repo) is the single highest-value item but lives outside this repo. The tasks above are everything actionable from THIS repo's perspective. The 1%/4%/20% tiers are about what we can do HERE to maximize value per minute.
+> **Note on effort vs value:** The consumer migration (formerly the single
+> highest-value item) is **DONE** — `library-policy` shipped on v0.3.0. The
+> 1% tier (release checklist) is now the highest-value remaining item. The
+> 20% tier (CI hardening, release automation, godoc examples) is polish that
+> raises the quality bar for a library whose API is now proven.
 
 ---
 
 ## 7. What needs a user decision before execution
 
-| Item | Question | Why it blocks |
-|------|----------|---------------|
-| Branch protection | Should master require CI green? How to handle auto-git daemon? | The daemon commits directly to master; enforcing PRs would block it |
-| pkg.go.dev re-index | Trigger now or wait for next tag? | Re-index is manual or tag-triggered; user preference on timing |
-| Consumer migration | When to start library-policy migration? | It's in another repo; user must initiate |
+| Item | Status |
+|------|--------|
+| Branch protection | **DECIDED** — disapproved by user (2026-08-08). Daemon workflow conflict. |
+| pkg.go.dev re-index | **Self-corrects on next tag.** No manual action needed unless a release is far off. |
+| ~~Consumer migration~~ | **DONE** — library-policy shipped on v0.3.0. |
+| v1.0.0 timing | **Open question:** gate 1 (consumer shipped) and gate 3 (no stringly-typed axes) are met. Gate 2 (validation surface) is the remaining question — did `library-policy` reveal validation needs, or is the current surface sufficient? Once answered, v1.0.0 can be tagged. |
 
 ---
 
