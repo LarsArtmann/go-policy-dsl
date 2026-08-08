@@ -64,10 +64,8 @@ The `Mode` typed enum has one design rule: **the ONLY value that suppresses the 
 
 ## Consumers
 
-- `library-policy` (github.com/LarsArtmann/library-policy) — primary consumer; its `domain/policy/spec.go` is the migration target.
-- `go-linter-sdk` — may adopt this as its rule-declaration language.
-
-Zero consumers currently shipped; `library-policy` migration is the first adoption target.
+- `library-policy` (github.com/LarsArtmann/library-policy) — **shipped consumer**; imports `github.com/larsartmann/go-policy-dsl` v0.3.0 directly (no local copy). First real consumer to exercise the API.
+- `go-linter-sdk` — may adopt this as its rule-declaration language (not yet shipped).
 
 ## License
 

@@ -159,5 +159,7 @@ structural version-range invariant. Domain rules — a `Ban("x")` with no
 `Because`, no detection patterns, no overrides — are still **deliberately**
 not enforced (documented in `AGENTS.md`): the DSL declares what a policy IS;
 the consumer validates domain fitness. Expanding `Validate()` to cover domain
-rules is a future decision, deferred until the first consumer (`library-policy`)
-migrates and the real required-field set is known.
+rules is a future decision. The first consumer (`library-policy`) has
+adopted the DSL as-is — whether the migration revealed unmet validation
+needs that should expand `Validate()` is the remaining open question for
+v1.0.0 readiness.

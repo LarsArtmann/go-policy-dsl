@@ -10,21 +10,27 @@ Long-term direction and raw ideas — not commitments. Items graduate to
 
 The API is not yet stable. v1.0.0 is reached when **all** of these hold:
 
-1. **First consumer shipped.** `library-policy` migrates its
-   `domain/policy/spec.go` onto this module and releases. This is the
-   load-bearing gate — until a real consumer exercises the API, "stable" is
-   a claim, not a fact.
+1. ~~**First consumer shipped.**~~ **MET (2026-08-08).** `library-policy`
+   imports `github.com/larsartmann/go-policy-dsl` v0.3.0 directly (no local
+   copy). The API has been exercised by a real consumer.
 2. **Validation surface settled.** `Spec()` stays validation-free (returns
    exactly what was built); `Validate()` checks the version-range invariant.
    Whether `Validate()` expands to cover domain rules (non-empty `Reason`,
-   detection patterns present, etc.) is deferred until the first consumer
-   migration reveals the real required-field set. See `FEATURES.md`
+   detection patterns present, etc.) is the remaining open question. The
+   first consumer adopted the DSL as-is, so the current validation surface
+   was sufficient — but whether `library-policy` revealed unmet validation
+   needs is not yet confirmed. See `FEATURES.md`
    "Domain validation in `Validate()`".
 3. **No stringly-typed axes remaining.** All formerly stringly-typed fields
    have been retyped: `Version` (semver-lite, `*Version` bounds), `Mode`
    (typed enum, deny-by-default), `CVE` (branded string with format
    validation), `Alternatives` (`[]Replacement`, no information loss). No
    known stringly-typed footguns remain.
+
+With gate 1 met, the remaining question for v1.0.0 is gate 2: does the
+validation surface need to expand based on what `library-policy` revealed,
+or is the current surface sufficient? Once that is answered, v1.0.0 can be
+tagged.
 
 Until v1.0.0: breaking changes are allowed in any `0.x` bump and are always
 listed in `CHANGELOG.md` under `Changed (breaking)` with a `**BREAKING**`
@@ -34,13 +40,12 @@ marker.
 
 ## Direction: adoption
 
-### `library-policy` migration (primary consumer)
+### `library-policy` (shipped consumer)
 
-`library-policy` has its own copy of the `PolicySpec` / `Builder` surface in
-`domain/policy/spec.go`. The migration target: import
-`github.com/larsartmann/go-policy-dsl` directly and delete the local copy.
-The `GoVersionRange` → `VersionRange` rename was verified safe against this
-consumer (it does not yet import this module).
+`library-policy` imports `github.com/larsartmann/go-policy-dsl` v0.3.0
+and has deleted its local `domain/policy/spec.go` copy. The migration is
+complete — the DSL's API was sufficient as-is, with no blocking gaps
+surfaced.
 
 ### `go-linter-sdk` adoption (secondary consumer)
 
@@ -107,9 +112,9 @@ It will not become real unless a concrete consumer demand appears.
 The enum ships eight values (`critical` through `obsolete`). The first five
 are battle-tested via consumer mappings; the last three (`recommended`,
 `deprecated`, `obsolete`) have no known consumer yet. They may be
-over-engineered, or they may prove useful once `library-policy` and
-`go-linter-sdk` adopt the DSL. No action until a consumer either uses or
-confirms they don't need them.
+over-engineered, or they may prove useful now that `library-policy` has
+adopted the DSL and `go-linter-sdk` evaluates it. Check which values
+`library-policy` actually maps and prune the unused ones if warranted.
 
 ---
 
@@ -118,17 +123,20 @@ confirms they don't need them.
 ### Go module proxy / GOPROXY visibility
 
 The repo is **public** and all three versions (v0.1.0–v0.3.0) are confirmed
-indexed on `proxy.golang.org`. pkg.go.dev renders the full module page (API
-docs, examples, README). No action needed unless a future tag fails to
-propagate — re-index is triggered by a new tag or a manual
-`go get @latest` + pkg.go.dev request.
+indexed on `proxy.golang.org`. pkg.go.dev renders the module page from the
+**latest tag** (v0.3.0), not HEAD — so the README served on pkg.go.dev is
+the v0.3.0-tagged version (includes a dead Go Report Card badge, different
+structure). The current HEAD README is the rewritten public-facing landing
+page. pkg.go.dev will self-correct on the next tag push; a manual re-index
+request is also possible but the next release tag is the clean path.
 
 ### Release automation
 
 Tag → pkg.go.dev update currently uses a manual tag-and-push flow. A GitHub
 Action that creates a GitHub release from `CHANGELOG.md` sections (and
-optionally generates an SBOM) would reduce manual steps. Low urgency until the
-first consumer is ready to pin a version.
+optionally generates an SBOM) would reduce manual steps. Now that the first
+consumer has pinned v0.3.0, release automation reduces friction for future
+consumer updates.
 
 ---
 
@@ -144,7 +152,8 @@ widens; pkg.go.dev + README cover the current audience.
 
 A runnable bridge sample makes the dependency-free `Severity` design
 concrete for consumer authors (the README has one; a godoc `Example*` would
-round out the surface). Low urgency until the first consumer cutover.
+round out the surface). `library-policy` has already bridged this in
+practice — the example would document the known-good pattern.
 
 ---
 
@@ -152,10 +161,11 @@ round out the surface). Low urgency until the first consumer cutover.
 
 ### Branch protection
 
-Master has no required status checks — the auto-git daemon commits directly.
-A public repo should enforce at minimum "CI green before merge," but this
-conflicts with the daemon's direct-push workflow. Resolving this needs a user
-decision (daemon bypass, daemon-via-PR, or CI-only gate without review).
+**Decided against** (2026-08-08). Master will not require CI-green status
+checks. The auto-git daemon commits directly to master; enforcing PRs or
+status-check gates would block the daemon's workflow. The user has
+disapproved branch protection. CI remains green and serves as a quality
+signal even without enforcement.
 
 ### CI hardening ideas
 
