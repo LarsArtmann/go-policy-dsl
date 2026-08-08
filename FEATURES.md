@@ -50,13 +50,16 @@ overrides. Evidence: `builder.go`, tested by
 ### Detection model
 
 `Detection{ImportPatterns, GoModPatterns, ExcludeIfContains,
-ExcludeIfTransitiveFrom}` declares how a consumer finds a violation.
-`ImportPattern(p)` / `GoModPattern(p)` are single-pattern constructors;
-`DetectVia(d)` replaces the whole struct; the four bare methods
-(`ImportPatterns`, `GoModPatterns`, `ExcludeIfContains`,
-`ExcludeIfTransitiveFrom`) append. Evidence: `policy.go:67`,
-`builder.go:44-80`, `builder.go:146-154`, tested by `TestBuilder_DetectVia_Replaces`,
-`TestBuilder_AppendDetectionHelpers`, `TestImportPattern`, `TestGoModPattern`.
+ExcludeIfTransitiveFrom, RequireIfContains}` declares how a consumer finds a
+violation and when a policy fires. `ImportPattern(p)` / `GoModPattern(p)` are
+single-pattern constructors; `DetectVia(d)` replaces the whole struct; the five
+bare methods (`ImportPatterns`, `GoModPatterns`, `ExcludeIfContains`,
+`ExcludeIfTransitiveFrom`, `RequireIfContains`) append. `RequireIfContains` is a
+content gate — when non-empty, the policy only activates if at least one declared
+string appears in the matched file content (the inverse of `ExcludeIfContains`).
+Evidence: `policy.go:67`, `builder.go:44-80`, `builder.go:146-154`, tested by
+`TestBuilder_DetectVia_Replaces`, `TestBuilder_AppendDetectionHelpers`,
+`TestImportPattern`, `TestGoModPattern`.
 
 ### Replacement suggestion
 

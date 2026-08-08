@@ -9,10 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > changes are allowed in any `0.x` bump and are always listed under the
 > **Changed** section with a `**BREAKING**` marker. `v0.1.0` was the first
 > tagged release (2026-07-26, signed — an early scaffolding snapshot). `v0.2.0`
-> is the second, carrying the panic-free + typed-domain breaking refactor. See
-> `ROADMAP.md` for the path to `v1.0.0`.
+> is the second, carrying the panic-free + typed-domain breaking refactor.
+> `v0.3.0` is the third, adding the `RequireIfContains` content gate (non-
+> breaking, additive). See `ROADMAP.md` for the path to `v1.0.0`.
 
 ## [Unreleased]
+
+### Added
+
+<!-- New additions go here. -->
+
+## [0.3.0] - 2026-08-08
 
 ### Added
 
