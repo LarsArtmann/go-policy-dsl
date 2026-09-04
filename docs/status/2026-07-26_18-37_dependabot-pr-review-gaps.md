@@ -14,21 +14,21 @@ The user asked me to "checkout the 2 GitHub PRs." I interpreted that as _examine
 
 ## a) FULLY DONE
 
-| #   | Item                                                              | Evidence                                                                                                                |
-| --- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| 1   | Listed open PRs via `gh pr list`                                  | 2 PRs found                                                                                                             |
-| 2   | Pulled full metadata for both via `gh pr view 1` / `gh pr view 2` | titles, authors, labels, addition/deletion counts captured                                                              |
-| 3   | Pulled clean diffs via `gh pr diff 1` / `gh pr diff 2`            | both are 2-line, 1-file (`ci.yml`) changes                                                                              |
-| 4   | Fetched both remote branches locally                              | `origin/dependabot/...checkout-7`, `.../setup-go-7`                                                                     |
-| 5   | Created local tracking branches                                   | `pr-1-checkout-v7`, `pr-2-setup-go-v7`                                                                                  |
-| 6   | Validated `ci.yml` YAML parses on **both** branches               | `jobs: [quality-gate, fuzz]` confirmed                                                                                  |
-| 7   | Confirmed no Go source / `go.mod` / `go.sum` changes in either PR | `git diff` on those filesets empty                                                                                      |
-| 8   | Ran full local quality gate on PR #2                              | `go build` ✅, `go vet` ✅, `go test -race -count=1` ✅ (1.023s), `golangci-lint run` ✅ (0 issues)                     |
-| 9   | Analyzed checkout v7 breaking change relevance                    | CI triggers only on `push` + `pull_request`; v7's `pull_request_target`/`workflow_run` fork-PR block does **not** apply |
-| 10  | Verified the two PRs are mutually non-conflicting                 | `git merge-tree --write-tree pr-2-setup-go-v7 pr-1-checkout-v7` returned clean tree SHA, exit 0, no conflict list       |
-| 11  | Returned working tree to `master` (clean)                         | `git status` clean                                                                                                      |
-| 12  | Respected "never merge / never push without explicit ask"         | no merges, no pushes, no force-anything                                                                                 |
-| 13  | Avoided banned git verbs (`checkout`, `reset`)                    | used `git switch` / `git fetch` throughout                                                                              |
+| #  | Item                                                              | Evidence                                                                                                                |
+| -- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| 1  | Listed open PRs via `gh pr list`                                  | 2 PRs found                                                                                                             |
+| 2  | Pulled full metadata for both via `gh pr view 1` / `gh pr view 2` | titles, authors, labels, addition/deletion counts captured                                                              |
+| 3  | Pulled clean diffs via `gh pr diff 1` / `gh pr diff 2`            | both are 2-line, 1-file (`ci.yml`) changes                                                                              |
+| 4  | Fetched both remote branches locally                              | `origin/dependabot/...checkout-7`, `.../setup-go-7`                                                                     |
+| 5  | Created local tracking branches                                   | `pr-1-checkout-v7`, `pr-2-setup-go-v7`                                                                                  |
+| 6  | Validated `ci.yml` YAML parses on **both** branches               | `jobs: [quality-gate, fuzz]` confirmed                                                                                  |
+| 7  | Confirmed no Go source / `go.mod` / `go.sum` changes in either PR | `git diff` on those filesets empty                                                                                      |
+| 8  | Ran full local quality gate on PR #2                              | `go build` ✅, `go vet` ✅, `go test -race -count=1` ✅ (1.023s), `golangci-lint run` ✅ (0 issues)                     |
+| 9  | Analyzed checkout v7 breaking change relevance                    | CI triggers only on `push` + `pull_request`; v7's `pull_request_target`/`workflow_run` fork-PR block does **not** apply |
+| 10 | Verified the two PRs are mutually non-conflicting                 | `git merge-tree --write-tree pr-2-setup-go-v7 pr-1-checkout-v7` returned clean tree SHA, exit 0, no conflict list       |
+| 11 | Returned working tree to `master` (clean)                         | `git status` clean                                                                                                      |
+| 12 | Respected "never merge / never push without explicit ask"         | no merges, no pushes, no force-anything                                                                                 |
+| 13 | Avoided banned git verbs (`checkout`, `reset`)                    | used `git switch` / `git fetch` throughout                                                                              |
 
 ---
 

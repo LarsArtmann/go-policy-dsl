@@ -88,7 +88,7 @@ The test I wrote (`TestMode_DenyByDefaultContract`) pins the **preconditions** o
 
 ### CHANGELOG.md — uncommitted
 
-The last edit (adding the `errMustCommit` removal entry) was not yet committed by the auto-git daemon at report time. `git status` shows ` M CHANGELOG.md`.
+The last edit (adding the `errMustCommit` removal entry) was not yet committed by the auto-git daemon at report time. `git status` shows `M CHANGELOG.md`.
 
 ---
 

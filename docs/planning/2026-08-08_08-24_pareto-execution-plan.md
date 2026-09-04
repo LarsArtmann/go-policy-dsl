@@ -131,13 +131,13 @@ Sorted by impact (desc) → effort (asc) → customer value (desc).
 
 ### Tier 1: The 1% → 51%
 
-| ID  | Task                                                                                               | Est (min) | Depends on |
-| --- | -------------------------------------------------------------------------------------------------- | --------- | ---------- |
-| F1  | Draft `docs/release-checklist.md` outline (sections: pre-tag, tag, post-tag)                       | 10        | —          |
-| F2  | Write pre-tag checklist items (CI green, CHANGELOG matches `git diff`, FEATURES consistent)        | 10        | F1         |
-| F3  | Write tag checklist items (annotated tag, push tags, verify on remote)                             | 5         | F2         |
-| F4  | Write post-tag checklist items (GitHub release from CHANGELOG, set Latest flag, verify pkg.go.dev) | 10        | F3         |
-| F5  | Run `git status` + commit release-checklist.md                                                     | 5         | F4         |
+| ID | Task                                                                                               | Est (min) | Depends on |
+| -- | -------------------------------------------------------------------------------------------------- | --------- | ---------- |
+| F1 | Draft `docs/release-checklist.md` outline (sections: pre-tag, tag, post-tag)                       | 10        | —          |
+| F2 | Write pre-tag checklist items (CI green, CHANGELOG matches `git diff`, FEATURES consistent)        | 10        | F1         |
+| F3 | Write tag checklist items (annotated tag, push tags, verify on remote)                             | 5         | F2         |
+| F4 | Write post-tag checklist items (GitHub release from CHANGELOG, set Latest flag, verify pkg.go.dev) | 10        | F3         |
+| F5 | Run `git status` + commit release-checklist.md                                                     | 5         | F4         |
 
 ### Tier 2: Release safety + pkg.go.dev (revised)
 

@@ -26,40 +26,40 @@ I ran a full-code-review, fixed three real defects (a naming lie on the public A
 
 ## a) FULLY DONE ✅
 
-| #   | Item                                                                                          | Evidence                                                                    |
-| --- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| 1   | Renamed lying public API `GoVersionRange`→`VersionRange`, `GoVersionMin/Max`→`VersionMin/Max` | `policy.go:117-122`, `builder.go:114-120`                                   |
-| 2   | Removed phantom `Require` builder from package + type docs                                    | `policy.go:3,103`                                                           |
-| 3   | Rewrote `policy_test.go` as external `policydsl_test` package with `t.Parallel()` everywhere  | `policy_test.go` (15 tests, race-clean)                                     |
-| 4   | Added 3 contract-locking tests for the surprising `Suggest`→`Description` side-effect         | `policy_test.go`                                                            |
-| 5   | Added `depguard` to `_test.go` exclusions so the external test package compiles               | `.golangci.yml:191-199`                                                     |
-| 6   | Synced README + AGENTS.md to the new names; bumped `.golangci.yml` go directive 1.26.4→1.26.5 | README, AGENTS.md, `.golangci.yml:4`                                        |
-| 7   | Table-driven the four append-style detection helpers (was 4 near-duplicate funcs)             | `TestBuilder_AppendDetectionHelpers`                                        |
-| 8   | Styled HTML review report written, no placeholders, 6 issues + 5 strengths + before/after     | `docs/reviews/2026-07-26_06-46_full-code-review.html` (committed `87a7f02`) |
+| # | Item                                                                                          | Evidence                                                                    |
+| - | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| 1 | Renamed lying public API `GoVersionRange`→`VersionRange`, `GoVersionMin/Max`→`VersionMin/Max` | `policy.go:117-122`, `builder.go:114-120`                                   |
+| 2 | Removed phantom `Require` builder from package + type docs                                    | `policy.go:3,103`                                                           |
+| 3 | Rewrote `policy_test.go` as external `policydsl_test` package with `t.Parallel()` everywhere  | `policy_test.go` (15 tests, race-clean)                                     |
+| 4 | Added 3 contract-locking tests for the surprising `Suggest`→`Description` side-effect         | `policy_test.go`                                                            |
+| 5 | Added `depguard` to `_test.go` exclusions so the external test package compiles               | `.golangci.yml:191-199`                                                     |
+| 6 | Synced README + AGENTS.md to the new names; bumped `.golangci.yml` go directive 1.26.4→1.26.5 | README, AGENTS.md, `.golangci.yml:4`                                        |
+| 7 | Table-driven the four append-style detection helpers (was 4 near-duplicate funcs)             | `TestBuilder_AppendDetectionHelpers`                                        |
+| 8 | Styled HTML review report written, no placeholders, 6 issues + 5 strengths + before/after     | `docs/reviews/2026-07-26_06-46_full-code-review.html` (committed `87a7f02`) |
 
 ---
 
 ## b) PARTIALLY DONE ⚠️
 
-| #   | Item                           | What's done                                                                             | What's missing                                                                                                                                    |
-| --- | ------------------------------ | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | README sync                    | Renamed `VersionRange` in prose + table                                                 | A formatter normalised a trailing space in the table after the commit; `README.md` shows as modified and **I never recommitted**. Sloppy hygiene. |
-| 2   | AGENTS.md sync                 | Updated Go version + rename note                                                        | Left the 2026-07-19 status report (which I _also_ read this session) untouched — see (d).                                                         |
-| 3   | LSP diagnostics reconciliation | Claimed the 7 stale `paralleltest`/`testpackage` warnings were "a gopls cache artifact" | **Never proved it.** I dismissed live diagnostics without running `lsp_restart` or reopening. That is assuming, not verifying.                    |
+| # | Item                           | What's done                                                                             | What's missing                                                                                                                                    |
+| - | ------------------------------ | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 | README sync                    | Renamed `VersionRange` in prose + table                                                 | A formatter normalised a trailing space in the table after the commit; `README.md` shows as modified and **I never recommitted**. Sloppy hygiene. |
+| 2 | AGENTS.md sync                 | Updated Go version + rename note                                                        | Left the 2026-07-19 status report (which I _also_ read this session) untouched — see (d).                                                         |
+| 3 | LSP diagnostics reconciliation | Claimed the 7 stale `paralleltest`/`testpackage` warnings were "a gopls cache artifact" | **Never proved it.** I dismissed live diagnostics without running `lsp_restart` or reopening. That is assuming, not verifying.                    |
 
 ---
 
 ## c) NOT STARTED ❌
 
-| #   | Item                                                                   | Why it matters                                                                                                                                                  |
-| --- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | `CHANGELOG.md` entry for the rename + doc fixes                        | A pre-release public API symbol changed shape. "Deferred to docs-health" is a cop-out — the change _is_ the changelog's job.                                    |
-| 2   | Annotate the now-lying `docs/status/2026-07-19_*.md`                   | That report says "0 issues" and references `GoVersionRange` (3 hits). My rename made it lie. The `update-old-docs` skill exists exactly for this; I skipped it. |
-| 3   | `docs/DOMAIN_LANGUAGE.md`, `FEATURES.md`, `TODO_LIST.md`, `ROADMAP.md` | Global AGENTS.md is explicit these four files exist for a reason. I did a "full review" and left the doc set half-built.                                        |
-| 4   | BDD tests (Ginkgo) for the fluent chain                                | Architect checklist line 27 literally asks "BDD Tests?" — I ignored it. For a user-facing DSL, behaviour tests earn their keep.                                 |
-| 5   | `deduplicate-code` / `docs-health` delegation                          | The `full-code-review` skill told me to consider both. I hand-waved "no dupes worth a skill" without running it.                                                |
-| 6   | Sketching a typed `Version` domain                                     | I dismissed stringly-typed `VersionMin/Max` as "accepted tradeoff" without actually designing the alternative. Hand-waving, not architecture.                   |
-| 7   | Final `golangci-lint fmt` gate before declaring done                   | Ran it once mid-session; the uncommitted README diff proves I didn't close the loop.                                                                            |
+| # | Item                                                                   | Why it matters                                                                                                                                                  |
+| - | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 | `CHANGELOG.md` entry for the rename + doc fixes                        | A pre-release public API symbol changed shape. "Deferred to docs-health" is a cop-out — the change _is_ the changelog's job.                                    |
+| 2 | Annotate the now-lying `docs/status/2026-07-19_*.md`                   | That report says "0 issues" and references `GoVersionRange` (3 hits). My rename made it lie. The `update-old-docs` skill exists exactly for this; I skipped it. |
+| 3 | `docs/DOMAIN_LANGUAGE.md`, `FEATURES.md`, `TODO_LIST.md`, `ROADMAP.md` | Global AGENTS.md is explicit these four files exist for a reason. I did a "full review" and left the doc set half-built.                                        |
+| 4 | BDD tests (Ginkgo) for the fluent chain                                | Architect checklist line 27 literally asks "BDD Tests?" — I ignored it. For a user-facing DSL, behaviour tests earn their keep.                                 |
+| 5 | `deduplicate-code` / `docs-health` delegation                          | The `full-code-review` skill told me to consider both. I hand-waved "no dupes worth a skill" without running it.                                                |
+| 6 | Sketching a typed `Version` domain                                     | I dismissed stringly-typed `VersionMin/Max` as "accepted tradeoff" without actually designing the alternative. Hand-waving, not architecture.                   |
+| 7 | Final `golangci-lint fmt` gate before declaring done                   | Ran it once mid-session; the uncommitted README diff proves I didn't close the loop.                                                                            |
 
 ---
 
