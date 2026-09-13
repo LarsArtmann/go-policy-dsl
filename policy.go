@@ -106,6 +106,16 @@ type Detection struct {
 	// IS present. Use cases: "net/http is both client and server; only
 	// recommend companions when the file actually serves HTTP."
 	RequireIfContains []string
+
+	// WhenAnyPresent is a first-class combination condition: when non-empty,
+	// the policy only applies when the scan context (project) contains at
+	// least one of these module paths or signals. Unlike RequireIfContains
+	// (a content gate on the matched file), WhenAnyPresent declares the
+	// ENVIRONMENT a policy is meant for — the "has B" half of "has A + has
+	// B = use C" combination rules. Consumers evaluate it against project-
+	// level context such as go.mod content. (ADR-0009 in library-policy
+	// records the gate-hack this replaces.)
+	WhenAnyPresent []string
 }
 
 // Replacement recommends a swap-in alternative for a banned library.

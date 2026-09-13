@@ -105,6 +105,18 @@ func (b *Builder) RequireIfContains(patterns ...string) *Builder {
 	return b
 }
 
+// WhenAnyPresent declares a first-class combination condition: the policy
+// only applies when the project context contains at least one of the given
+// module paths or signals (e.g. webserver frameworks for "this project
+// serves HTTP"). Semantically the ENVIRONMENT half of a combination rule —
+// distinct from RequireIfContains, which gates on matched-file content.
+// The consumer owns where the context comes from (typically go.mod).
+func (b *Builder) WhenAnyPresent(patterns ...string) *Builder {
+	b.spec.Detection.WhenAnyPresent = append(b.spec.Detection.WhenAnyPresent, patterns...)
+
+	return b
+}
+
 // WithDescription sets the optional detailed description for reporting.
 func (b *Builder) WithDescription(desc string) *Builder {
 	b.spec.Description = desc
