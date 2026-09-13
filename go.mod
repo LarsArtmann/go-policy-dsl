@@ -1,3 +1,3 @@
 module github.com/larsartmann/go-policy-dsl
 
-go 1.26.7
+go 1.26
