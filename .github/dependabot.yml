@@ -1,12 +1,26 @@
 version: 2
 updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: github-actions
+    directory: /
     schedule:
-      interval: "weekly"
+      interval: weekly
     open-pull-requests-limit: 5
+    groups:
+      actions:
+        patterns:
+          - '*'
     labels:
-      - "dependencies"
-      - "github-actions"
+      - dependencies
+      - github-actions
     commit-message:
-      prefix: "chore(ci)"
+      prefix: chore(ci)
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
