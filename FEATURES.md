@@ -50,16 +50,23 @@ overrides. Evidence: `builder.go`, tested by
 ### Detection model
 
 `Detection{ImportPatterns, GoModPatterns, ExcludeIfContains,
-ExcludeIfTransitiveFrom, RequireIfContains}` declares how a consumer finds a
-violation and when a policy fires. `ImportPattern(p)` / `GoModPattern(p)` are
-single-pattern constructors; `DetectVia(d)` replaces the whole struct; the five
-bare methods (`ImportPatterns`, `GoModPatterns`, `ExcludeIfContains`,
-`ExcludeIfTransitiveFrom`, `RequireIfContains`) append. `RequireIfContains` is a
-content gate — when non-empty, the policy only activates if at least one declared
-string appears in the matched file content (the inverse of `ExcludeIfContains`).
-Evidence: `policy.go:84`, `builder.go:59-106`, tested by
-`TestBuilder_DetectVia_Replaces`, `TestBuilder_AppendDetectionHelpers`,
-`TestImportPattern`, `TestGoModPattern`.
+ExcludeIfTransitiveFrom, RequireIfContains, WhenAnyPresent}` declares how a
+consumer finds a violation and when a policy fires. `ImportPattern(p)` /
+`GoModPattern(p)` are single-pattern constructors; `DetectVia(d)` replaces the
+whole struct; the six bare methods (`ImportPatterns`, `GoModPatterns`,
+`ExcludeIfContains`, `ExcludeIfTransitiveFrom`, `RequireIfContains`,
+`WhenAnyPresent`) append. `RequireIfContains` is a content gate — when
+non-empty, the policy only activates if at least one declared string appears in
+the matched file content (the inverse of `ExcludeIfContains`). `WhenAnyPresent`
+is a first-class combination condition — when non-empty, the policy only
+applies when the scan context (project) contains at least one of the listed
+module paths/signals; unlike `RequireIfContains` (a content gate on the matched
+file) it declares the ENVIRONMENT a policy is meant for — the "has B" half of
+"has A + has B = use C" combination rules. Consumers evaluate it against
+project-level context such as go.mod content. Evidence: `policy.go:84`,
+`builder.go:59-118`, tested by `TestBuilder_DetectVia_Replaces`,
+`TestBuilder_AppendDetectionHelpers`, `TestImportPattern`, `TestGoModPattern`,
+`TestBuilderWhenAnyPresent`, `TestBuilderWhenAnyPresentAppends`.
 
 ### Replacement suggestion
 

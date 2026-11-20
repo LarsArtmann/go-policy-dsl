@@ -11,6 +11,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-04
+
+### Added
+
+- **`Detection.WhenAnyPresent []string`** — first-class combination condition
+  declaring WHERE a policy applies. When non-empty, the policy only applies
+  when the scan context (project) contains at least one of the listed module
+  paths/signals. Unlike `RequireIfContains` (a content gate on the matched
+  file), `WhenAnyPresent` declares the ENVIRONMENT a policy is meant for —
+  the "has B" half of "has A + has B = use C" combination rules. Consumers
+  evaluate it against project-level context such as go.mod content.
+- **`Builder.WhenAnyPresent(patterns ...string)`** — fluent append helper
+  matching the convention of `RequireIfContains` / `ExcludeIfContains`.
+
 ## [0.3.0] - 2026-08-08
 
 ### Added
